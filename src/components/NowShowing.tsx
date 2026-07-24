@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import Reveal from "@/components/Reveal";
+import AOS from "aos";
+import "aos/dist/aos.css";
 
 interface Showtime {
   id: number;
@@ -55,6 +57,19 @@ export default function NowShowing() {
       })
       .finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => {
+    AOS.init({
+      duration: 700,
+      easing: "ease-out-cubic",
+      once: false,
+      offset: 80,
+    });
+  }, []);
+
+  useEffect(() => {
+    AOS.refresh();
+  }, [current]);
 
   useEffect(() => {
     if (movies.length <= 1) return;
@@ -154,7 +169,7 @@ export default function NowShowing() {
       <Reveal className="relative z-10 flex min-h-[calc(100vh-5rem)] flex-col justify-end" direction="up">
         <div className="mx-auto w-full max-w-7xl px-4 pb-16 sm:pb-20">
           <div className="max-w-3xl">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3" data-aos="fade-up" data-aos-duration="600">
               <span className="rounded bg-white/10 px-2.5 py-1 text-xs font-bold text-white backdrop-blur-sm">
                 {movie.certification || "UA"}
               </span>
@@ -166,12 +181,18 @@ export default function NowShowing() {
               )}
             </div>
 
-            <h2 className="mt-3 text-4xl font-black uppercase leading-none tracking-wide text-white drop-shadow-lg sm:text-6xl lg:text-7xl">
+            <h2
+              key={`title-${movie.id}`}
+              className="mt-3 text-4xl font-black uppercase leading-none tracking-wide text-white drop-shadow-lg sm:text-6xl lg:text-7xl"
+              data-aos="fade-up"
+              data-aos-delay="100"
+              data-aos-duration="700"
+            >
               {movie.title}
             </h2>
 
             {movie.showtimes.length > 0 && (
-              <div className="mt-6 flex flex-wrap gap-2">
+              <div className="mt-6 flex flex-wrap gap-2" data-aos="fade-up" data-aos-delay="200" data-aos-duration="600">
                 {movie.showtimes.map((show) => {
                   const active = activeTime === show.time;
                   return (
@@ -201,6 +222,9 @@ export default function NowShowing() {
               target="_blank"
               rel="noopener noreferrer"
               className="mt-6 inline-flex items-center gap-2 rounded bg-gold px-8 py-3.5 text-sm font-semibold text-background shadow-lg transition-transform hover:scale-105 hover:bg-gold-dark"
+              data-aos="fade-up"
+              data-aos-delay="300"
+              data-aos-duration="600"
             >
               BOOK TICKETS
               <svg
@@ -220,7 +244,7 @@ export default function NowShowing() {
 
           {/* carousel controls */}
           {movies.length > 1 && (
-            <div className="mt-10 flex items-center gap-4">
+            <div className="mt-10 flex items-center gap-4" data-aos="fade-up" data-aos-delay="400" data-aos-duration="600">
               <button
                 onClick={() =>
                   setCurrent((c) => (c - 1 + movies.length) % movies.length)

@@ -1,7 +1,9 @@
 "use client";
 
-import { useState, type MouseEvent } from "react";
+import { useState, type MouseEvent, useEffect } from "react";
 import { useInView } from "@/lib/useInView";
+import AOS from "aos";
+import "aos/dist/aos.css";
 
 export default function Projection() {
   const [mouse, setMouse] = useState({ x: 0, y: 0 });
@@ -18,6 +20,15 @@ export default function Projection() {
 
   const { ref: textRef, inView: textInView } = useInView<HTMLDivElement>();
   const { ref: visualRef, inView: visualInView } = useInView<HTMLDivElement>();
+
+  useEffect(() => {
+    AOS.init({
+      duration: 700,
+      easing: "ease-out-cubic",
+      once: true,
+      offset: 80,
+    });
+  }, []);
 
   const sceneTilt = mouse.y * 8 + mouse.x * 6;
   const screenTilt = mouse.y * -5 + mouse.x * -4;
@@ -40,13 +51,27 @@ export default function Projection() {
             ref={textRef}
             className={`order-2 lg:order-1 reveal-group from-left ${textInView ? "is-visible" : ""}`}
           >
-            <p className="reveal-item stagger-1 text-xs font-semibold tracking-[0.2em] text-gold uppercase">
+            <p
+              className="text-xs font-semibold tracking-[0.2em] text-gold uppercase"
+              data-aos="fade-up"
+              data-aos-duration="600"
+            >
               Crystal-Clear Visuals
             </p>
-            <h2 className="reveal-item stagger-2 mt-2 text-3xl font-bold tracking-wide text-white uppercase sm:text-4xl lg:text-5xl">
+            <h2
+              className="mt-2 text-3xl font-bold tracking-wide text-white uppercase sm:text-4xl lg:text-5xl"
+              data-aos="fade-up"
+              data-aos-delay="100"
+              data-aos-duration="700"
+            >
               4K 19B Barco Projection
             </h2>
-            <p className="reveal-item stagger-3 mt-4 text-sm leading-relaxed text-muted sm:text-base">
+            <p
+              className="mt-4 text-sm leading-relaxed text-muted sm:text-base"
+              data-aos="fade-up"
+              data-aos-delay="200"
+              data-aos-duration="600"
+            >
               Every frame is projected in breathtaking 4K clarity. Barco&apos;s
               industry-leading 19B laser engine delivers richer blacks, brighter
               highlights and colours that pull you deeper into the story.
@@ -57,18 +82,18 @@ export default function Projection() {
                 "High-contrast laser projection",
                 "Wider colour gamut for lifelike images",
                 "Uniform brightness across the entire screen",
-              ].map((item, i) => {
-                const delays = ["stagger-3", "stagger-4", "stagger-5", "stagger-5"];
-                return (
-                  <li
-                    key={item}
-                    className={`reveal-item ${delays[i]} flex items-start gap-3`}
-                  >
+              ].map((item, i) => (
+                <li
+                  key={item}
+                  className="flex items-start gap-3"
+                  data-aos="fade-up"
+                  data-aos-delay={`${300 + i * 80}`}
+                  data-aos-duration="500"
+                >
                     <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-gold" />
                     {item}
                   </li>
-                );
-              })}
+              ))}
             </ul>
           </div>
 
@@ -77,10 +102,12 @@ export default function Projection() {
             className={`order-1 relative h-64 w-full sm:h-80 lg:h-96 lg:order-2 reveal-group from-right ${visualInView ? "is-visible" : ""}`}
           >
             <svg
-              className="reveal-item stagger-3 h-full w-full"
+              className="h-full w-full"
               viewBox="0 0 600 340"
               preserveAspectRatio="xMidYMid meet"
               fill="none"
+              data-aos="zoom-in"
+              data-aos-duration="800"
             >
               <defs>
                 <linearGradient id="beam" x1="0" y1="0" x2="1" y2="0">

@@ -1,4 +1,9 @@
+"use client";
+
 import Reveal from "@/components/Reveal";
+import AOS from "aos";
+import "aos/dist/aos.css";
+import { useEffect } from "react";
 
 const features = [
   {
@@ -9,8 +14,7 @@ const features = [
         <path d="M8 16a8 8 0 0 1 8 0" />
       </svg>
     ),
-    title: "FULLY",
-    subtitle: "AIR-CONDITIONED",
+    title: "AIR-CONDITIONED",
   },
   {
     icon: (
@@ -20,8 +24,7 @@ const features = [
         <path d="M5 18v2M19 18v2" />
       </svg>
     ),
-    title: "PUSH BACK",
-    subtitle: "SEATING",
+    title: "PUSH BACK SEATS",
   },
   {
     icon: (
@@ -33,8 +36,7 @@ const features = [
         <path d="M7 16h10" />
       </svg>
     ),
-    title: "FOOD",
-    subtitle: "COURT",
+    title: "FOOD COURT",
   },
   {
     icon: (
@@ -45,31 +47,52 @@ const features = [
       </svg>
     ),
     title: "AMPLE PARKING",
-    subtitle: "TWO-WHEELERS & CARS",
   },
 ];
 
 export default function Features() {
+  useEffect(() => {
+    AOS.init({
+      duration: 700,
+      easing: "ease-out-cubic",
+      once: true,
+      offset: 80,
+    });
+  }, []);
+
   return (
     <section id="features" className="border-y border-card-border bg-card/30 py-12 sm:py-16">
       <Reveal className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <h2 className="section-title">OUR FEATURES</h2>
 
-        <div className="mt-8 grid grid-cols-2 gap-4 sm:mt-10 sm:gap-6 lg:grid-cols-4">
-          {features.map((feature) => (
+        {/* Mobile: inline row without cards */}
+        <div className="mt-8 flex items-center justify-between gap-2 sm:hidden">
+          {features.map((feature, index) => (
+            <div key={feature.title} className="flex flex-1 flex-col items-center text-center" data-aos="fade-up" data-aos-delay={`${index * 80}`} data-aos-duration="500">
+              <div className="text-gold">{feature.icon}</div>
+              <p className="mt-1.5 text-[0.6rem] font-bold leading-tight tracking-wide text-white">
+                {feature.title}
+              </p>
+            </div>
+          ))}
+        </div>
+
+        {/* Desktop: equal-weight cards */}
+        <div className="mt-10 hidden grid-cols-4 gap-4 sm:grid lg:gap-6">
+          {features.map((feature, index) => (
             <div
               key={feature.title}
-              className="flex flex-col items-center rounded-xl border border-card-border bg-card p-5 text-center transition-transform hover:-translate-y-1 sm:p-6"
+              className="flex h-full flex-col items-center justify-center rounded-xl border border-card-border bg-card p-6 text-center transition-all duration-300 hover:-translate-y-1 hover:border-gold/40"
+              data-aos="zoom-in"
+              data-aos-delay={`${index * 100}`}
+              data-aos-duration="600"
             >
-              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gold/10 text-gold">
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gold/10 text-gold">
                 {feature.icon}
               </div>
               <h3 className="mt-4 text-sm font-bold tracking-wide text-white sm:text-base">
                 {feature.title}
               </h3>
-              <p className="mt-1 text-[0.65rem] tracking-wider text-muted sm:text-xs">
-                {feature.subtitle}
-              </p>
             </div>
           ))}
         </div>

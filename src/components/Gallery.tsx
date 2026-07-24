@@ -1,7 +1,21 @@
+"use client";
+
 import Image from "next/image";
 import Reveal from "@/components/Reveal";
+import AOS from "aos";
+import "aos/dist/aos.css";
+import { useEffect } from "react";
 
 export default function Gallery() {
+  useEffect(() => {
+    AOS.init({
+      duration: 700,
+      easing: "ease-out-cubic",
+      once: true,
+      offset: 80,
+    });
+  }, []);
+
   const items = [
     { src: "/1_(2)_1671424715600.avif", label: "Auditorium" },
     { src: "/3_(1)_1671424648485.avif", label: "Projection" },
@@ -18,10 +32,13 @@ export default function Gallery() {
         </p>
 
         <div className="mt-8 grid grid-cols-2 gap-3 sm:mt-10 sm:gap-4 lg:grid-cols-4">
-          {items.map((item) => (
+          {items.map((item, index) => (
             <div
               key={item.label}
               className="group relative aspect-square overflow-hidden rounded-xl border border-card-border"
+              data-aos="zoom-in"
+              data-aos-delay={`${index * 100}`}
+              data-aos-duration="600"
             >
               <Image
                 src={item.src}

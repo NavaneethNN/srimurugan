@@ -126,7 +126,7 @@ export default function Footer() {
 
         <div className="mt-8 flex flex-col items-start justify-between gap-4 border-t border-card-border pt-8 sm:flex-row sm:items-center">
           <p className="text-xs text-muted">
-            © 2024 Sri Murugan Cinema. All Rights Reserved.
+            © 2026 Sri Murugan Cinema. All Rights Reserved.
           </p>
           <Link
             href="https://in.bookmyshow.com/cinemas/COIM/murugan-cinemas-ac-4k-atmos-thudiyalur/buytickets/MCTC/"

@@ -188,16 +188,7 @@ export default function Hero() {
         </svg>
       </div>
 
-      <div className="absolute bottom-6 left-1/2 z-10 flex -translate-x-1/2 gap-2">
-        {[0, 1, 2, 3].map((i) => (
-          <span
-            key={i}
-            className={`h-2 w-2 rounded-full transition-all ${
-              i === 0 ? "w-5 bg-gold shadow-[0_0_10px_rgba(212,168,75,0.8)]" : "bg-white/30"
-            }`}
-          />
-        ))}
-      </div>
+      <div className="absolute bottom-0 left-0 z-10 h-px w-full bg-gradient-to-r from-transparent via-gold/40 to-transparent" />
 
       <style jsx global>{`
         @keyframes glow-pulse {

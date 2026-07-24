@@ -2,6 +2,9 @@
 
 import Image from "next/image";
 import { useInView } from "@/lib/useInView";
+import AOS from "aos";
+import "aos/dist/aos.css";
+import { useEffect } from "react";
 
 const highlights = [
   {
@@ -50,6 +53,15 @@ export default function About() {
   const { ref: imageRef, inView: imageInView } = useInView<HTMLDivElement>();
   const { ref: contentRef, inView: contentInView } = useInView<HTMLDivElement>();
 
+  useEffect(() => {
+    AOS.init({
+      duration: 700,
+      easing: "ease-out-cubic",
+      once: true,
+      offset: 80,
+    });
+  }, []);
+
   return (
     <section
       id="about"
@@ -82,33 +94,47 @@ export default function About() {
 
           <div
             ref={contentRef}
-            className={`relative flex flex-col justify-center rounded-2xl border border-card-border bg-card/80 p-6 backdrop-blur-sm sm:p-8 lg:p-10 reveal-group from-right ${contentInView ? "is-visible" : ""}`}
+            className={`relative flex flex-col justify-center p-0 sm:rounded-2xl sm:border sm:border-card-border sm:bg-card/80 sm:p-8 sm:backdrop-blur-sm lg:p-10 reveal-group from-right ${contentInView ? "is-visible" : ""}`}
           >
-            <p className="reveal-item stagger-1 text-xs font-semibold tracking-[0.2em] text-gold uppercase">
+            <p
+              className="text-xs font-semibold tracking-[0.2em] text-gold uppercase"
+              data-aos="fade-up"
+              data-aos-duration="600"
+            >
               Our Legacy
             </p>
-            <h2 className="reveal-item stagger-2 mt-2 text-3xl font-bold tracking-wide text-white uppercase sm:text-4xl lg:text-5xl">
+            <h2
+              className="mt-2 text-3xl font-bold tracking-wide text-white uppercase sm:text-4xl lg:text-5xl"
+              data-aos="fade-up"
+              data-aos-delay="100"
+              data-aos-duration="700"
+            >
               About Sri Murugan Cinema
             </h2>
-            <div className="reveal-item stagger-3 mx-auto mt-4 h-0.5 w-16 bg-gradient-to-r from-transparent via-gold to-transparent sm:mx-0" />
+            <div
+              className="mx-auto mt-4 h-0.5 w-16 bg-gradient-to-r from-transparent via-gold to-transparent sm:mx-0"
+              data-aos="fade-up"
+              data-aos-delay="150"
+              data-aos-duration="500"
+            />
 
             <div className="mt-8 space-y-5">
-              {highlights.map((item, index) => {
-                const delays = ["stagger-3", "stagger-4", "stagger-5", "stagger-5"];
-                return (
-                  <div
-                    key={index}
-                    className={`reveal-item ${delays[index]} group/item flex gap-4 rounded-xl border border-transparent p-3 transition-all hover:border-gold/10 hover:bg-white/[0.03]`}
-                  >
-                    <div className="mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gold/10 text-gold transition-colors group-hover/item:bg-gold/20">
-                      {item.icon}
-                    </div>
-                    <p className="text-sm leading-relaxed text-muted sm:text-base">
-                      {item.text}
-                    </p>
+              {highlights.map((item, index) => (
+                <div
+                  key={index}
+                  className="group/item flex gap-4 rounded-xl border border-transparent p-3 transition-all hover:border-gold/10 hover:bg-white/[0.03]"
+                  data-aos="fade-up"
+                  data-aos-delay={`${200 + index * 100}`}
+                  data-aos-duration="600"
+                >
+                  <div className="mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gold/10 text-gold transition-colors group-hover/item:bg-gold/20">
+                    {item.icon}
                   </div>
-                );
-              })}
+                  <p className="text-sm leading-relaxed text-muted sm:text-base">
+                    {item.text}
+                  </p>
+                </div>
+              ))}
             </div>
           </div>
         </div>

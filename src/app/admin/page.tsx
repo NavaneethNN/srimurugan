@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useCallback, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 interface Showtime {
   id?: number;
@@ -38,6 +39,7 @@ function isValidImageUrl(url: string) {
 }
 
 export default function AdminPanel() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<"now" | "upcoming">("now");
   const [movies, setMovies] = useState<Movie[]>([]);
   const [upcoming, setUpcoming] = useState<UpcomingMovie[]>([]);
@@ -275,7 +277,20 @@ export default function AdminPanel() {
   return (
     <main className="min-h-screen bg-background px-4 py-8 text-white">
       <div className="mx-auto max-w-4xl">
-        <h1 className="mb-6 text-center text-2xl font-bold text-gold sm:text-3xl">Admin Panel</h1>
+        <div className="mb-6 flex items-center justify-between">
+          <h1 className="text-center text-2xl font-bold text-gold sm:text-3xl">Admin Panel</h1>
+          <button
+            type="button"
+            onClick={() => {
+              document.cookie = "admin-auth=; path=/; max-age=0";
+              router.push("/admin/login");
+              router.refresh();
+            }}
+            className="rounded border border-white/20 px-4 py-2 text-xs font-semibold text-white/70 transition-all hover:border-red-500/50 hover:text-red-400"
+          >
+            Logout
+          </button>
+        </div>
 
         <div className="mb-8 flex justify-center gap-4">
           <button
