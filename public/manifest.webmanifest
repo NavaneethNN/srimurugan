@@ -1,0 +1,23 @@
+{
+  "name": "Sri Murugan Cinema",
+  "short_name": "Sri Murugan",
+  "description": "Premium movie theatre in Coimbatore with 4K Barco projection, 64-channel Dolby Atmos, push-back seating and daily shows.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0a0a",
+  "theme_color": "#0a0a0a",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
