@@ -127,3 +127,12 @@ body {
   background: var(--gold);
   margin: 0.75rem auto 0;
 }
+
+.admin-time-input::-webkit-calendar-picker-indicator {
+  filter: invert(1) brightness(0.7);
+  cursor: pointer;
+}
+
+.admin-time-input::-webkit-calendar-picker-indicator:hover {
+  filter: invert(1) brightness(1);
+}

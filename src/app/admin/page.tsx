@@ -38,6 +38,17 @@ function isValidImageUrl(url: string) {
   }
 }
 
+function to12HourFormat(time: string) {
+  const [hourStr, minuteStr] = time.split(":");
+  if (!hourStr || !minuteStr) return time;
+  const hour = parseInt(hourStr, 10);
+  const minute = parseInt(minuteStr, 10);
+  if (Number.isNaN(hour) || Number.isNaN(minute)) return time;
+  const suffix = hour >= 12 ? "PM" : "AM";
+  const displayHour = hour % 12 || 12;
+  return `${String(displayHour).padStart(2, "0")}:${String(minute).padStart(2, "0")} ${suffix}`;
+}
+
 export default function AdminPanel() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<"now" | "upcoming">("now");
@@ -52,7 +63,7 @@ export default function AdminPanel() {
     dimension: "2D",
     posterUrl: "",
     isNowShowing: true,
-    showtimes: [{ time: "", format: "DOLBY ATMOS" }],
+    showtimes: [{ time: "", format: "4K DOLBY ATMOS" }],
   });
   const [editingMovieId, setEditingMovieId] = useState<number | null>(null);
 
@@ -224,7 +235,7 @@ export default function AdminPanel() {
       isNowShowing: movie.isNowShowing,
       showtimes: movie.showtimes.length
         ? movie.showtimes.map(({ time, format }) => ({ time, format }))
-        : [{ time: "", format: "DOLBY ATMOS" }],
+        : [{ time: "", format: "4K DOLBY ATMOS" }],
     });
   }
 
@@ -247,7 +258,7 @@ export default function AdminPanel() {
       dimension: "2D",
       posterUrl: "",
       isNowShowing: true,
-      showtimes: [{ time: "", format: "DOLBY ATMOS" }],
+      showtimes: [{ time: "", format: "4K DOLBY ATMOS" }],
     });
   }
 
@@ -265,13 +276,13 @@ export default function AdminPanel() {
   function addShowtime() {
     setMovieForm({
       ...movieForm,
-      showtimes: [...movieForm.showtimes, { time: "", format: "DOLBY ATMOS" }],
+      showtimes: [...movieForm.showtimes, { time: "", format: "4K DOLBY ATMOS" }],
     });
   }
 
   function removeShowtime(index: number) {
     const next = movieForm.showtimes.filter((_, i) => i !== index);
-    setMovieForm({ ...movieForm, showtimes: next.length ? next : [{ time: "", format: "DOLBY ATMOS" }] });
+    setMovieForm({ ...movieForm, showtimes: next.length ? next : [{ time: "", format: "4K DOLBY ATMOS" }] });
   }
 
   return (
@@ -282,7 +293,7 @@ export default function AdminPanel() {
           <button
             type="button"
             onClick={() => {
-              document.cookie = "admin-auth=; path=/; max-age=0";
+              document.cookie = "admin-session=; path=/; max-age=0";
               router.push("/admin/login");
               router.refresh();
             }}
@@ -404,19 +415,22 @@ export default function AdminPanel() {
                 <label className="mb-2 block text-sm font-medium text-white/80">Showtimes</label>
                 {movieForm.showtimes.map((show, index) => (
                   <div key={index} className="mb-2 flex items-center gap-2">
-                    <input
-                      type="time"
-                      value={show.time}
-                      onChange={(e) => updateShowtime(index, "time", e.target.value)}
-                      className="w-32 rounded border border-white/10 bg-black/40 px-3 py-2 text-sm text-white focus:border-gold focus:outline-none"
-                    />
-                    <input
-                      type="text"
-                      placeholder="Format"
-                      value={show.format}
-                      onChange={(e) => updateShowtime(index, "format", e.target.value)}
-                      className="flex-1 rounded border border-white/10 bg-black/40 px-3 py-2 text-sm text-white placeholder-white/50 focus:border-gold focus:outline-none"
-                    />
+                    <div className="relative w-40">
+                      <input
+                        type="time"
+                        value={show.time}
+                        onChange={(e) => updateShowtime(index, "time", e.target.value)}
+                        className="admin-time-input w-full rounded border border-white/10 bg-black/40 px-3 py-2 text-sm text-white focus:border-gold focus:outline-none"
+                      />
+                      {show.time && (
+                        <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gold">
+                          {to12HourFormat(show.time)}
+                        </span>
+                      )}
+                    </div>
+                    <span className="flex-1 rounded border border-white/10 bg-black/40 px-3 py-2 text-sm text-white/60">
+                      4K DOLBY ATMOS
+                    </span>
                     <button
                       type="button"
                       onClick={() => removeShowtime(index)}
@@ -524,7 +538,7 @@ export default function AdminPanel() {
                       <div className="mt-2 flex flex-wrap gap-1">
                         {movie.showtimes.map((show) => (
                           <span key={show.id} className="rounded bg-black/40 px-2 py-1 text-xs text-white/80">
-                            {show.time} {show.format}
+                            {to12HourFormat(show.time)}
                           </span>
                         ))}
                       </div>

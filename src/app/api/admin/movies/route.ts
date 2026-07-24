@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
         times.map((t: { time: string; format?: string }) => ({
           movieId: newMovie.id,
           time: t.time,
-          format: t.format || "DOLBY ATMOS",
+          format: t.format || "4K DOLBY ATMOS",
         }))
       );
     }

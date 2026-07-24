@@ -140,29 +140,9 @@ export default function NowShowing() {
 
       {/* header */}
       <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between pt-6">
-          <p className="text-xs font-semibold tracking-[0.2em] text-gold uppercase">
-            Now Showing
-          </p>
-          <Link
-            href="/admin"
-            className="inline-flex items-center gap-2 rounded border border-white/10 bg-white/5 px-4 py-2 text-xs font-medium tracking-wider text-white backdrop-blur-sm transition-colors hover:border-gold hover:text-gold"
-          >
-            MANAGE MOVIES
-            <svg
-              className="h-4 w-4"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M5 12h14" />
-              <path d="m12 5 7 7-7 7" />
-            </svg>
-          </Link>
-        </div>
+        <p className="pt-6 text-xs font-semibold tracking-[0.2em] text-gold uppercase">
+          Now Showing
+        </p>
       </div>
 
       {/* movie details */}

@@ -40,7 +40,7 @@ export async function PUT(request: NextRequest, { params }: Params) {
         times.map((t: { time: string; format?: string }) => ({
           movieId,
           time: t.time,
-          format: t.format || "DOLBY ATMOS",
+          format: t.format || "4K DOLBY ATMOS",
         }))
       );
     }
