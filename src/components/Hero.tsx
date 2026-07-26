@@ -5,48 +5,6 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import HeroParticles from "./HeroParticles";
 
-const badges = [
-  {
-    icon: (
-      <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="3" y="4" width="18" height="12" rx="2" />
-        <path d="M8 20h8M12 16v4M7 8h.01M12 8h.01M17 8h.01" />
-      </svg>
-    ),
-    label: "4K",
-    sub: "Projection",
-  },
-  {
-    icon: (
-      <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M2 10v3M6 6v11M10 3v18M14 8v7M18 5v13M22 10v3" />
-      </svg>
-    ),
-    label: "Dolby",
-    sub: "Atmos",
-  },
-  {
-    icon: (
-      <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M19 9V6a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v3" />
-        <path d="M3 11v5a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-5a2 2 0 0 0-4 0v2H7v-2a2 2 0 0 0-4 0Z" />
-        <path d="M5 18v2M19 18v2" />
-      </svg>
-    ),
-    label: "Push-back",
-    sub: "Seating",
-  },
-  {
-    icon: (
-      <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M12 3v18M8 8a8 8 0 0 0 8 0M8 16a8 8 0 0 1 8 0" />
-      </svg>
-    ),
-    label: "Air",
-    sub: "Conditioned",
-  },
-];
-
 export default function Hero() {
   const [mouse, setMouse] = useState({ x: 0, y: 0 });
 
@@ -105,8 +63,9 @@ export default function Hero() {
       />
 
       {/* ── Main content ── */}
-      <div className="relative z-10 flex h-full w-full max-w-4xl flex-col items-center justify-center px-5 pb-20 pt-28 text-center sm:px-8 sm:pb-24 sm:pt-32">
-        <div className="flex flex-col items-center gap-5 sm:gap-7">
+      <div className="relative z-10 flex h-full w-full max-w-4xl flex-col items-center justify-center px-5 text-center sm:px-8">
+        {/* offset for header on mobile, larger offset on desktop */}
+        <div className="mt-16 sm:mt-20 mb-16 sm:mb-20 flex flex-col items-center gap-2 sm:gap-3">
 
           {/* Eyebrow */}
           <p className="animate-text-reveal section-label text-white/60">
@@ -114,11 +73,18 @@ export default function Hero() {
           </p>
 
           {/* Main headline */}
-          <div className="animate-text-reveal delay-200 flex flex-col items-center gap-1 sm:gap-2">
+          <div className="animate-text-reveal delay-200 flex flex-col items-center gap-1 sm:gap-1.5">
+            <div className="flex items-center gap-3 sm:gap-5">
+              <span className="h-px w-8 bg-gradient-to-r from-transparent to-gold/70 sm:w-14" />
+              <p className="text-[0.6rem] font-light tracking-[0.45em] text-white/80 uppercase sm:text-[0.75rem] sm:tracking-[0.55em]">
+                Experience
+              </p>
+              <span className="h-px w-8 bg-gradient-to-l from-transparent to-gold/70 sm:w-14" />
+            </div>
             <h1 className="bg-gradient-to-b from-[#f0d98a] via-gold to-[#9a7228] bg-clip-text text-[4.5rem] font-black leading-none tracking-[0.06em] text-transparent drop-shadow-[0_2px_30px_rgba(201,153,58,0.4)] sm:text-[6rem] md:text-[7.5rem] lg:text-[9rem]">
               CINEMA
             </h1>
-            <p className="font-dancing text-xl font-medium italic text-white/85 sm:text-3xl md:text-4xl">
+            <p className="font-[family-name:var(--font-cormorant)] text-2xl font-light italic tracking-widest text-white/85 sm:text-4xl md:text-5xl">
               Like Never Before
             </p>
             <span className="mt-1 block h-px w-16 rounded-full bg-gradient-to-r from-transparent via-gold/70 to-transparent sm:w-24" />
@@ -130,21 +96,22 @@ export default function Hero() {
             Coimbatore&apos;s finest movie theatre.
           </p>
 
-          {/* Feature badges */}
-          <div className="animate-fade-in-up delay-500 grid w-full max-w-xs grid-cols-4 gap-2 sm:max-w-md sm:gap-3">
-            {badges.map((b) => (
-              <div
-                key={b.label}
-                className="group relative flex flex-col items-center gap-1.5 overflow-hidden rounded-md border border-white/[0.08] bg-white/[0.04] px-1 py-3.5 backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-gold/40 hover:bg-white/[0.08] sm:py-4"
-              >
-                <span className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(201,153,58,0.14),transparent_65%)] opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-                <span className="text-gold/80 group-hover:text-gold transition-colors">{b.icon}</span>
-                <span className="relative text-center leading-tight">
-                  <span className="block text-[0.62rem] font-bold text-white sm:text-[0.7rem]">{b.label}</span>
-                  <span className="block text-[0.5rem] tracking-wider text-white/50 sm:text-[0.58rem]">{b.sub}</span>
-                </span>
-              </div>
-            ))}
+          {/* Brand logo + 4K Atmos logo */}
+          <div className="animate-fade-in-up delay-500 flex flex-col items-center gap-1">
+            <Image
+              src="/logo.png"
+              alt="Sri Murugan Cinema"
+              width={80}
+              height={80}
+              className="object-contain sm:w-[100px]"
+            />
+            <Image
+              src="/4katmos copy.png"
+              alt="4K Dolby Atmos"
+              width={220}
+              height={80}
+              className="object-contain opacity-100 -mt-6 -mb-6 sm:w-[260px] lg:w-[300px]"
+            />
           </div>
 
           {/* CTA */}
@@ -169,10 +136,15 @@ export default function Hero() {
       </div>
 
       {/* Scroll cue */}
-      <div className="animate-fade-in-up delay-1000 absolute bottom-8 left-1/2 z-10 flex -translate-x-1/2 flex-col items-center gap-1.5 sm:bottom-12">
-        <span className="text-[0.6rem] font-semibold tracking-[0.4em] text-white/35 uppercase">Scroll</span>
+      <button
+        type="button"
+        aria-label="Scroll to next section"
+        onClick={() => document.getElementById("now-showing")?.scrollIntoView({ behavior: "smooth" })}
+        className="animate-fade-in-up delay-1000 absolute bottom-8 left-1/2 z-10 flex -translate-x-1/2 flex-col items-center gap-1.5 cursor-pointer sm:bottom-12 group"
+      >
+        <span className="text-[0.6rem] font-semibold tracking-[0.4em] text-white/35 uppercase transition-colors group-hover:text-white/60">Scroll</span>
         <svg
-          className="h-4 w-4 animate-bounce-slow text-white/35"
+          className="h-4 w-4 animate-bounce-slow text-white/35 transition-colors group-hover:text-white/60"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
@@ -182,7 +154,7 @@ export default function Hero() {
         >
           <path d="M12 5v14M19 12l-7 7-7-7" />
         </svg>
-      </div>
+      </button>
 
       {/* Bottom gold rule */}
       <div className="absolute bottom-0 left-0 z-10 w-full">

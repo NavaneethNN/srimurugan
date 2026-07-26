@@ -8,6 +8,8 @@ export const movies = pgTable("movies", {
   certification: varchar("certification", { length: 50 }),
   dimension: varchar("dimension", { length: 50 }),
   posterUrl: text("poster_url"),
+  mobileBgUrl: text("mobile_bg_url"),
+  desktopBgUrl: text("desktop_bg_url"),
   isNowShowing: boolean("is_now_showing").default(true).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),

@@ -17,6 +17,8 @@ interface Movie {
   certification?: string;
   dimension?: string;
   posterUrl?: string;
+  mobileBgUrl?: string;
+  desktopBgUrl?: string;
   isNowShowing: boolean;
   showtimes: Showtime[];
 }
@@ -62,6 +64,8 @@ export default function AdminPanel() {
     certification: "",
     dimension: "2D",
     posterUrl: "",
+    mobileBgUrl: "",
+    desktopBgUrl: "",
     isNowShowing: true,
     showtimes: [{ time: "", format: "4K DOLBY ATMOS" }],
   });
@@ -232,6 +236,8 @@ export default function AdminPanel() {
       certification: movie.certification || "",
       dimension: movie.dimension || "2D",
       posterUrl: movie.posterUrl || "",
+      mobileBgUrl: movie.mobileBgUrl || "",
+      desktopBgUrl: movie.desktopBgUrl || "",
       isNowShowing: movie.isNowShowing,
       showtimes: movie.showtimes.length
         ? movie.showtimes.map(({ time, format }) => ({ time, format }))
@@ -257,6 +263,8 @@ export default function AdminPanel() {
       certification: "",
       dimension: "2D",
       posterUrl: "",
+      mobileBgUrl: "",
+      desktopBgUrl: "",
       isNowShowing: true,
       showtimes: [{ time: "", format: "4K DOLBY ATMOS" }],
     });
@@ -385,31 +393,48 @@ export default function AdminPanel() {
                   />
                 </label>
                 <label className="block space-y-1 sm:col-span-2">
-                  <span className="text-xs font-medium text-white/70">Poster Image URL</span>
+                  <span className="text-xs font-medium text-white/70">
+                    Background Image — Mobile{" "}
+                    <span className="font-normal text-white/40">(portrait, used on small screens)</span>
+                  </span>
                   <input
                     type="url"
-                    value={movieForm.posterUrl}
-                    onChange={(e) => setMovieForm({ ...movieForm, posterUrl: e.target.value.trim() })}
+                    value={movieForm.mobileBgUrl}
+                    onChange={(e) => setMovieForm({ ...movieForm, mobileBgUrl: e.target.value.trim() })}
                     className="w-full rounded border border-white/10 bg-black/40 px-3 py-2 text-sm text-white placeholder-white/50 focus:border-gold focus:outline-none"
-                    placeholder="https://..."
+                    placeholder="https://... (portrait / tall crop)"
                   />
+                  {movieForm.mobileBgUrl && isValidImageUrl(movieForm.mobileBgUrl) && (
+                    <div className="relative mt-2 w-32 overflow-hidden rounded-lg border border-white/10" style={{ aspectRatio: "9/16" }}>
+                      <Image src={movieForm.mobileBgUrl} alt="Mobile bg preview" fill className="object-cover" sizes="128px" />
+                    </div>
+                  )}
+                  {movieForm.mobileBgUrl && !isValidImageUrl(movieForm.mobileBgUrl) && (
+                    <p className="mt-1 text-xs text-red-400">Please enter a valid https:// image URL.</p>
+                  )}
+                </label>
+                <label className="block space-y-1 sm:col-span-2">
+                  <span className="text-xs font-medium text-white/70">
+                    Background Image — Desktop{" "}
+                    <span className="font-normal text-white/40">(landscape, used on large screens)</span>
+                  </span>
+                  <input
+                    type="url"
+                    value={movieForm.desktopBgUrl}
+                    onChange={(e) => setMovieForm({ ...movieForm, desktopBgUrl: e.target.value.trim() })}
+                    className="w-full rounded border border-white/10 bg-black/40 px-3 py-2 text-sm text-white placeholder-white/50 focus:border-gold focus:outline-none"
+                    placeholder="https://... (landscape / wide crop)"
+                  />
+                  {movieForm.desktopBgUrl && isValidImageUrl(movieForm.desktopBgUrl) && (
+                    <div className="relative mt-2 aspect-video w-full max-w-xs overflow-hidden rounded-lg border border-white/10">
+                      <Image src={movieForm.desktopBgUrl} alt="Desktop bg preview" fill className="object-cover" sizes="300px" />
+                    </div>
+                  )}
+                  {movieForm.desktopBgUrl && !isValidImageUrl(movieForm.desktopBgUrl) && (
+                    <p className="mt-1 text-xs text-red-400">Please enter a valid https:// image URL.</p>
+                  )}
                 </label>
               </div>
-
-              {movieForm.posterUrl && isValidImageUrl(movieForm.posterUrl) && (
-                <div className="relative mt-4 aspect-video w-full max-w-xs overflow-hidden rounded-lg border border-white/10">
-                  <Image
-                    src={movieForm.posterUrl}
-                    alt="Poster preview"
-                    fill
-                    className="object-cover"
-                    sizes="300px"
-                  />
-                </div>
-              )}
-              {movieForm.posterUrl && !isValidImageUrl(movieForm.posterUrl) && (
-                <p className="mt-3 text-xs text-red-400">Please enter a valid https:// image URL.</p>
-              )}
 
               <div className="mt-5">
                 <label className="mb-2 block text-sm font-medium text-white/80">Showtimes</label>
@@ -510,10 +535,10 @@ export default function AdminPanel() {
                     key={movie.id}
                     className="flex flex-col overflow-hidden rounded-xl border border-white/10 bg-white/5"
                   >
-                    {movie.posterUrl ? (
+                    {(movie.desktopBgUrl || movie.mobileBgUrl || movie.posterUrl) ? (
                       <div className="relative aspect-video w-full overflow-hidden">
                         <Image
-                          src={movie.posterUrl}
+                          src={(movie.desktopBgUrl || movie.mobileBgUrl || movie.posterUrl)!}
                           alt={movie.title}
                           fill
                           className="object-cover"

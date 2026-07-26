@@ -20,6 +20,8 @@ interface Movie {
   certification?: string;
   dimension?: string;
   posterUrl?: string;
+  mobileBgUrl?: string;
+  desktopBgUrl?: string;
   showtimes: Showtime[];
 }
 
@@ -89,10 +91,31 @@ export default function NowShowing() {
           key={m.id}
           className={`absolute inset-0 transition-opacity duration-1000 ${i === current ? "opacity-100" : "opacity-0"}`}
         >
-          {m.posterUrl ? (
-            <Image src={m.posterUrl} alt={m.title} fill priority={i === current} className="object-cover" sizes="100vw" />
+          {/* Mobile background (portrait) — hidden on md+ */}
+          {(m.mobileBgUrl || m.posterUrl) ? (
+            <Image
+              src={(m.mobileBgUrl || m.posterUrl)!}
+              alt={m.title}
+              fill
+              priority={i === current}
+              className="object-cover md:hidden"
+              sizes="100vw"
+            />
           ) : (
-            <div className={`absolute inset-0 bg-gradient-to-br ${gradients[i % gradients.length]}`} />
+            <div className="absolute inset-0 md:hidden bg-gradient-to-br from-stone-950 to-neutral-950" />
+          )}
+          {/* Desktop background (landscape) — hidden below md */}
+          {(m.desktopBgUrl || m.posterUrl) ? (
+            <Image
+              src={(m.desktopBgUrl || m.posterUrl)!}
+              alt={m.title}
+              fill
+              priority={i === current}
+              className="object-cover hidden md:block"
+              sizes="100vw"
+            />
+          ) : (
+            <div className={`absolute inset-0 hidden md:block bg-gradient-to-br ${gradients[i % gradients.length]}`} />
           )}
           {/* graduated overlays */}
           <div className="absolute inset-0 bg-black/50" />
@@ -138,32 +161,34 @@ export default function NowShowing() {
 
             {/* Showtimes */}
             {movie.showtimes.length > 0 && (
-              <div className="mt-5 flex flex-wrap items-center gap-2" data-aos="fade-up" data-aos-delay="160" data-aos-duration="550">
-                <span className="mr-1 text-[0.65rem] font-semibold tracking-[0.15em] uppercase text-white/40">
+              <div className="mt-5" data-aos="fade-up" data-aos-delay="160" data-aos-duration="550">
+                <span className="mb-2 block text-[0.65rem] font-semibold tracking-[0.15em] uppercase text-white/40">
                   Showtimes
                 </span>
-                {movie.showtimes.map((s) => {
-                  const active = activeT === s.time;
-                  return (
-                    <button
-                      key={s.id}
-                      type="button"
-                      onClick={() =>
-                        setSelectedTimes((prev) => ({
-                          ...prev,
-                          [movie.id]: active ? null : s.time,
-                        }))
-                      }
-                      className={`rounded px-4 py-2 text-[0.72rem] font-semibold tracking-wide transition-all duration-200 ${
-                        active
-                          ? "bg-gold text-[#0a0805] shadow-[0_0_12px_rgba(201,153,58,0.4)]"
-                          : "border border-white/15 bg-white/[0.06] text-white/80 backdrop-blur-sm hover:border-gold/50 hover:text-white"
-                      }`}
-                    >
-                      {to12h(s.time)}
-                    </button>
-                  );
-                })}
+                <div className="flex flex-wrap gap-2">
+                  {movie.showtimes.map((s) => {
+                    const active = activeT === s.time;
+                    return (
+                      <button
+                        key={s.id}
+                        type="button"
+                        onClick={() =>
+                          setSelectedTimes((prev) => ({
+                            ...prev,
+                            [movie.id]: active ? null : s.time,
+                          }))
+                        }
+                        className={`rounded px-4 py-2 text-[0.72rem] font-semibold tracking-wide transition-all duration-200 ${
+                          active
+                            ? "bg-gold text-[#0a0805] shadow-[0_0_12px_rgba(201,153,58,0.4)]"
+                            : "border border-white/15 bg-white/[0.06] text-white/80 backdrop-blur-sm hover:border-gold/50 hover:text-white"
+                        }`}
+                      >
+                        {to12h(s.time)}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             )}
 

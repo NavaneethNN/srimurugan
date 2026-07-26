@@ -27,6 +27,7 @@
   --color-surface-border: var(--surface-border);
   --font-sans: var(--font-inter);
   --font-dancing: var(--font-dancing);
+  --font-cormorant: var(--font-cormorant);
 }
 
 .font-dancing {

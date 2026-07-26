@@ -13,7 +13,7 @@ export async function PUT(request: NextRequest, { params }: Params) {
     const { id } = await params;
     const movieId = Number(id);
     const body = await request.json();
-    const { title, language, certification, dimension, posterUrl, isNowShowing, showtimes: times } = body;
+    const { title, language, certification, dimension, posterUrl, mobileBgUrl, desktopBgUrl, isNowShowing, showtimes: times } = body;
 
     if (!title) {
       return NextResponse.json({ error: "Title is required" }, { status: 400 });
@@ -27,6 +27,8 @@ export async function PUT(request: NextRequest, { params }: Params) {
         certification,
         dimension,
         posterUrl,
+        mobileBgUrl,
+        desktopBgUrl,
         isNowShowing: isNowShowing ?? true,
         updatedAt: new Date(),
       })
