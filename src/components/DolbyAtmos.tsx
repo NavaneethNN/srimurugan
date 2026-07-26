@@ -60,33 +60,34 @@ export default function DolbyAtmos() {
   return (
     <section
       id="atmos"
-      className="relative overflow-hidden border-y border-[#a855f7]/20 bg-background py-16 sm:py-20 lg:py-24"
+      className="relative overflow-hidden bg-surface py-20 sm:py-24 lg:py-28"
       onMouseMove={handleMove}
       onMouseLeave={handleLeave}
     >
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_50%,rgba(212,168,75,0.12),transparent_45%)]" />
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_80%_30%,rgba(168,85,247,0.12),transparent_45%)]" />
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#a855f7]/40 to-transparent" />
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[#a855f7]/40 to-transparent" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_52%,rgba(201,153,58,0.09),transparent_42%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_82%_28%,rgba(168,85,247,0.1),transparent_42%)]" />
+      <hr className="gold-rule absolute inset-x-0 top-0" />
+      <hr className="gold-rule absolute inset-x-0 bottom-0" />
 
       <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
+        <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-20">
           <div
             ref={textRef}
             className={`order-2 reveal-group from-right ${textInView ? "is-visible" : ""}`}
           >
-            <p className="reveal-item stagger-1 text-xs font-semibold tracking-[0.2em] text-gold uppercase">
+            <p className="reveal-item stagger-1 section-label">
               Three-Dimensional Sound
             </p>
-            <h2 className="reveal-item stagger-2 mt-2 text-3xl font-bold tracking-wide text-white uppercase sm:text-4xl lg:text-5xl">
-              64-Channel Dolby Atmos
+            <h2 className="reveal-item stagger-2 mt-3 text-3xl font-bold uppercase tracking-wide text-white sm:text-4xl lg:text-5xl">
+              64-Channel<br />
+              <span className="text-gold">Dolby Atmos</span>
             </h2>
-            <p className="reveal-item stagger-3 mt-4 text-sm leading-relaxed text-muted sm:text-base">
+            <p className="reveal-item stagger-3 mt-4 max-w-md text-sm leading-relaxed text-muted sm:text-[0.95rem]">
               Sound is no longer just around you — it moves above, below and
               through you. With 64 independent channels, every whisper, roar and
               raindrop is placed precisely in three-dimensional space.
             </p>
-            <ul className="mt-6 space-y-3 text-sm text-muted">
+            <ul className="mt-7 space-y-3.5 text-sm text-muted">
               {[
                 "Overhead and surround speakers for true 3D audio",
                 "64 discrete audio channels",
@@ -99,7 +100,7 @@ export default function DolbyAtmos() {
                     key={item}
                     className={`reveal-item ${delays[i]} flex items-start gap-3`}
                   >
-                    <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-gold" />
+                    <span className="mt-[5px] h-1.5 w-1.5 shrink-0 rounded-full bg-gold" />
                     {item}
                   </li>
                 );
