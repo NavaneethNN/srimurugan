@@ -1,4 +1,4 @@
-import { pgTable, serial, varchar, text, boolean, timestamp, integer } from "drizzle-orm/pg-core";
+import { pgTable, serial, varchar, text, boolean, timestamp, integer, jsonb } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
 export const movies = pgTable("movies", {
@@ -32,6 +32,16 @@ export const upcomingMovies = pgTable("upcoming_movies", {
   releaseDate: timestamp("release_date"),
   posterUrl: text("poster_url"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const foodOrders = pgTable("food_orders", {
+  id: serial("id").primaryKey(),
+  customerName: varchar("customer_name", { length: 120 }),
+  seat: varchar("seat", { length: 120 }).notNull(),
+  items: jsonb("items").notNull(),
+  status: varchar("status", { length: 30 }).default("pending").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
 export const moviesRelations = relations(movies, ({ many }) => ({

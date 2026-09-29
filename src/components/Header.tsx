@@ -10,6 +10,7 @@ const navLinks = [
   { label: "Now Showing", href: "/now-showing" },
   { label: "Coming Soon", href: "/coming-soon" },
   { label: "Features",    href: "/features" },
+  { label: "Order Food",  href: "/order-food" },
   { label: "About",       href: "/about" },
   { label: "Gallery",     href: "/gallery" },
   { label: "Contact",     href: "/contact" },
@@ -98,7 +99,7 @@ export default function Header() {
               <a
                 key={link.label}
                 href={link.href}
-                onClick={(e) => handleNavClick(e, link.href)}
+                onClick={link.href === "/order-food" ? () => setOpen(false) : (e) => handleNavClick(e, link.href)}
                 className={`relative px-3 py-1.5 text-[0.7rem] font-semibold tracking-[0.12em] uppercase transition-colors duration-200 ${
                   isActive ? "text-gold" : "text-white/70 hover:text-white"
                 }`}
@@ -173,7 +174,7 @@ export default function Header() {
               <a
                 key={link.label}
                 href={link.href}
-                onClick={(e) => handleNavClick(e, link.href)}
+                onClick={link.href === "/order-food" ? () => setOpen(false) : (e) => handleNavClick(e, link.href)}
                 className={`group flex w-full items-center gap-3 rounded px-3 py-4 text-lg font-semibold uppercase tracking-widest transition-all duration-200 ${
                   isActive
                     ? "text-gold"

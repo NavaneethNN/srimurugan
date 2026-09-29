@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "Murugan@123";
-const SESSION_SECRET = process.env.SESSION_SECRET || "srimurugan-cinema-secret-2024";
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+const SESSION_SECRET = process.env.SESSION_SECRET;
 
 async function signToken(payload: string): Promise<string> {
+  if (!SESSION_SECRET) throw new Error("SESSION_SECRET is required for admin authentication");
   const encoder = new TextEncoder();
   const key = await crypto.subtle.importKey(
     "raw",
@@ -21,7 +22,7 @@ async function verifyToken(token: string, expectedPayload: string): Promise<bool
   return token === expectedToken;
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   if (pathname === "/admin/login") {
@@ -33,6 +34,11 @@ export async function middleware(request: NextRequest) {
   }
 
   const authCookie = request.cookies.get("admin-session")?.value;
+
+  if (!ADMIN_PASSWORD || !SESSION_SECRET) {
+    if (pathname.startsWith("/api/admin")) return NextResponse.json({ error: "Admin access is not configured." }, { status: 503 });
+    return new NextResponse("Admin access is not configured.", { status: 503 });
+  }
 
   if (pathname.startsWith("/api/admin")) {
     if (!authCookie) {

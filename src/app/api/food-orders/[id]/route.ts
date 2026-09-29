@@ -1,0 +1,33 @@
+import { NextRequest, NextResponse } from "next/server";
+import { and, eq, gt } from "drizzle-orm";
+import { getDb } from "@/lib/db";
+import { foodOrders } from "@/lib/schema";
+import { SEAT_EDIT_WINDOW_MS, verifySeatEditToken } from "@/lib/foodOrderEdit";
+
+export async function PATCH(request: NextRequest, context: { params: Promise<{ id: string }> }) {
+  const { id } = await context.params;
+  const orderId = Number(id);
+  const body = await request.json().catch(() => null);
+  const seat = typeof body?.seat === "string" ? body.seat.trim() : "";
+
+  if (!Number.isSafeInteger(orderId) || orderId < 1 || !seat || seat.length > 120) {
+    return NextResponse.json({ error: "Enter a valid screen and seat number." }, { status: 400 });
+  }
+  if (!verifySeatEditToken(body?.editToken, orderId)) {
+    return NextResponse.json({ error: `The ${SEAT_EDIT_WINDOW_MS / 1000}-second seat edit window has ended.` }, { status: 403 });
+  }
+
+  try {
+    const [order] = await getDb().update(foodOrders)
+      .set({ seat, updatedAt: new Date() })
+      .where(and(eq(foodOrders.id, orderId), gt(foodOrders.createdAt, new Date(Date.now() - SEAT_EDIT_WINDOW_MS))))
+      .returning({ id: foodOrders.id, seat: foodOrders.seat });
+    if (!order) {
+      return NextResponse.json({ error: `The ${SEAT_EDIT_WINDOW_MS / 1000}-second seat edit window has ended.` }, { status: 403 });
+    }
+    return NextResponse.json({ order }, { headers: { "Cache-Control": "no-store" } });
+  } catch (error) {
+    console.error("Food order seat update failed", error);
+    return NextResponse.json({ error: "We could not update your seat. Please try again." }, { status: 500 });
+  }
+}

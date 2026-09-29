@@ -7,6 +7,7 @@ const SECTION_PATHS = [
   "/now-showing",
   "/coming-soon",
   "/features",
+  "/order-food",
   "/about",
   "/gallery",
   "/contact",
@@ -26,6 +27,13 @@ export function scrollToSection(id: string) {
 
 export function useSectionNav() {
   const handleNav = useCallback((e: React.MouseEvent<HTMLAnchorElement>, path: string) => {
+    if (window.location.pathname !== "/") {
+      e.preventDefault();
+      const id = pathToId(path);
+      window.location.href = `/?section=${encodeURIComponent(id)}`;
+      return;
+    }
+
     e.preventDefault();
     const id = pathToId(path);
     scrollToSection(id);

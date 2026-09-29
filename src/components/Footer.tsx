@@ -10,6 +10,7 @@ const quickLinks = [
   { label: "Now Showing", href: "/now-showing" },
   { label: "Coming Soon", href: "/coming-soon" },
   { label: "Features",    href: "/features" },
+  { label: "Order Food",  href: "/order-food" },
   { label: "About Us",    href: "/about" },
   { label: "Gallery",     href: "/gallery" },
 ];
@@ -123,7 +124,7 @@ export default function Footer() {
                 <li key={link.label}>
                   <a
                     href={link.href}
-                    onClick={(e) => handleNav(e, link.href)}
+                    onClick={link.href === "/order-food" ? undefined : (e) => handleNav(e, link.href)}
                     className="text-sm text-muted transition-colors duration-150 hover:text-gold"
                   >
                     {link.label}

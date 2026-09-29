@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -311,7 +312,7 @@ export default function AdminPanel() {
           </button>
         </div>
 
-        <div className="mb-8 flex justify-center gap-4">
+        <div className="mb-8 flex flex-wrap justify-center gap-4">
           <button
             type="button"
             onClick={() => setActiveTab("now")}
@@ -330,6 +331,9 @@ export default function AdminPanel() {
           >
             Upcoming
           </button>
+          <Link href="/admin/orders" className="rounded border border-gold px-4 py-2 text-sm font-semibold text-gold transition-colors hover:bg-gold/10">
+            Food Orders
+          </Link>
         </div>
 
         {status && (

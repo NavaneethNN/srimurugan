@@ -34,3 +34,7 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## Food orders
+
+The food menu sends order requests to the `food_orders` table. On an existing cinema database, apply `drizzle/food_orders_only.sql`; the initial Drizzle migration also creates the movie tables and should only be used for a new database. Staff can review and update requests at `/admin/orders`; the list refreshes every 15 seconds. Set `ADMIN_PASSWORD` and `SESSION_SECRET` in the deployment environment to enable admin access. The website does not collect payment.

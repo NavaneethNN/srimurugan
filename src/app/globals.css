@@ -214,6 +214,27 @@ body {
 }
 .btn-gold:active { transform: translateY(0); }
 
+.order-input {
+  display: block;
+  width: 100%;
+  min-height: 3rem;
+  margin-top: 0.5rem;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid rgba(255,255,255,0.16);
+  border-radius: 0.65rem;
+  outline: none;
+  background: #201d18;
+  color: #fff;
+  font-size: 0.875rem;
+  font-weight: 400;
+}
+.order-input::placeholder { color: #99918a; }
+.order-input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(201,153,58,0.15); }
+
+@media (prefers-reduced-motion: reduce) {
+  .btn-gold { transition: none; }
+}
+
 /* ── Outline gold button ───────────────────────────────────────────── */
 .btn-outline {
   display: inline-flex;
