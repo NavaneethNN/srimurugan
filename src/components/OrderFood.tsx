@@ -2,6 +2,7 @@
 
 import { FormEvent, useEffect, useRef, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { categories, menuItems, pairings, type Category } from "@/lib/foodMenu";
 
 type Status = "idle" | "submitting" | "success" | "error";
@@ -236,6 +237,12 @@ export default function OrderFood() {
       <label className="block text-xs font-semibold text-white/80">Screen and seat number <span className="text-gold">*</span>
         <input required maxLength={120} value={seat} onChange={(event) => setSeat(event.target.value)} placeholder="For example, Screen 1 · E12" className="order-input" />
       </label>
+      <p className="text-xs leading-5 text-white/65">
+        Please allow 20–25 minutes for service. Check your seat number carefully: an incorrect seat may result in cancellation without a refund. No exchanges or refunds apply, except where required by law. Payment is online only when checkout is available.
+      </p>
+      <p className="text-xs leading-5 text-white/65">
+        By sending your request, you acknowledge our <Link href="/terms-and-conditions" className="text-gold underline underline-offset-2" target="_blank" rel="noopener noreferrer">Terms and Conditions</Link>, <Link href="/cancellation-policy" className="text-gold underline underline-offset-2" target="_blank" rel="noopener noreferrer">Cancellation Policy</Link>, and <Link href="/refund-policy" className="text-gold underline underline-offset-2" target="_blank" rel="noopener noreferrer">Refund Policy</Link>.
+      </p>
       <button type="submit" disabled={!itemCount || status === "submitting"} className="btn-gold min-h-12 w-full justify-center disabled:cursor-not-allowed disabled:opacity-40">
         {status === "submitting" ? "Sending your order…" : "Send order request"}
         {status !== "submitting" && <span aria-hidden="true">→</span>}

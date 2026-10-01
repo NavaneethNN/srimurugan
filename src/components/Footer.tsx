@@ -160,9 +160,11 @@ export default function Footer() {
           <p className="text-[0.7rem] text-muted/60">
             © {new Date().getFullYear()} Sri Murugan Cinema. All Rights Reserved.
           </p>
-          <p className="text-[0.65rem] text-muted/40 tracking-wider">
-            Mettupalayam Road · Coimbatore · Tamil Nadu
-          </p>
+          <nav aria-label="Customer policies" className="flex flex-wrap justify-center gap-x-4 gap-y-2 text-xs text-muted">
+            <Link href="/terms-and-conditions" className="hover:text-gold">Terms and Conditions</Link>
+            <Link href="/cancellation-policy" className="hover:text-gold">Cancellation Policy</Link>
+            <Link href="/refund-policy" className="hover:text-gold">Refund Policy</Link>
+          </nav>
         </div>
       </Reveal>
     </footer>
