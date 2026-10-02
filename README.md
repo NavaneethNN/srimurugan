@@ -35,6 +35,12 @@ The easiest way to deploy your Next.js app is to use the [Vercel Platform](https
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
 
-## Food orders
+## Cafe orders and Razorpay test payments
 
-The food menu sends order requests to the `food_orders` table. On an existing cinema database, apply `drizzle/food_orders_only.sql`; the initial Drizzle migration also creates the movie tables and should only be used for a new database. Staff can review and update requests at `/admin/orders`; the list refreshes every 15 seconds. Set `ADMIN_PASSWORD` and `SESSION_SECRET` in the deployment environment to enable admin access. The website does not collect payment.
+Set `DATABASE_URL`, `ADMIN_PASSWORD`, `SESSION_SECRET`, `RAZORPAY_TEST_API_KEY`, and `RAZORPAY_TEST_API_SECRET` in the deployment environment. Apply the Drizzle migrations before starting the app. Existing cafe products have no prices; add a price of at least ₹1 to each variant in `/admin/cafe` before it can be purchased.
+
+The customer pays through Razorpay Standard Checkout. The server prices the cart, reserves a unique checkout attempt, creates the Razorpay order, verifies the checkout signature, checks and captures the payment, then releases the food order to `/admin/orders`. Unpaid orders are hidden from staff. Repeated requests with the same checkout key reuse one order. The customer can recover a checkout or check payment status after closing the browser. Staff see paginated status queues, with oldest pending orders first.
+
+For recovery when a customer closes the browser before confirmation, set a separate `RAZORPAY_WEBHOOK_SECRET` and create a **test mode** Razorpay webhook for `payment.authorized` and `payment.captured` at `https://YOUR_DOMAIN/api/razorpay/webhook`. The webhook secret must match the value in the deployment environment. Razorpay requires a public HTTPS URL. These credentials are test mode only; live payments require live API keys and a separately configured live webhook.
+
+Run `npm test` for the order, signature, session, and request-size checks. With the app running locally and test keys configured, `node --env-file=.env --env-file=.env.local scripts/order-integration.mjs` creates a temporary ₹1 product, tests concurrent idempotent checkout requests, and removes its test records. A 1,000-request validation load passed locally, but this is not a benchmark of 1,000 completed payments. Verify actual payment capacity on the deployed infrastructure with Razorpay's test environment and its applicable API limits before promising that throughput to customers.

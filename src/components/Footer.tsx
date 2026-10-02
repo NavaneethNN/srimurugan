@@ -56,13 +56,15 @@ export default function Footer() {
 
         {/* ── Top band ── */}
         <div className="flex flex-col items-start justify-between gap-6 border-b border-card-border py-10 sm:flex-row sm:items-center sm:py-12">
-          <Image
-            src="/logo.png"
-            alt="Sri Murugan Cinema"
-            width={130}
-            height={130}
-            className="h-[62px] w-auto object-contain"
-          />
+          <div className="rounded-xl bg-[#080808] px-3 py-1">
+            <Image
+              src="/logo.png"
+              alt="Sri Murugan Cinema"
+              width={130}
+              height={130}
+              className="h-[62px] w-auto object-contain"
+            />
+          </div>
 
           <div className="flex flex-col items-start gap-2 sm:items-end">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted">Book your next show</p>
@@ -93,7 +95,7 @@ export default function Footer() {
                 <circle cx="12" cy="10" r="3" />
               </svg>
               <div>
-                <p className="text-sm font-medium text-white">Mettupalayam Road</p>
+                <p className="text-sm font-medium text-foreground">Mettupalayam Road</p>
                 <p className="mt-0.5 text-sm text-muted">Coimbatore, Tamil Nadu</p>
                 <p className="text-sm text-muted">641 043</p>
               </div>
@@ -109,9 +111,9 @@ export default function Footer() {
                 <path d="M12 6v6l4 2" />
               </svg>
               <div>
-                <p className="text-sm font-medium text-white">Daily Shows</p>
+                <p className="text-sm font-medium text-foreground">Daily Shows</p>
                 <p className="mt-0.5 text-sm text-muted">10:00 AM – 10:00 PM</p>
-                <p className="mt-1 text-[0.7rem] text-muted/60">All days of the week</p>
+                <p className="mt-1 text-[0.7rem] text-muted">All days of the week</p>
               </div>
             </div>
           </div>
@@ -149,7 +151,7 @@ export default function Footer() {
                 </a>
               ))}
             </div>
-            <p className="mt-6 text-[0.7rem] leading-relaxed text-muted/60">
+            <p className="mt-6 text-[0.7rem] leading-relaxed text-muted">
               Stay up to date with the latest releases and offers.
             </p>
           </div>
@@ -157,7 +159,7 @@ export default function Footer() {
 
         {/* ── Bottom bar ── */}
         <div className="flex flex-col items-center justify-between gap-3 border-t border-card-border py-6 sm:flex-row">
-          <p className="text-[0.7rem] text-muted/60">
+          <p className="text-[0.7rem] text-muted">
             © {new Date().getFullYear()} Sri Murugan Cinema. All Rights Reserved.
           </p>
           <nav aria-label="Customer policies" className="flex flex-wrap justify-center gap-x-4 gap-y-2 text-xs text-muted">

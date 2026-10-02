@@ -56,7 +56,7 @@ function MovieCard({ movie, index }: { movie: UpcomingMovie; index: number }) {
 
         {/* "Coming Soon" ribbon */}
         <div className="absolute left-0 top-4 bg-gold px-3 py-0.5">
-          <span className="text-[0.58rem] font-bold uppercase tracking-widest text-background">
+          <span className="text-[0.58rem] font-bold uppercase tracking-widest text-white">
             Coming Soon
           </span>
         </div>
@@ -67,7 +67,7 @@ function MovieCard({ movie, index }: { movie: UpcomingMovie; index: number }) {
 
       {/* Info */}
       <div className="px-4 py-3">
-        <p className="truncate text-[0.82rem] font-semibold text-white">{movie.title}</p>
+        <p className="truncate text-[0.82rem] font-semibold text-foreground">{movie.title}</p>
         <div className="mt-1 flex flex-wrap items-center gap-1.5">
           {movie.language && (
             <span className="rounded bg-gold/10 px-1.5 py-0.5 text-[0.6rem] font-semibold uppercase tracking-wider text-gold">
@@ -128,7 +128,7 @@ export default function ComingSoon() {
         </div>
 
         {loading && (
-          <p className="text-center text-sm text-white/40 tracking-wider">Loading…</p>
+          <p className="text-center text-sm text-muted tracking-wider">Loading…</p>
         )}
 
         {!loading && upcoming.length === 0 && (
@@ -199,7 +199,7 @@ export default function ComingSoon() {
                   onClick={() => setCurrent(i)}
                   aria-label={`Go to slide ${i + 1}`}
                   className={`rounded-full transition-all duration-300 ${
-                    i === safeCur ? "h-2 w-5 bg-gold" : "h-1.5 w-1.5 bg-white/20 hover:bg-white/40"
+                    i === safeCur ? "h-2 w-5 bg-gold" : "h-1.5 w-1.5 bg-[#d8c9b4] hover:bg-gold/60"
                   }`}
                 />
               ))}

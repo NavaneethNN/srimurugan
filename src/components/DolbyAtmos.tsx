@@ -28,7 +28,7 @@ export default function DolbyAtmos() {
             <p className="reveal-item stagger-1 section-label">
               Three-Dimensional Sound
             </p>
-            <h2 className="reveal-item stagger-2 mt-3 text-3xl font-bold uppercase tracking-wide text-white sm:text-4xl lg:text-5xl">
+            <h2 className="reveal-item stagger-2 mt-3 text-3xl font-bold uppercase tracking-wide text-foreground sm:text-4xl lg:text-5xl">
               64-Channel<br />
               <span className="text-gold">Dolby Atmos</span>
             </h2>
@@ -60,12 +60,13 @@ export default function DolbyAtmos() {
             ref={visualRef}
             className={`order-1 reveal-group from-left ${visualInView ? "is-visible" : ""}`}
           >
-            <div className="relative overflow-hidden rounded-xl border border-card-border">
+            <div className="relative overflow-hidden rounded-2xl border border-card-border shadow-[0_20px_50px_rgba(60,39,21,.12)]">
               <Image
                 src="/dolby.png"
                 alt="64-Channel Dolby Atmos Sound System"
                 width={800}
                 height={500}
+                unoptimized
                 className="h-auto w-full object-cover"
                 sizes="(max-width:1024px) 100vw, 50vw"
               />

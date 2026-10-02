@@ -74,8 +74,8 @@ export default function Header() {
     <header
       className={`fixed top-0 z-50 w-full transition-all duration-300 ${
         scrolled
-          ? "border-b border-card-border bg-background/95 shadow-[0_1px_18px_rgba(0,0,0,0.6)] backdrop-blur-md"
-          : "border-b border-transparent bg-gradient-to-b from-black/60 to-transparent backdrop-blur-none"
+          ? "border-b border-[#222018] bg-[#080808]/95 shadow-[0_1px_18px_rgba(0,0,0,0.2)] backdrop-blur-md"
+          : "border-b border-[#222018] bg-[#080808]/95 backdrop-blur-md"
       }`}
     >
       <div className="mx-auto flex h-[68px] max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
@@ -156,7 +156,7 @@ export default function Header() {
 
       {/* Mobile drawer */}
       <div
-        className={`fixed inset-0 z-50 flex flex-col bg-background transition-all duration-300 ease-in-out lg:hidden ${
+        className={`fixed inset-0 z-50 flex flex-col bg-[#080808] transition-all duration-300 ease-in-out lg:hidden ${
           open ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"
         }`}
       >

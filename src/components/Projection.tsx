@@ -44,7 +44,7 @@ export default function Projection() {
               Crystal-Clear Visuals
             </p>
             <h2
-              className="mt-3 text-3xl font-bold uppercase tracking-wide text-white sm:text-4xl lg:text-5xl"
+              className="mt-3 text-3xl font-bold uppercase tracking-wide text-foreground sm:text-4xl lg:text-5xl"
               data-aos="fade-up"
               data-aos-delay="80"
               data-aos-duration="650"
@@ -86,12 +86,13 @@ export default function Projection() {
             data-aos="fade-up"
             data-aos-duration="700"
           >
-            <div className="relative overflow-hidden rounded-xl border border-card-border">
+            <div className="relative overflow-hidden rounded-2xl border border-card-border shadow-[0_20px_50px_rgba(60,39,21,.12)]">
               <Image
                 src="/4k.png"
                 alt="4K Barco Laser Projection"
                 width={800}
                 height={500}
+                unoptimized
                 className="h-auto w-full object-cover"
                 sizes="(max-width:1024px) 100vw, 50vw"
               />

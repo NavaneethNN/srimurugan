@@ -13,7 +13,7 @@ import SectionScrollHandler from "@/components/SectionScrollHandler";
 
 export default function Home() {
   return (
-    <div className="flex flex-1 flex-col">
+    <div className="site-light flex flex-1 flex-col">
       <Preloader />
       <SectionScrollHandler />
       <Header />
