@@ -93,21 +93,26 @@ export default function NowShowing() {
               {movie.showtimes.length > 0 && (
                 <div className="mt-10">
                   <p className="mb-3 text-xs font-bold uppercase tracking-[.16em] text-muted">Showtimes</p>
-                  <div className="flex flex-wrap justify-center gap-2 sm:justify-start">
-                    {movie.showtimes.map((showtime) => {
-                      const active = activeTime === showtime.time;
-                      return (
-                        <button
-                          key={showtime.id}
-                          type="button"
-                          onClick={() => setSelectedTimes((previous) => ({ ...previous, [movie.id]: active ? null : showtime.time }))}
-                          aria-pressed={active}
-                          className={`min-h-11 rounded-lg border px-4 py-2.5 text-sm font-semibold transition ${active ? "border-gold bg-gold text-white" : "border-surface-border bg-surface text-foreground hover:border-gold hover:text-gold"}`}
-                        >
-                          {to12h(showtime.time)}
-                        </button>
-                      );
-                    })}
+                  <div className="overflow-x-auto pb-1">
+                    <div
+                      className={`grid w-full gap-2 ${movie.showtimes.length > 4 ? "max-w-[400px]" : "max-w-[280px]"}`}
+                      style={{ gridTemplateColumns: `repeat(${Math.ceil(movie.showtimes.length / 2)}, minmax(4.25rem, 1fr))` }}
+                    >
+                      {movie.showtimes.map((showtime) => {
+                        const active = activeTime === showtime.time;
+                        return (
+                          <button
+                            key={showtime.id}
+                            type="button"
+                            onClick={() => setSelectedTimes((previous) => ({ ...previous, [movie.id]: active ? null : showtime.time }))}
+                            aria-pressed={active}
+                            className={`min-h-11 whitespace-nowrap rounded-lg border py-2.5 font-semibold transition ${movie.showtimes.length > 4 ? "px-1 text-[0.7rem] sm:text-sm" : "px-2 text-sm"} ${active ? "border-gold bg-gold text-white" : "border-surface-border bg-surface text-foreground hover:border-gold hover:text-gold"}`}
+                          >
+                            {to12h(showtime.time)}
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
                 </div>
               )}
