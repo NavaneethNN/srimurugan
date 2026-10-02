@@ -62,8 +62,7 @@ export default function Facilities() {
           <h2 className="section-title">Our Facilities</h2>
         </div>
 
-        {/* Cards — always a grid, single row on all sizes */}
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 sm:gap-6">
+        <div className="grid grid-cols-1 gap-4 min-[400px]:grid-cols-2 sm:grid-cols-4 sm:gap-6">
           {features.map((f, i) => (
             <div
               key={f.title}
@@ -81,7 +80,7 @@ export default function Facilities() {
                 <h3 className="text-[0.82rem] font-bold uppercase tracking-wide text-foreground sm:text-sm">
                   {f.title}
                 </h3>
-                <p className="mt-1.5 hidden text-[0.72rem] leading-relaxed text-muted sm:block">
+                <p className="mt-1.5 text-[0.72rem] leading-relaxed text-muted">
                   {f.desc}
                 </p>
               </div>

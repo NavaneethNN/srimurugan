@@ -76,8 +76,9 @@ export default function NowShowing() {
                 <div className="absolute inset-0 bg-gradient-to-br from-[#704928] via-[#322117] to-[#18120d]" />
               )}
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-              <div className="absolute bottom-6 left-6 rounded-full border border-white/40 bg-black/30 px-4 py-2 text-xs font-semibold uppercase tracking-[.16em] text-white backdrop-blur-sm sm:bottom-8 sm:left-8">
-                Playing at Sri Murugan Cinema
+              <div className="absolute bottom-6 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full border border-white/40 bg-black/50 px-4 py-2 text-[0.65rem] font-semibold uppercase tracking-[.08em] text-white backdrop-blur-sm sm:bottom-8 sm:left-8 sm:translate-x-0 sm:text-xs sm:tracking-[.16em]">
+                <span className="sm:hidden">Playing at Sri Murugan</span>
+                <span className="hidden sm:inline">Playing at Sri Murugan Cinema</span>
               </div>
             </div>
 
@@ -92,7 +93,7 @@ export default function NowShowing() {
               {movie.showtimes.length > 0 && (
                 <div className="mt-10">
                   <p className="mb-3 text-xs font-bold uppercase tracking-[.16em] text-muted">Showtimes</p>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap justify-center gap-2 sm:justify-start">
                     {movie.showtimes.map((showtime) => {
                       const active = activeTime === showtime.time;
                       return (
@@ -101,7 +102,7 @@ export default function NowShowing() {
                           type="button"
                           onClick={() => setSelectedTimes((previous) => ({ ...previous, [movie.id]: active ? null : showtime.time }))}
                           aria-pressed={active}
-                          className={`rounded-lg border px-4 py-2.5 text-sm font-semibold transition ${active ? "border-gold bg-gold text-white" : "border-surface-border bg-surface text-foreground hover:border-gold hover:text-gold"}`}
+                          className={`min-h-11 rounded-lg border px-4 py-2.5 text-sm font-semibold transition ${active ? "border-gold bg-gold text-white" : "border-surface-border bg-surface text-foreground hover:border-gold hover:text-gold"}`}
                         >
                           {to12h(showtime.time)}
                         </button>
@@ -114,19 +115,19 @@ export default function NowShowing() {
                 href="https://in.bookmyshow.com/cinemas/COIM/murugan-cinemas-ac-4k-atmos-thudiyalur/buytickets/MCTC/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="btn-gold mt-10 w-fit min-h-12"
+                className="btn-gold mt-10 min-h-12 w-full justify-center sm:w-fit"
               >
                 Book Tickets <span aria-hidden="true">↗</span>
               </Link>
               {movies.length > 1 && (
                 <div className="mt-10 flex items-center gap-3 border-t border-surface-border pt-6">
-                  <button type="button" onClick={() => setCurrent((index) => (index - 1 + movies.length) % movies.length)} aria-label="Previous movie" className="flex h-10 w-10 items-center justify-center rounded-full border border-surface-border text-foreground transition hover:border-gold hover:text-gold">←</button>
-                  <div className="flex gap-2" aria-label="Movie slides">
+                  <button type="button" onClick={() => setCurrent((index) => (index - 1 + movies.length) % movies.length)} aria-label="Previous movie" className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-surface-border text-foreground transition hover:border-gold hover:text-gold">←</button>
+                  <div className="flex min-w-0 flex-1 flex-wrap justify-center" aria-label="Movie slides">
                     {movies.map((item, index) => (
-                      <button key={item.id} type="button" onClick={() => setCurrent(index)} aria-label={`Show ${item.title}`} aria-current={index === current ? "true" : undefined} className={`h-2 rounded-full transition-all ${index === current ? "w-7 bg-gold" : "w-2 bg-[#d8c9b4] hover:bg-gold/60"}`} />
+                      <button key={item.id} type="button" onClick={() => setCurrent(index)} aria-label={`Show ${item.title}`} aria-current={index === current ? "true" : undefined} className="flex h-10 w-10 items-center justify-center"><span className={`h-2 rounded-full transition-all ${index === current ? "w-7 bg-gold" : "w-2 bg-[#d8c9b4]"}`} /></button>
                     ))}
                   </div>
-                  <button type="button" onClick={() => setCurrent((index) => (index + 1) % movies.length)} aria-label="Next movie" className="flex h-10 w-10 items-center justify-center rounded-full border border-surface-border text-foreground transition hover:border-gold hover:text-gold">→</button>
+                  <button type="button" onClick={() => setCurrent((index) => (index + 1) % movies.length)} aria-label="Next movie" className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-surface-border text-foreground transition hover:border-gold hover:text-gold">→</button>
                 </div>
               )}
             </div>

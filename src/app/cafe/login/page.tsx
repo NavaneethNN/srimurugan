@@ -105,13 +105,13 @@ export default function CafeLoginPage() {
           <p className="mt-2 text-xl text-gray-400">Cafe POS System</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="rounded-2xl border border-gray-800 bg-gray-900/50 p-8 shadow-2xl backdrop-blur">
+        <form onSubmit={handleSubmit} className="rounded-2xl border border-gray-800 bg-gray-900/50 p-4 shadow-2xl backdrop-blur sm:p-8">
           <h2 className="mb-6 text-center text-2xl font-bold text-white">
             Enter Your PIN
           </h2>
 
           {/* PIN Input */}
-          <div className="mb-6 flex justify-center gap-3">
+          <div className="mb-6 flex justify-center gap-1.5 sm:gap-3">
             {[0, 1, 2, 3, 4, 5].map((index) => (
               <input
                 key={index}
@@ -124,7 +124,7 @@ export default function CafeLoginPage() {
                 onKeyDown={(e) => handleKeyDown(index, e)}
                 onPaste={handlePaste}
                 disabled={loading}
-                className="h-16 w-14 rounded-lg border-2 border-gray-700 bg-gray-800 text-center text-2xl font-bold text-white transition-all focus:border-amber-400 focus:outline-none disabled:opacity-50"
+                className="h-14 min-w-0 flex-1 rounded-lg border-2 border-gray-700 bg-gray-800 text-center text-xl font-bold text-white transition-all focus:border-amber-400 focus:outline-none disabled:opacity-50 sm:h-16 sm:max-w-14 sm:text-2xl"
               />
             ))}
           </div>

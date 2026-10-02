@@ -138,7 +138,7 @@ export default function ComingSoon() {
         {!loading && upcoming.length > 0 && upcoming.length <= visible && (
           <div className="flex flex-wrap justify-center gap-5">
             {upcoming.map((m, i) => (
-              <div key={m.id} className="w-full max-w-[200px] sm:w-[calc(50%-10px)] lg:w-[calc(25%-15px)]">
+              <div key={m.id} className="w-full max-w-[280px] sm:w-[calc(50%-10px)] lg:w-[calc(25%-15px)]">
                 <MovieCard movie={m} index={i} />
               </div>
             ))}
@@ -174,7 +174,7 @@ export default function ComingSoon() {
                 type="button"
                 onClick={() => setCurrent((i) => Math.max(i - 1, 0))}
                 aria-label="Previous"
-                className="absolute -left-4 top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-card-border bg-card text-gold shadow-lg transition hover:border-gold/50 sm:-left-5"
+                className="absolute -left-3 top-1/2 z-10 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-card-border bg-card text-gold shadow-lg transition hover:border-gold/50 sm:-left-5"
               >
                 <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6" /></svg>
               </button>
@@ -184,24 +184,24 @@ export default function ComingSoon() {
                 type="button"
                 onClick={() => setCurrent((i) => Math.min(i + 1, maxIndex))}
                 aria-label="Next"
-                className="absolute -right-4 top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-card-border bg-card text-gold shadow-lg transition hover:border-gold/50 sm:-right-5"
+                className="absolute -right-3 top-1/2 z-10 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-card-border bg-card text-gold shadow-lg transition hover:border-gold/50 sm:-right-5"
               >
                 <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6" /></svg>
               </button>
             )}
 
             {/* Dot indicators */}
-            <div className="mt-6 flex justify-center gap-1.5">
+            <div className="mt-4 flex flex-wrap justify-center gap-1">
               {Array.from({ length: maxIndex + 1 }).map((_, i) => (
                 <button
                   key={i}
                   type="button"
                   onClick={() => setCurrent(i)}
                   aria-label={`Go to slide ${i + 1}`}
-                  className={`rounded-full transition-all duration-300 ${
-                    i === safeCur ? "h-2 w-5 bg-gold" : "h-1.5 w-1.5 bg-[#d8c9b4] hover:bg-gold/60"
-                  }`}
-                />
+                  className="flex h-10 w-10 items-center justify-center rounded-full"
+                >
+                  <span className={`rounded-full transition-all duration-300 ${i === safeCur ? "h-2 w-5 bg-gold" : "h-2 w-2 bg-[#d8c9b4]"}`} />
+                </button>
               ))}
             </div>
           </div>

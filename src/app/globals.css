@@ -56,6 +56,14 @@ html {
   -moz-osx-font-smoothing: grayscale;
 }
 
+section[id]:not(#home), footer[id] {
+  scroll-margin-top: 68px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}
+
 body {
   background: var(--background);
   color: var(--foreground);

@@ -1,4 +1,3 @@
-import Preloader from "@/components/Preloader";
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
 import NowShowing from "@/components/NowShowing";
@@ -14,7 +13,6 @@ import SectionScrollHandler from "@/components/SectionScrollHandler";
 export default function Home() {
   return (
     <div className="site-light flex flex-1 flex-col">
-      <Preloader />
       <SectionScrollHandler />
       <Header />
       <main className="flex-1">

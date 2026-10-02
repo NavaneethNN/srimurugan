@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import Image from "next/image";
 import Link from "next/link";
 import { useSectionNav, navigateToSectionFromPath } from "@/lib/sectionNav";
@@ -20,6 +21,8 @@ export default function Header() {
   const [open,       setOpen]       = useState(false);
   const [scrolled,   setScrolled]   = useState(false);
   const [activeHref, setActiveHref] = useState("");
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
   const { handleNav } = useSectionNav();
 
   /* scroll-aware background */
@@ -32,8 +35,37 @@ export default function Header() {
 
   /* lock body scroll when drawer is open */
   useEffect(() => {
-    document.body.style.overflow = open ? "hidden" : "";
-    return () => { document.body.style.overflow = ""; };
+    if (!open) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    closeButtonRef.current?.focus();
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setOpen(false);
+        menuButtonRef.current?.focus();
+      } else if (event.key === "Tab") {
+        const focusable = Array.from(document.querySelectorAll<HTMLElement>("#mobile-menu button, #mobile-menu a"));
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (event.shiftKey && document.activeElement === first) {
+          event.preventDefault();
+          last?.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+          event.preventDefault();
+          first?.focus();
+        }
+      }
+    };
+    const onResize = () => {
+      if (window.innerWidth >= 1280) setOpen(false);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    window.addEventListener("resize", onResize);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", onKeyDown);
+      window.removeEventListener("resize", onResize);
+    };
   }, [open]);
 
   /* deep-link restoration */
@@ -92,7 +124,7 @@ export default function Header() {
         </Link>
 
         {/* Desktop nav */}
-        <nav className="hidden items-center gap-1 lg:flex" aria-label="Main navigation">
+        <nav className="hidden items-center gap-1 xl:flex" aria-label="Main navigation">
           {navLinks.map((link) => {
             const isActive = activeHref === link.href;
             return (
@@ -114,7 +146,7 @@ export default function Header() {
         </nav>
 
         {/* Desktop CTA */}
-        <div className="hidden items-center lg:flex">
+        <div className="hidden items-center xl:flex">
           <Link
             href="https://in.bookmyshow.com/cinemas/COIM/murugan-cinemas-ac-4k-atmos-thudiyalur/buytickets/MCTC/"
             target="_blank"
@@ -131,62 +163,46 @@ export default function Header() {
 
         {/* Hamburger */}
         <button
+          ref={menuButtonRef}
           type="button"
-          onClick={() => setOpen(!open)}
-          aria-label="Toggle menu"
+          onClick={() => setOpen(true)}
+          aria-label="Open menu"
           aria-expanded={open}
-          className="relative z-[60] flex h-10 w-10 items-center justify-center rounded text-white/80 transition-colors hover:text-gold lg:hidden"
+          aria-controls="mobile-menu"
+          className="flex h-11 w-11 items-center justify-center rounded text-white/80 transition-colors hover:text-gold xl:hidden"
         >
           <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            {open ? (
-              <>
-                <path d="M18 6 6 18" />
-                <path d="m6 6 12 12" />
-              </>
-            ) : (
-              <>
-                <path d="M4 6h16" />
-                <path d="M4 12h10" />
-                <path d="M4 18h16" />
-              </>
-            )}
+            <path d="M4 6h16" /><path d="M4 12h16" /><path d="M4 18h16" />
           </svg>
         </button>
       </div>
 
       {/* Mobile drawer */}
-      <div
-        className={`fixed inset-0 z-50 flex flex-col bg-[#080808] transition-all duration-300 ease-in-out lg:hidden ${
-          open ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"
-        }`}
-      >
+      {open && createPortal(<div id="mobile-menu" role="dialog" aria-modal="true" aria-label="Main menu" className="fixed inset-0 z-[100] flex h-dvh flex-col bg-[#080808] text-white xl:hidden">
         {/* top bar */}
-        <div className="flex h-[68px] shrink-0 items-center justify-between border-b border-card-border px-4 sm:px-6">
+        <div className="flex h-[68px] shrink-0 items-center justify-between border-b border-[#28251f] px-4 sm:px-6">
           <Image src="/logo.png" alt="Sri Murugan Cinema" width={110} height={110} className="h-[56px] w-auto object-contain" />
-          {/* close button placeholder — handled by the hamburger above */}
+          <button ref={closeButtonRef} type="button" onClick={() => { setOpen(false); menuButtonRef.current?.focus(); }} aria-label="Close menu" className="flex h-11 w-11 items-center justify-center rounded text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold">
+            <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M18 6 6 18" /><path d="M6 6 18 18" /></svg>
+          </button>
         </div>
 
         {/* nav links */}
-        <nav className="flex flex-1 flex-col items-start justify-center gap-0.5 overflow-y-auto px-6 py-6">
-          {navLinks.map((link, i) => {
+        <nav className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-3 sm:px-6" aria-label="Mobile navigation">
+          {navLinks.map((link) => {
             const isActive = activeHref === link.href;
             return (
               <a
                 key={link.label}
                 href={link.href}
                 onClick={link.href === "/order-food" ? () => setOpen(false) : (e) => handleNavClick(e, link.href)}
-                className={`group flex w-full items-center gap-3 rounded px-3 py-4 text-lg font-semibold uppercase tracking-widest transition-all duration-200 ${
+                className={`group flex min-h-12 w-full items-center gap-3 rounded px-3 py-3 text-base font-semibold uppercase tracking-[0.12em] transition-colors sm:text-lg ${
                   isActive
                     ? "text-gold"
                     : "text-white/80 hover:bg-white/[0.03] hover:text-white"
                 }`}
-                style={{
-                  transitionDelay: open ? `${i * 35}ms` : "0ms",
-                  opacity:    open ? 1 : 0,
-                  transform:  open ? "translateX(0)" : "translateX(-12px)",
-                }}
               >
-                {isActive && <span className="h-4 w-0.5 rounded-full bg-gold" />}
+                <span className={`h-4 w-0.5 shrink-0 rounded-full ${isActive ? "bg-gold" : "bg-transparent"}`} />
                 {link.label}
               </a>
             );
@@ -194,13 +210,13 @@ export default function Header() {
         </nav>
 
         {/* mobile CTA */}
-        <div className="shrink-0 border-t border-card-border px-6 py-5">
+        <div className="shrink-0 border-t border-[#28251f] px-4 py-4 sm:px-6" style={{ paddingBottom: "max(1rem, env(safe-area-inset-bottom))" }}>
           <Link
             href="https://in.bookmyshow.com/cinemas/COIM/murugan-cinemas-ac-4k-atmos-thudiyalur/buytickets/MCTC/"
             target="_blank"
             rel="noopener noreferrer"
             onClick={() => setOpen(false)}
-            className="btn-gold w-full justify-center"
+            className="btn-gold min-h-12 w-full justify-center"
           >
             <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <rect x="2" y="7" width="20" height="10" rx="2" />
@@ -209,7 +225,7 @@ export default function Header() {
             Book Tickets
           </Link>
         </div>
-      </div>
+      </div>, document.body)}
     </header>
   );
 }
