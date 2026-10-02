@@ -36,25 +36,26 @@ export default function Preloader() {
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(212,168,75,0.08),transparent_60%)]" />
 
       <div className="relative flex flex-col items-center gap-8">
-        <div className="relative h-28 w-28">
+        <div className="relative h-28 w-28 rounded-xl bg-[#080808]">
           <Image
             src="/logo.png"
             alt="Sri Murugan Cinema"
             fill
+            sizes="112px"
             className="object-contain"
             priority
           />
         </div>
 
         <div className="flex flex-col items-center gap-3">
-          <div className="h-0.5 w-40 overflow-hidden rounded-full bg-white/10 sm:w-52">
+          <div className="h-0.5 w-40 overflow-hidden rounded-full bg-surface-border sm:w-52">
             <div
               className="h-full rounded-full bg-gradient-to-r from-gold via-[#f5d06a] to-gold transition-[width] duration-100 ease-out"
               style={{ width: `${progress}%` }}
             />
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-xs font-medium tracking-[0.3em] text-white/50">
+            <span className="text-xs font-medium tracking-[0.3em] text-muted">
               SRI MURUGAN CINEMA
             </span>
             <span className="text-xs font-bold tabular-nums text-gold">

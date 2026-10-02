@@ -14,6 +14,21 @@
   --surface-border: #2c2820;
 }
 
+.site-light {
+  --background: #fffdf9;
+  --foreground: #29241f;
+  --gold: #9a6324;
+  --gold-light: #b77b37;
+  --gold-dark: #714517;
+  --card: #ffffff;
+  --card-border: #e9ddcd;
+  --muted: #675f55;
+  --surface: #f7f1e8;
+  --surface-border: #e5d7c4;
+  background: var(--background);
+  color: var(--foreground);
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -173,11 +188,11 @@ body {
 }
 
 .section-title {
-  font-size: clamp(1.6rem, 3vw, 2.1rem);
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: #fff;
+  font-family: var(--font-cormorant), Georgia, serif;
+  font-size: clamp(2.8rem, 5vw, 4rem);
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  color: var(--foreground);
   text-align: center;
 }
 .section-title::after {
@@ -200,7 +215,7 @@ body {
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: #0a0805;
+  color: #fffdf9;
   background: var(--gold);
   border: 1px solid transparent;
   border-radius: 4px;
@@ -208,7 +223,7 @@ body {
   white-space: nowrap;
 }
 .btn-gold:hover {
-  background: var(--gold-light);
+  background: var(--gold-dark);
   transform: translateY(-1px);
   box-shadow: 0 6px 22px rgba(201,153,58,0.35);
 }
@@ -220,15 +235,15 @@ body {
   min-height: 3rem;
   margin-top: 0.5rem;
   padding: 0.75rem 0.9rem;
-  border: 1px solid rgba(255,255,255,0.16);
+  border: 1px solid var(--surface-border);
   border-radius: 0.65rem;
   outline: none;
-  background: #201d18;
-  color: #fff;
+  background: var(--card);
+  color: var(--foreground);
   font-size: 0.875rem;
   font-weight: 400;
 }
-.order-input::placeholder { color: #99918a; }
+.order-input::placeholder { color: var(--muted); }
 .order-input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(201,153,58,0.15); }
 
 @media (prefers-reduced-motion: reduce) {
@@ -253,7 +268,7 @@ body {
 }
 .btn-outline:hover {
   background: var(--gold);
-  color: #0a0805;
+  color: #fffdf9;
   transform: translateY(-1px);
 }
 
@@ -261,12 +276,14 @@ body {
 .pro-card {
   background: var(--card);
   border: 1px solid var(--card-border);
-  border-radius: 10px;
-  transition: border-color 0.25s, transform 0.25s;
+  border-radius: 16px;
+  box-shadow: 0 14px 40px rgba(73, 51, 28, 0.05);
+  transition: border-color 0.25s, transform 0.25s, box-shadow 0.25s;
 }
 .pro-card:hover {
   border-color: rgba(201,153,58,0.35);
   transform: translateY(-2px);
+  box-shadow: 0 18px 44px rgba(73, 51, 28, 0.11);
 }
 
 /* ── Thin gold line divider ────────────────────────────────────────── */

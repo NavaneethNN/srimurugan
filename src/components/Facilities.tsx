@@ -78,7 +78,7 @@ export default function Facilities() {
               </div>
 
               <div>
-                <h3 className="text-[0.82rem] font-bold uppercase tracking-wide text-white sm:text-sm">
+                <h3 className="text-[0.82rem] font-bold uppercase tracking-wide text-foreground sm:text-sm">
                   {f.title}
                 </h3>
                 <p className="mt-1.5 hidden text-[0.72rem] leading-relaxed text-muted sm:block">

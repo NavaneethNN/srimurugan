@@ -9,7 +9,7 @@ export const metadata = {
 
 export default function OrderFoodPage() {
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="site-light flex min-h-screen flex-col">
       <Header />
       <main className="flex-1 pt-[68px]">
         <OrderFood />

@@ -64,7 +64,7 @@ export default function About() {
           {/* ── Image column ── */}
           <div
             ref={imgRef}
-            className={`relative min-h-[300px] overflow-hidden rounded-xl border border-card-border sm:min-h-[380px] lg:min-h-[520px] reveal-group from-left ${imgInView ? "is-visible" : ""}`}
+            className={`relative min-h-[300px] overflow-hidden rounded-2xl border border-card-border shadow-[0_20px_50px_rgba(60,39,21,.12)] sm:min-h-[380px] lg:min-h-[520px] reveal-group from-left ${imgInView ? "is-visible" : ""}`}
           >
             <Image
               src="/about.avif"
@@ -74,11 +74,11 @@ export default function About() {
               sizes="(max-width:1024px) 100vw, 50vw"
             />
             {/* gradient overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/20 to-transparent" />
-            <div className="absolute inset-0 bg-gradient-to-r from-background/40 via-transparent to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/10 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-r from-black/25 via-transparent to-transparent" />
 
             {/* Since badge */}
-            <div className="absolute bottom-5 left-5 rounded-lg border border-gold/30 bg-background/70 px-4 py-3 backdrop-blur-sm">
+            <div className="absolute bottom-5 left-5 rounded-lg border border-gold/30 bg-[#21170e]/75 px-4 py-3 backdrop-blur-sm">
               <p className="text-[0.6rem] font-bold uppercase tracking-[0.2em] text-gold">Since</p>
               <p className="text-2xl font-black text-white">1971</p>
             </div>
@@ -97,7 +97,7 @@ export default function About() {
               Our Legacy
             </p>
             <h2
-              className="mt-3 text-3xl font-bold uppercase tracking-wide text-white sm:text-4xl lg:text-5xl"
+              className="mt-3 text-3xl font-bold uppercase tracking-wide text-foreground sm:text-4xl lg:text-5xl"
               data-aos="fade-up"
               data-aos-delay="80"
               data-aos-duration="650"
@@ -120,7 +120,7 @@ export default function About() {
               {highlights.map((item, i) => (
                 <li
                   key={i}
-                  className="flex items-start gap-4 rounded-lg border border-transparent p-3 transition-all duration-200 hover:border-gold/10 hover:bg-white/[0.025]"
+                  className="flex items-start gap-4 rounded-lg border border-transparent p-3 transition-all duration-200 hover:border-gold/10 hover:bg-card"
                   data-aos="fade-up"
                   data-aos-delay={`${200 + i * 80}`}
                   data-aos-duration="550"
