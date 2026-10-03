@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { and, eq, gt, inArray, or } from "drizzle-orm";
+import { and, eq, gt } from "drizzle-orm";
 import { getDb } from "@/lib/db";
 import { foodOrders } from "@/lib/schema";
 import { SEAT_EDIT_WINDOW_MS, verifySeatEditToken } from "@/lib/foodOrderEdit";
@@ -28,11 +28,8 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
       .set({ seat, updatedAt: new Date() })
       .where(and(
         eq(foodOrders.id, orderId),
-        inArray(foodOrders.paymentStatus, ["paid", "legacy"]),
-        or(
-          and(eq(foodOrders.paymentStatus, "paid"), gt(foodOrders.paidAt, new Date(Date.now() - SEAT_EDIT_WINDOW_MS))),
-          and(eq(foodOrders.paymentStatus, "legacy"), gt(foodOrders.createdAt, new Date(Date.now() - SEAT_EDIT_WINDOW_MS))),
-        ),
+        eq(foodOrders.paymentStatus, "paid"),
+        gt(foodOrders.paidAt, new Date(Date.now() - SEAT_EDIT_WINDOW_MS)),
       ))
       .returning({ id: foodOrders.id, seat: foodOrders.seat });
     if (!order) {

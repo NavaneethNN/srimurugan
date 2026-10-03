@@ -40,7 +40,7 @@ export const foodOrders = pgTable("food_orders", {
   seat: varchar("seat", { length: 120 }).notNull(),
   items: jsonb("items").notNull(),
   status: varchar("status", { length: 30 }).default("pending").notNull(),
-  paymentStatus: varchar("payment_status", { length: 20 }).default("legacy").notNull(),
+  paymentStatus: varchar("payment_status", { length: 20 }).default("awaiting_payment").notNull(),
   amountPaise: integer("amount_paise"),
   razorpayOrderId: varchar("razorpay_order_id", { length: 80 }),
   razorpayPaymentId: varchar("razorpay_payment_id", { length: 80 }),

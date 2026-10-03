@@ -2,14 +2,18 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { cafeUsers } from "@/lib/schema";
 import { eq } from "drizzle-orm";
+import { createCafeSession } from "@/lib/cafeSession";
+import { readJsonBody, RequestTooLargeError } from "@/lib/requestBody";
 
 export async function POST(request: NextRequest) {
   try {
-    const { pin } = await request.json();
+    const body = await readJsonBody(request, 1_024) as { pin?: unknown } | null;
+    const pin = body?.pin;
 
-    if (!pin || !/^\d{4,6}$/.test(pin)) {
+    if (typeof pin !== "string" || !/^\d{4,6}$/.test(pin)) {
       return NextResponse.json({ error: "Invalid PIN" }, { status: 400 });
     }
+    if (!process.env.SESSION_SECRET) return NextResponse.json({ error: "Cafe access is unavailable." }, { status: 503 });
 
     const [user] = await db.select()
       .from(cafeUsers)
@@ -34,7 +38,7 @@ export async function POST(request: NextRequest) {
     });
 
     // Set session cookie
-    response.cookies.set("cafe-session", `${user.id}:${pin}`, {
+    response.cookies.set("cafe-session", createCafeSession(user.id, process.env.SESSION_SECRET), {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
@@ -44,6 +48,7 @@ export async function POST(request: NextRequest) {
 
     return response;
   } catch (error) {
+    if (error instanceof RequestTooLargeError) return NextResponse.json({ error: "Request is too large." }, { status: 413 });
     console.error("Cafe login error:", error);
     return NextResponse.json({ error: "Login failed" }, { status: 500 });
   }

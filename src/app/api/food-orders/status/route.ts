@@ -3,7 +3,7 @@ import { eq } from "drizzle-orm";
 import { getDb } from "@/lib/db";
 import { foodOrders } from "@/lib/schema";
 import { confirmFoodPayment, foodOrderConfirmation } from "@/lib/foodPayment";
-import { fetchRazorpayOrderPayments, razorpayKeyId } from "@/lib/razorpay";
+import { fetchRazorpayOrderPayments, isCapturedFoodPayment, razorpayKeyId } from "@/lib/razorpay";
 import { readJsonBody, RequestTooLargeError } from "@/lib/requestBody";
 
 export async function POST(request: NextRequest) {
@@ -27,8 +27,9 @@ export async function POST(request: NextRequest) {
         { status: 202, headers: { "Retry-After": "2", "Cache-Control": "no-store" } });
     }
     const payments = await fetchRazorpayOrderPayments(order.razorpayOrderId);
-    const successful = payments.items.find((payment) => payment.status === "captured") ||
-      payments.items.find((payment) => payment.status === "authorized");
+    const successful = payments.items.find((payment) => isCapturedFoodPayment(payment, order.razorpayOrderId!, payment.id, order.amountPaise!)) ||
+      payments.items.find((payment) => payment.status === "authorized" && payment.id &&
+        payment.order_id === order.razorpayOrderId && payment.amount === order.amountPaise && payment.currency === "INR");
     if (successful) {
       const confirmed = await confirmFoodPayment(order.id, order.razorpayOrderId, successful.id, order.amountPaise);
       if (confirmed) {

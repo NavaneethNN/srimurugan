@@ -1,11 +1,11 @@
 import { and, eq } from "drizzle-orm";
 import { getDb } from "@/lib/db";
 import { foodOrders } from "@/lib/schema";
-import { captureRazorpayPayment, fetchRazorpayPayment } from "@/lib/razorpay";
+import { captureRazorpayPayment, fetchRazorpayPayment, isCapturedFoodPayment } from "@/lib/razorpay";
 import { createSeatEditToken, SEAT_EDIT_WINDOW_MS } from "@/lib/foodOrderEdit";
 
 export function foodOrderConfirmation(order: typeof foodOrders.$inferSelect) {
-  if (!order.paidAt) throw new Error("Paid order has no payment timestamp");
+  if (order.paymentStatus !== "paid" || !order.paidAt || !order.razorpayPaymentId) throw new Error("Order payment is not confirmed");
   const expiresAt = order.paidAt.getTime() + SEAT_EDIT_WINDOW_MS;
   return {
     order: { id: order.id, status: order.status, customerName: order.customerName, seat: order.seat, items: order.items, amountPaise: order.amountPaise },
@@ -17,7 +17,7 @@ export function foodOrderConfirmation(order: typeof foodOrders.$inferSelect) {
 
 export async function confirmFoodPayment(orderId: number, razorpayOrderId: string, paymentId: string, amountPaise: number) {
   let payment = await fetchRazorpayPayment(paymentId);
-  if (payment.order_id !== razorpayOrderId || payment.amount !== amountPaise || payment.currency !== "INR") return null;
+  if (payment.id !== paymentId || payment.order_id !== razorpayOrderId || payment.amount !== amountPaise || payment.currency !== "INR") return null;
   if (payment.status === "authorized") {
     try {
       payment = await captureRazorpayPayment(paymentId, amountPaise);
@@ -26,7 +26,7 @@ export async function confirmFoodPayment(orderId: number, razorpayOrderId: strin
       payment = await fetchRazorpayPayment(paymentId);
     }
   }
-  if (payment.status !== "captured" || !payment.captured || payment.order_id !== razorpayOrderId || payment.amount !== amountPaise || payment.currency !== "INR") return null;
+  if (!isCapturedFoodPayment(payment, razorpayOrderId, paymentId, amountPaise)) return null;
 
   const db = getDb();
   const now = new Date();

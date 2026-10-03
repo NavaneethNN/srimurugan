@@ -19,7 +19,7 @@ export default function TermsAndConditionsPage() {
         },
         {
           title: "Payment",
-          content: <p>Payment for orders is 100% online. Orders placed through this website are currently order requests; online payment is not yet available in this flow.</p>,
+          content: <p>Payment for food and beverage orders is online. Your order is sent to cinema staff only after the payment provider confirms that payment has been captured.</p>,
         },
         {
           title: "Screen and seat details",

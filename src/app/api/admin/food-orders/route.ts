@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { and, asc, count, desc, eq, gt, inArray, lt } from "drizzle-orm";
+import { and, asc, count, desc, eq, gt, isNotNull, lt } from "drizzle-orm";
 import { getDb } from "@/lib/db";
 import { foodOrders } from "@/lib/schema";
 
@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
   try {
     const db = getDb();
     const oldestFirst = status === "pending" || status === "preparing";
-    const visible = inArray(foodOrders.paymentStatus, ["paid", "legacy"]);
+    const visible = and(eq(foodOrders.paymentStatus, "paid"), isNotNull(foodOrders.paidAt), isNotNull(foodOrders.razorpayPaymentId))!;
     const conditions = [visible];
     if (status !== "all") conditions.push(eq(foodOrders.status, status));
     if (cursor !== null) conditions.push(oldestFirst ? gt(foodOrders.id, cursor) : lt(foodOrders.id, cursor));

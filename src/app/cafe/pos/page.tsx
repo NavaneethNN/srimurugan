@@ -43,7 +43,7 @@ export default function CafePOSPage() {
   const loadOrders = useCallback(async (isInitialLoad = false) => {
     const currentRequest = ++requestId.current;
     try {
-      const response = await fetch("/api/admin/food-orders?status=all&limit=50", { 
+      const response = await fetch("/api/cafe/food-orders?status=all&limit=50", {
         cache: "no-store" 
       });
       const data = await response.json();
@@ -121,7 +121,7 @@ export default function CafePOSPage() {
   const updateOrderStatus = async (orderId: number, newStatus: string) => {
     setProcessing(orderId);
     try {
-      const response = await fetch(`/api/admin/food-orders/${orderId}`, {
+      const response = await fetch(`/api/cafe/food-orders/${orderId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: newStatus }),

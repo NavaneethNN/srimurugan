@@ -3,8 +3,9 @@ import { createHmac } from "node:crypto";
 import { test } from "node:test";
 import { createAdminSession, verifyAdminSession } from "../src/lib/adminSession";
 import { recommendAddOns, recommendVariantUpgrade } from "../src/lib/foodRecommendations";
-import { verifyRazorpaySignature, verifyRazorpayWebhook } from "../src/lib/razorpay";
+import { isCapturedFoodPayment, verifyRazorpaySignature, verifyRazorpayWebhook } from "../src/lib/razorpay";
 import { readJsonBody, RequestTooLargeError } from "../src/lib/requestBody";
+import { createCafeSession, verifyCafeSession } from "../src/lib/cafeSession";
 import type { FoodCategory, FoodProduct } from "../src/lib/foodMenu";
 
 const categories: FoodCategory[] = [
@@ -46,6 +47,16 @@ test("admin sessions reject tampering and expired tokens", () => {
   assert.equal(verifyAdminSession(parts.join("."), "password", "secret"), false);
 });
 
+test("cafe sessions require a valid signature and expire", () => {
+  const now = Date.now();
+  const token = createCafeSession(3, "secret", now);
+  assert.equal(verifyCafeSession(token, "secret", now), 3);
+  assert.equal(verifyCafeSession(token, "wrong-secret", now), null);
+  assert.equal(verifyCafeSession(token, "secret", now + 12 * 60 * 60 * 1000 + 1), null);
+  assert.equal(verifyCafeSession(token.replace(/^3/, "4"), "secret", now), null);
+  assert.equal(verifyCafeSession("3:1234", "secret", now), null);
+});
+
 test("Razorpay signatures are checked against trusted order IDs and raw webhook bodies", () => {
   process.env.RAZORPAY_TEST_API_KEY = "rzp_test_example";
   process.env.RAZORPAY_TEST_API_SECRET = "test-secret";
@@ -57,6 +68,18 @@ test("Razorpay signatures are checked against trusted order IDs and raw webhook 
   const webhookSignature = createHmac("sha256", "webhook-secret").update(body).digest("hex");
   assert.equal(verifyRazorpayWebhook(body, webhookSignature), true);
   assert.equal(verifyRazorpayWebhook(`${body} `, webhookSignature), false);
+});
+
+test("only a captured payment for the exact order, payment ID, amount and currency can confirm food", () => {
+  const payment = { id: "pay_123", order_id: "order_123", amount: 100, currency: "INR", status: "captured", captured: true };
+  assert.equal(isCapturedFoodPayment(payment, "order_123", "pay_123", 100), true);
+  assert.equal(isCapturedFoodPayment({ ...payment, status: "failed" }, "order_123", "pay_123", 100), false);
+  assert.equal(isCapturedFoodPayment({ ...payment, status: "authorized", captured: false }, "order_123", "pay_123", 100), false);
+  assert.equal(isCapturedFoodPayment({ ...payment, captured: false }, "order_123", "pay_123", 100), false);
+  assert.equal(isCapturedFoodPayment(payment, "order_other", "pay_123", 100), false);
+  assert.equal(isCapturedFoodPayment(payment, "order_123", "pay_other", 100), false);
+  assert.equal(isCapturedFoodPayment(payment, "order_123", "pay_123", 101), false);
+  assert.equal(isCapturedFoodPayment({ ...payment, currency: "USD" }, "order_123", "pay_123", 100), false);
 });
 
 test("request bodies over the checkout limit are rejected even without Content-Length", async () => {

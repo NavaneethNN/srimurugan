@@ -51,6 +51,11 @@ export type RazorpayPayment = {
   captured: boolean;
 };
 
+export function isCapturedFoodPayment(payment: RazorpayPayment, razorpayOrderId: string, paymentId: string, amountPaise: number) {
+  return payment.id === paymentId && payment.status === "captured" && payment.captured === true &&
+    payment.order_id === razorpayOrderId && payment.amount === amountPaise && payment.currency === "INR";
+}
+
 export async function createRazorpayOrder(amount: number, receipt: string) {
   return requestRazorpay<{ id: string; amount: number; currency: string }>("/orders", "POST", {
     amount,
