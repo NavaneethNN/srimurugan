@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { formatPrice } from "@/lib/foodMenu";
 
@@ -13,422 +13,138 @@ type Order = {
   amountPaise: number | null;
   createdAt: string;
 };
-
-const STATUS_COLORS = {
-  pending: "bg-amber-500",
-  preparing: "bg-blue-500",
-  completed: "bg-green-500",
-};
-
-const STATUS_LABELS = {
-  pending: "NEW",
-  preparing: "PREP",
-  completed: "DONE",
-};
+type View = "all" | "pending" | "preparing";
 
 export default function CafePOSPage() {
   const router = useRouter();
   const [orders, setOrders] = useState<Order[]>([]);
-  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [processing, setProcessing] = useState<number | null>(null);
+  const [counts, setCounts] = useState<Record<string, number>>({});
+  const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [noticeId, setNoticeId] = useState<number | null>(null);
+  const [view, setView] = useState<View>("all");
+  const [search, setSearch] = useState("");
   const [user, setUser] = useState<{ id: number; name: string } | null>(null);
-  const [newOrderPopup, setNewOrderPopup] = useState<Order | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [savingId, setSavingId] = useState<number | null>(null);
+  const [error, setError] = useState("");
+  const [updatedAt, setUpdatedAt] = useState<Date | null>(null);
+  const [hasMore, setHasMore] = useState(false);
   const requestId = useRef(0);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const prevOrderIdsRef = useRef<Set<number>>(new Set());
-  const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const hasLoaded = useRef(false);
+  const knownIds = useRef(new Set<number>());
+  const noticeQueue = useRef<number[]>([]);
+  const activeNoticeId = useRef<number | null>(null);
 
-  // Fast polling for real-time updates (every 2 seconds)
-  const loadOrders = useCallback(async (isInitialLoad = false) => {
-    const currentRequest = ++requestId.current;
-    try {
-      const response = await fetch("/api/cafe/food-orders?status=all&limit=50", {
-        cache: "no-store" 
-      });
-      const data = await response.json();
-      
-      if (!response.ok) throw new Error(data.error || "Failed to load orders");
-      if (currentRequest !== requestId.current) return;
-      
-      const activeOrders = data.orders.filter(
-        (o: Order) => o.status !== "completed" && o.status !== "cancelled"
-      );
-      
-      // Detect new orders by comparing IDs
-      if (!isInitialLoad && prevOrderIdsRef.current.size > 0) {
-        const newOrders = activeOrders.filter(
-          (order: Order) => order.status === "pending" && !prevOrderIdsRef.current.has(order.id)
-        );
-        
-        // Show popup for the first new order
-        if (newOrders.length > 0) {
-          setNewOrderPopup(newOrders[0]);
-          audioRef.current?.play().catch(() => {});
-        }
-      }
-      
-      // Update previous order IDs
-      prevOrderIdsRef.current = new Set(activeOrders.map((o: Order) => o.id));
-      
-      setOrders(activeOrders);
-    } catch (error) {
-      console.error("Failed to load orders:", error);
-    } finally {
-      if (currentRequest === requestId.current) {
-        setLoading(false);
-      }
-    }
+  const showNextNotice = useCallback((active: Order[]) => {
+    if (activeNoticeId.current !== null) return;
+    noticeQueue.current = noticeQueue.current.filter((id) => active.some((order) => order.id === id && order.status === "pending"));
+    const next = noticeQueue.current.shift();
+    if (next === undefined) return;
+    activeNoticeId.current = next;
+    setNoticeId(next);
   }, []);
 
+  const loadOrders = useCallback(async () => {
+    const id = ++requestId.current;
+    try {
+      const response = await fetch("/api/cafe/food-orders?status=active&limit=100", { cache: "no-store" });
+      const data = await response.json();
+      if (response.status === 401) { router.replace("/cafe/login"); return; }
+      if (!response.ok) throw new Error(data.error || "Unable to load orders.");
+      if (id !== requestId.current) return;
+      const active = (data.orders as Order[]).slice().sort((a, b) =>
+        Number(b.status === "pending") - Number(a.status === "pending") || a.id - b.id);
+      if (hasLoaded.current) for (const order of active) {
+        if (order.status === "pending" && !knownIds.current.has(order.id)) noticeQueue.current.push(order.id);
+      }
+      for (const order of active) knownIds.current.add(order.id);
+      hasLoaded.current = true;
+      if (activeNoticeId.current !== null && !active.some((order) => order.id === activeNoticeId.current && order.status === "pending")) {
+        activeNoticeId.current = null;
+        setNoticeId(null);
+      }
+      showNextNotice(active);
+      setOrders(active);
+      setCounts(data.counts || {});
+      setHasMore(data.nextCursor !== null);
+      setUpdatedAt(new Date());
+      setError("");
+    } catch (cause) {
+      if (id === requestId.current) setError(cause instanceof Error ? cause.message : "Unable to load orders.");
+    } finally {
+      if (id === requestId.current) setLoading(false);
+    }
+  }, [router, showNextNotice]);
+
   useEffect(() => {
-    // Load user from cookie
-    const checkAuth = async () => {
+    async function checkSession() {
       try {
-        const response = await fetch("/api/cafe/session");
-        if (response.ok) {
-          const data = await response.json();
-          setUser(data.user);
-        } else {
-          router.push("/cafe/login");
-        }
-      } catch {
-        router.push("/cafe/login");
-      }
-    };
-    
-    void checkAuth();
-    void loadOrders(true); // Initial load
-    
-    // Fast polling every 2 seconds for real-time updates
-    pollingIntervalRef.current = setInterval(() => void loadOrders(), 2000);
-    
-    return () => {
-      if (pollingIntervalRef.current) {
-        clearInterval(pollingIntervalRef.current);
-      }
-      requestId.current += 1;
-    };
+        const response = await fetch("/api/cafe/session", { cache: "no-store" });
+        if (!response.ok) { router.replace("/cafe/login"); return; }
+        const data = await response.json();
+        setUser(data.user);
+      } catch { router.replace("/cafe/login"); }
+    }
+    const initial = window.setTimeout(() => { void checkSession(); void loadOrders(); }, 0);
+    const timer = window.setInterval(() => { if (document.visibilityState === "visible") void loadOrders(); }, 3_000);
+    const onVisible = () => { if (document.visibilityState === "visible") void loadOrders(); };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => { window.clearTimeout(initial); window.clearInterval(timer); document.removeEventListener("visibilitychange", onVisible); requestId.current += 1; };
   }, [loadOrders, router]);
 
-  const acceptNewOrder = async (order: Order) => {
-    setNewOrderPopup(null);
-    setSelectedOrder(order);
-    // Automatically start preparing
-    await updateOrderStatus(order.id, "preparing");
-  };
+  const selectedOrder = orders.find((order) => order.id === selectedId) || null;
+  const noticeOrder = orders.find((order) => order.id === noticeId) || null;
+  const visibleOrders = useMemo(() => {
+    const term = search.trim().toLowerCase();
+    return orders.filter((order) => (view === "all" || order.status === view) &&
+      (!term || String(order.id).includes(term) || order.seat.toLowerCase().includes(term) || order.customerName?.toLowerCase().includes(term)));
+  }, [orders, view, search]);
 
-  const updateOrderStatus = async (orderId: number, newStatus: string) => {
-    setProcessing(orderId);
+  function dismissNotice() {
+    activeNoticeId.current = null;
+    setNoticeId(null);
+    showNextNotice(orders);
+  }
+
+  async function updateStatus(order: Order, next: "preparing" | "completed" | "cancelled") {
+    if (next === "cancelled" && !window.confirm(`Cancel order #${order.id}? The customer will see this status.`)) return;
+    setSavingId(order.id);
+    setError("");
     try {
-      const response = await fetch(`/api/cafe/food-orders/${orderId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: newStatus }),
+      const response = await fetch(`/api/cafe/food-orders/${order.id}`, {
+        method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: next }),
       });
-
-      if (!response.ok) throw new Error("Failed to update order");
-      
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Unable to update order.");
+      setOrders((current) => current.map((item) => item.id === order.id ? data.order : item));
+      if (next === "completed" || next === "cancelled") setSelectedId(null);
+      if (activeNoticeId.current === order.id) dismissNotice();
       await loadOrders();
-      
-      if (selectedOrder?.id === orderId) {
-        if (newStatus === "completed") {
-          setSelectedOrder(null);
-        } else {
-          setSelectedOrder({ ...selectedOrder, status: newStatus });
-        }
-      }
-    } catch (error) {
-      console.error("Failed to update order:", error);
-      alert("Failed to update order");
-    } finally {
-      setProcessing(null);
-    }
-  };
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Unable to update order.");
+    } finally { setSavingId(null); }
+  }
 
-  const logout = async () => {
+  async function logout() {
     await fetch("/api/cafe/auth", { method: "DELETE" });
-    router.push("/cafe/login");
-  };
-
-  const pendingCount = orders.filter(o => o.status === "pending").length;
-  const preparingCount = orders.filter(o => o.status === "preparing").length;
+    router.replace("/cafe/login");
+  }
 
   return (
-    <main className="flex h-screen flex-col bg-gray-950 text-white">
-      {/* Hidden audio element for notification */}
-      <audio ref={audioRef} preload="auto">
-        <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBTGH0fPTgjMGHm7A7+OZUQ0PVqzn77BhGAg+ltryxnMmBSx+zPHaizsIGGS57OihUAwNUKXi8bllGwY7k9jyynksBSd3y/DdkEEKFWC16+umVRQLR6Df8r5sIAMxh9Hz04IzBSBtwu/jmVENEFWs5++wYRgIPpXa8sZzJgUsesvx2os7CRllu+zooVAMDlCl4vG5ZRsGOpPY8sp5LAUnd8vw3ZBBChVgtevqplUUC0eg3/K+bCADMYfR89OCMwUgbcLv45lRDRBVrOfvr2EYBz6V2vLGcyYFK3rL8dqLOwkZZbvs6KFQDANQpeLxuWUbBjqT2PLKeSwFJ3fL8N2QQQoVYLXr6qZVFAtHoN/yvmwgAzGH0fPTgjMFIG3C7+OZUQwQVqzn769hGAc+ldryx3MmBSt6y/HaizsJGWW77OihUAwDUKXi8bllGwY6k9jyynksBSd3y/DdkEEKFWC16+qmVRQLR6Df8r5sIAMxh9Hz04IzBSBtwu/jmVEMEFas5++vYRgHPpXa8sdzJgUrec===" type="audio/wav" />
-      </audio>
-
-      {/* New Order Popup Notification */}
-      {newOrderPopup && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
-          <div className="relative w-full max-w-2xl animate-bounce rounded-2xl border-4 border-amber-500 bg-gradient-to-br from-amber-500 via-amber-600 to-orange-600 p-8 shadow-2xl">
-            <div className="text-center">
-              <div className="mb-4 text-6xl">🔔</div>
-              <h2 className="mb-2 text-4xl font-bold text-white">NEW ORDER!</h2>
-              <p className="mb-6 text-2xl font-bold text-black">Order #{newOrderPopup.id}</p>
-              
-              <div className="mb-6 rounded-xl bg-black/30 p-6">
-                <p className="mb-2 text-3xl font-bold text-white">{newOrderPopup.seat}</p>
-                <p className="mb-4 text-lg text-white/90">
-                  {newOrderPopup.customerName || "Guest"}
-                </p>
-                <div className="mb-4 space-y-2 text-left">
-                  {newOrderPopup.items.slice(0, 5).map((item, idx) => (
-                    <p key={idx} className="text-lg font-semibold text-white">
-                      {item.quantity}x {item.name}
-                      {item.variantName && ` (${item.variantName})`}
-                    </p>
-                  ))}
-                  {newOrderPopup.items.length > 5 && (
-                    <p className="text-white/70">
-                      +{newOrderPopup.items.length - 5} more items
-                    </p>
-                  )}
-                </div>
-                <p className="text-3xl font-bold text-amber-300">
-                  {formatPrice(newOrderPopup.amountPaise)}
-                </p>
-              </div>
-
-              <button
-                onClick={() => acceptNewOrder(newOrderPopup)}
-                className="w-full rounded-xl bg-white px-12 py-6 text-3xl font-bold text-amber-600 shadow-lg transition-transform hover:scale-105 active:scale-95"
-              >
-                ACCEPT & START PREPARING
-              </button>
-            </div>
-          </div>
+    <main className="flex min-h-screen flex-col bg-slate-950 text-slate-100">
+      <header className="border-b border-slate-800 bg-slate-900/70 px-4 py-3 sm:px-6"><div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3"><div><p className="text-xs font-semibold uppercase tracking-[.16em] text-slate-400">Sri Murugan Cinema</p><h1 className="text-lg font-semibold">Cafe POS</h1></div><div className="flex items-center gap-3 text-sm"><span className="text-slate-400">{user?.name || "Staff"}</span><button type="button" onClick={() => void logout()} className="min-h-9 rounded-md border border-slate-700 px-3 hover:bg-slate-800">Sign out</button></div></div></header>
+      <div className="mx-auto w-full max-w-7xl flex-1 px-4 py-5 sm:px-6">
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3"><div className="flex gap-2"><span className="rounded-md border border-slate-700 px-3 py-2 text-sm"><strong className="tabular-nums">{counts.pending || 0}</strong> new</span><span className="rounded-md border border-slate-700 px-3 py-2 text-sm"><strong className="tabular-nums">{counts.preparing || 0}</strong> preparing</span></div><div className="flex items-center gap-3"><span className="text-xs text-slate-500">{updatedAt ? `Updated ${updatedAt.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}` : ""}</span><button type="button" onClick={() => void loadOrders()} className="min-h-9 rounded-md border border-slate-700 px-3 text-sm hover:bg-slate-800">Refresh</button></div></div>
+        {error && <p role="alert" className="mb-4 rounded-md border border-rose-800 bg-rose-950/40 px-4 py-3 text-sm text-rose-200">{error}</p>}
+        {hasMore && <p className="mb-4 rounded-md border border-amber-800 bg-amber-950/30 px-4 py-3 text-sm text-amber-200">More than 100 active orders are waiting. Ask an administrator to review the full queue.</p>}
+        <div className="grid min-h-[65vh] gap-4 lg:grid-cols-[minmax(300px,360px)_minmax(0,1fr)]">
+          <section aria-label="Active orders" className="overflow-hidden rounded-lg border border-slate-800 bg-slate-900/50"><div className="border-b border-slate-800 p-3"><div className="flex gap-1">{(["all", "pending", "preparing"] as View[]).map((item) => <button type="button" key={item} onClick={() => setView(item)} aria-pressed={view === item} className={`min-h-9 flex-1 rounded-md px-2 text-sm capitalize ${view === item ? "bg-slate-100 font-semibold text-slate-950" : "text-slate-400 hover:bg-slate-800"}`}>{item === "pending" ? "New" : item}</button>)}</div><label htmlFor="pos-search" className="sr-only">Search orders</label><input id="pos-search" type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Order #, customer or seat" className="mt-3 h-10 w-full rounded-md border border-slate-700 bg-slate-950 px-3 text-sm outline-none focus:border-slate-400" /></div>
+            {loading && orders.length === 0 ? <p className="p-8 text-center text-sm text-slate-400">Loading orders…</p> : visibleOrders.length ? <div className="max-h-[70vh] divide-y divide-slate-800 overflow-y-auto">{visibleOrders.map((order) => <button type="button" key={order.id} onClick={() => setSelectedId(order.id)} aria-pressed={selectedId === order.id} className={`w-full px-4 py-3 text-left hover:bg-slate-800 ${selectedId === order.id ? "bg-slate-800" : ""}`}><div className="flex items-center justify-between gap-2"><span className="font-semibold tabular-nums">#{order.id} · {order.seat}</span><span className={`rounded px-2 py-0.5 text-xs ${order.status === "pending" ? "bg-amber-950/60 text-amber-200" : "bg-slate-700 text-slate-200"}`}>{order.status === "pending" ? "New" : "Preparing"}</span></div><p className="mt-1 truncate text-xs text-slate-400">{order.customerName || "Guest"} · {order.items.reduce((sum, item) => sum + item.quantity, 0)} items · {formatPrice(order.amountPaise)}</p></button>)}</div> : <p className="p-8 text-center text-sm text-slate-400">No orders in this view.</p>}
+          </section>
+          <section aria-label="Selected order" className="rounded-lg border border-slate-800 bg-slate-900/50 p-4 sm:p-6">{selectedOrder ? <><div className="flex flex-wrap items-start justify-between gap-3 border-b border-slate-800 pb-4"><div><p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Order #{selectedOrder.id}</p><h2 className="mt-1 text-2xl font-semibold">{selectedOrder.seat}</h2><p className="mt-1 text-sm text-slate-400">{selectedOrder.customerName || "Guest"} · {new Date(selectedOrder.createdAt).toLocaleString("en-IN")}</p></div><span className="rounded-md border border-slate-700 px-3 py-1.5 text-sm capitalize">{selectedOrder.status}</span></div><div className="divide-y divide-slate-800">{selectedOrder.items.map((item, index) => <div key={`${item.name}-${index}`} className="flex justify-between gap-4 py-3 text-sm"><span>{item.name}{item.variantName ? <span className="text-slate-400"> · {item.variantName}</span> : null}</span><strong className="tabular-nums">× {item.quantity}</strong></div>)}</div><div className="flex items-center justify-between border-t border-slate-800 py-4"><span className="text-sm text-slate-400">Paid total</span><strong className="text-xl tabular-nums">{formatPrice(selectedOrder.amountPaise)}</strong></div><div className="flex flex-wrap gap-2 border-t border-slate-800 pt-4">{selectedOrder.status === "pending" && <button type="button" disabled={savingId === selectedOrder.id} onClick={() => void updateStatus(selectedOrder, "preparing")} className="min-h-11 rounded-md bg-slate-100 px-5 text-sm font-semibold text-slate-950 hover:bg-white disabled:opacity-50">{savingId === selectedOrder.id ? "Saving…" : "Accept & start preparing"}</button>}{selectedOrder.status === "preparing" && <button type="button" disabled={savingId === selectedOrder.id} onClick={() => void updateStatus(selectedOrder, "completed")} className="min-h-11 rounded-md bg-slate-100 px-5 text-sm font-semibold text-slate-950 hover:bg-white disabled:opacity-50">{savingId === selectedOrder.id ? "Saving…" : "Mark complete"}</button>}<button type="button" disabled={savingId === selectedOrder.id} onClick={() => void updateStatus(selectedOrder, "cancelled")} className="min-h-11 rounded-md border border-slate-700 px-4 text-sm hover:bg-slate-800 disabled:opacity-50">Cancel order</button></div></> : <div className="flex min-h-60 items-center justify-center text-center text-sm text-slate-400">Select an order from the queue to view and update it.</div>}</section>
         </div>
-      )}
-
-      {/* Header */}
-      <header className="flex items-center justify-between border-b border-gray-800 bg-gray-900 px-6 py-3">
-        <div className="flex items-center gap-4">
-          <h1 className="text-2xl font-bold text-amber-400">Sri Murugan POS</h1>
-          <div className="flex gap-2">
-            <div className="rounded bg-amber-500/20 px-3 py-1 text-sm font-bold">
-              <span className="text-amber-400">{pendingCount}</span> NEW
-            </div>
-            <div className="rounded bg-blue-500/20 px-3 py-1 text-sm font-bold">
-              <span className="text-blue-400">{preparingCount}</span> PREP
-            </div>
-          </div>
-        </div>
-        <div className="flex items-center gap-4">
-          <span className="text-sm text-gray-400">
-            Operator: <strong className="text-white">{user?.name}</strong>
-          </span>
-          <button
-            onClick={logout}
-            className="rounded bg-red-600 px-4 py-2 text-sm font-bold uppercase transition-colors hover:bg-red-700"
-          >
-            Logout
-          </button>
-        </div>
-      </header>
-
-      {loading ? (
-        <div className="flex flex-1 items-center justify-center">
-          <div className="text-center">
-            <div className="mx-auto h-12 w-12 animate-spin rounded-full border-4 border-gray-700 border-t-amber-400" />
-            <p className="mt-4 text-gray-400">Loading orders...</p>
-          </div>
-        </div>
-      ) : (
-        <div className="flex flex-1 overflow-hidden">
-          {/* Order List */}
-          <div className="w-2/5 overflow-y-auto border-r border-gray-800 bg-gray-900">
-            <div className="sticky top-0 bg-gray-800 px-4 py-3">
-              <h2 className="text-lg font-bold uppercase tracking-wide">
-                Active Orders ({orders.length})
-              </h2>
-            </div>
-            
-            {orders.length === 0 ? (
-              <div className="p-8 text-center text-gray-500">
-                <p className="text-lg font-bold">No active orders</p>
-                <p className="mt-2 text-sm">New orders will appear here</p>
-              </div>
-            ) : (
-              <div className="space-y-1 p-2">
-                {orders.map((order) => (
-                  <button
-                    key={order.id}
-                    onClick={() => setSelectedOrder(order)}
-                    className={`w-full rounded p-4 text-left transition-all ${
-                      selectedOrder?.id === order.id
-                        ? "bg-amber-500 text-black"
-                        : order.status === "pending"
-                        ? "bg-amber-500/10 hover:bg-amber-500/20"
-                        : "bg-gray-800 hover:bg-gray-750"
-                    }`}
-                  >
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-2xl font-bold">#{order.id}</span>
-                          <span
-                            className={`rounded px-2 py-0.5 text-xs font-bold uppercase ${
-                              selectedOrder?.id === order.id
-                                ? "bg-black/20 text-black"
-                                : `${STATUS_COLORS[order.status as keyof typeof STATUS_COLORS]} text-white`
-                            }`}
-                          >
-                            {STATUS_LABELS[order.status as keyof typeof STATUS_LABELS]}
-                          </span>
-                        </div>
-                        <p className={`mt-1 text-sm font-bold ${
-                          selectedOrder?.id === order.id ? "text-black" : "text-gray-400"
-                        }`}>
-                          {order.seat}
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-sm font-mono">
-                          {new Date(order.createdAt).toLocaleTimeString("en-IN", {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
-                        </p>
-                        <p className={`mt-1 text-lg font-bold ${
-                          selectedOrder?.id === order.id ? "text-black" : "text-amber-400"
-                        }`}>
-                          {formatPrice(order.amountPaise)}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="mt-3 space-y-1">
-                      {order.items.slice(0, 3).map((item, idx) => (
-                        <p key={idx} className={`text-sm ${
-                          selectedOrder?.id === order.id ? "text-black/80" : "text-gray-300"
-                        }`}>
-                          {item.quantity}x {item.name}
-                          {item.variantName && ` (${item.variantName})`}
-                        </p>
-                      ))}
-                      {order.items.length > 3 && (
-                        <p className={`text-xs ${
-                          selectedOrder?.id === order.id ? "text-black/60" : "text-gray-500"
-                        }`}>
-                          +{order.items.length - 3} more items
-                        </p>
-                      )}
-                    </div>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Order Details */}
-          <div className="flex-1 bg-gray-950 p-6">
-            {selectedOrder ? (
-              <div className="flex h-full flex-col">
-                <div className="mb-6 flex items-start justify-between">
-                  <div>
-                    <h2 className="text-4xl font-bold text-amber-400">
-                      Order #{selectedOrder.id}
-                    </h2>
-                    <p className="mt-2 text-xl font-bold">{selectedOrder.seat}</p>
-                    <p className="mt-1 text-sm text-gray-400">
-                      {selectedOrder.customerName || "Guest"} •{" "}
-                      {new Date(selectedOrder.createdAt).toLocaleString("en-IN")}
-                    </p>
-                  </div>
-                  <div
-                    className={`rounded-lg ${
-                      STATUS_COLORS[selectedOrder.status as keyof typeof STATUS_COLORS]
-                    } px-6 py-3 text-2xl font-bold uppercase text-white`}
-                  >
-                    {STATUS_LABELS[selectedOrder.status as keyof typeof STATUS_LABELS]}
-                  </div>
-                </div>
-
-                {/* Items */}
-                <div className="mb-6 flex-1 overflow-y-auto rounded-lg border border-gray-800 bg-gray-900">
-                  <table className="w-full">
-                    <thead className="sticky top-0 bg-gray-800">
-                      <tr className="text-left">
-                        <th className="px-6 py-4 text-sm font-bold uppercase tracking-wide text-gray-400">
-                          Item
-                        </th>
-                        <th className="px-6 py-4 text-center text-sm font-bold uppercase tracking-wide text-gray-400">
-                          Qty
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-800">
-                      {selectedOrder.items.map((item, idx) => (
-                        <tr key={idx} className="hover:bg-gray-800/50">
-                          <td className="px-6 py-4">
-                            <p className="text-lg font-bold">{item.name}</p>
-                            {item.variantName && (
-                              <p className="text-sm text-gray-400">{item.variantName}</p>
-                            )}
-                          </td>
-                          <td className="px-6 py-4 text-center text-2xl font-bold text-amber-400">
-                            {item.quantity}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-
-                {/* Total */}
-                <div className="mb-6 rounded-lg border border-gray-800 bg-gray-900 px-6 py-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xl font-bold uppercase tracking-wide text-gray-400">
-                      Total Amount
-                    </span>
-                    <span className="text-4xl font-bold text-amber-400">
-                      {formatPrice(selectedOrder.amountPaise)}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="grid grid-cols-2 gap-4">
-                  {selectedOrder.status === "pending" && (
-                    <button
-                      onClick={() => updateOrderStatus(selectedOrder.id, "preparing")}
-                      disabled={processing === selectedOrder.id}
-                      className="col-span-2 rounded-lg bg-blue-500 px-8 py-6 text-xl font-bold uppercase transition-colors hover:bg-blue-600 disabled:opacity-50"
-                    >
-                      {processing === selectedOrder.id ? "Processing..." : "Start Preparing"}
-                    </button>
-                  )}
-                  {selectedOrder.status === "preparing" && (
-                    <button
-                      onClick={() => updateOrderStatus(selectedOrder.id, "completed")}
-                      disabled={processing === selectedOrder.id}
-                      className="col-span-2 rounded-lg bg-green-500 px-8 py-6 text-xl font-bold uppercase transition-colors hover:bg-green-600 disabled:opacity-50"
-                    >
-                      {processing === selectedOrder.id ? "Processing..." : "Mark Complete"}
-                    </button>
-                  )}
-                  <button
-                    onClick={() => setSelectedOrder(null)}
-                    className="col-span-2 rounded-lg border-2 border-gray-700 px-8 py-6 text-xl font-bold uppercase transition-colors hover:bg-gray-800"
-                  >
-                    Clear
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className="flex h-full items-center justify-center text-gray-600">
-                <div className="text-center">
-                  <p className="text-2xl font-bold">Select an order to view details</p>
-                  <p className="mt-2">Click on any order from the list on the left</p>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+      </div>
+      {noticeOrder && <aside role="status" className="fixed bottom-4 right-4 z-50 w-[min(calc(100vw-2rem),360px)] rounded-lg border border-amber-700 bg-slate-900 p-4 shadow-2xl"><div className="flex items-start justify-between gap-3"><div><p className="text-xs font-semibold uppercase tracking-wider text-amber-300">New paid order</p><p className="mt-1 text-lg font-semibold">#{noticeOrder.id} · {noticeOrder.seat}</p><p className="mt-1 text-sm text-slate-400">{noticeOrder.customerName || "Guest"} · {formatPrice(noticeOrder.amountPaise)}</p></div><button type="button" onClick={dismissNotice} aria-label="Dismiss new order notice" className="rounded px-2 text-xl text-slate-400 hover:text-white">×</button></div><button type="button" onClick={() => { setSelectedId(noticeOrder.id); void updateStatus(noticeOrder, "preparing"); }} disabled={savingId === noticeOrder.id} className="mt-4 min-h-11 w-full rounded-md bg-slate-100 px-4 text-sm font-semibold text-slate-950 hover:bg-white disabled:opacity-50">{savingId === noticeOrder.id ? "Saving…" : "Accept & start preparing"}</button></aside>}
     </main>
   );
 }

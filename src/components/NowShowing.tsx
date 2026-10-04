@@ -49,23 +49,42 @@ export default function NowShowing() {
   }, [movies.length]);
 
   const movie = movies[current];
+  // Use separate images for desktop and mobile
   const desktopImage = movie?.desktopBgUrl || movie?.posterUrl;
-  const mobileImage = movie?.mobileBgUrl || movie?.posterUrl;
+  const mobileImage = movie?.mobileBgUrl || movie?.desktopBgUrl || movie?.posterUrl;
   const activeTime = movie && selectedTimes[movie.id];
 
   return (
-    <section id="now-showing" className="relative overflow-hidden bg-gradient-to-b from-[#0a0806] via-[#0f0c09] to-[#0a0806] py-16 sm:py-20 lg:py-28">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'1\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")' }} />
+    <section id="now-showing" className="relative overflow-hidden bg-gradient-to-b from-[#0a0806] via-[#0f0c09] to-[#0a0806]">
+      {/* Mobile: Full Background Image */}
+      {movie && mobileImage && (
+        <div className="absolute inset-0 md:hidden">
+          <Image
+            key={`mobile-bg-${mobileImage}`}
+            src={mobileImage}
+            alt={movie.title}
+            fill
+            priority
+            className="object-cover"
+            sizes="100vw"
+          />
+          {/* Dark Overlay for Readability */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/60 to-black/90" />
+        </div>
+      )}
 
-      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      {/* Background Pattern - Desktop Only */}
+      <div className="absolute inset-0 hidden opacity-[0.03] md:block" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'1\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")' }} />
+
+      <div className="relative py-12 sm:py-16 lg:py-20">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="mb-12 text-center sm:mb-16">
-          <p className="text-xs font-bold uppercase tracking-[0.3em] text-gold">Cinema Experience</p>
-          <h2 className="mt-4 font-[family-name:var(--font-cormorant)] text-5xl font-bold text-white sm:text-6xl lg:text-7xl">
+          <p className="text-[0.65rem] font-bold uppercase tracking-[0.3em] text-gold sm:text-xs">Cinema Experience</p>
+          <h2 className="mt-3 font-[family-name:var(--font-cormorant)] text-3xl font-bold text-white sm:mt-4 sm:text-5xl lg:text-6xl xl:text-7xl">
             Now Showing
           </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-base text-gray-400 sm:text-lg">
+          <p className="mx-auto mt-3 max-w-2xl text-sm text-gray-400 sm:mt-4 sm:text-base lg:text-lg">
             Experience the magic of cinema with crystal-clear 4K projection and Dolby Atmos sound
           </p>
         </div>
@@ -84,143 +103,232 @@ export default function NowShowing() {
             <p className="mt-2 text-sm text-gray-500">Check back soon for upcoming releases</p>
           </div>
         ) : (
-          <div className="group relative">
-            {/* Main Movie Card */}
-            <div className="overflow-hidden rounded-2xl border border-gray-800/50 bg-gradient-to-br from-gray-900/90 to-gray-900/50 shadow-2xl backdrop-blur-sm transition-all duration-500 hover:shadow-gold/10">
-              <div className="grid lg:grid-cols-[1.1fr_1fr]">
-                {/* Movie Image */}
-                <div className="relative aspect-[16/10] overflow-hidden sm:aspect-[16/9] lg:aspect-auto lg:min-h-[600px]">
-                  {/* Desktop Image */}
-                  {desktopImage && (
-                    <Image
-                      key={`desktop-${desktopImage}`}
-                      src={desktopImage}
-                      alt={movie.title}
-                      fill
-                      priority
-                      className="hidden object-cover transition-transform duration-700 group-hover:scale-105 sm:block"
-                      sizes="(max-width: 1024px) 100vw, 60vw"
-                    />
-                  )}
-                  {/* Mobile Image */}
-                  {mobileImage && (
-                    <Image
-                      key={`mobile-${mobileImage}`}
-                      src={mobileImage}
-                      alt={movie.title}
-                      fill
-                      priority
-                      className="block object-cover transition-transform duration-700 group-hover:scale-105 sm:hidden"
-                      sizes="100vw"
-                    />
-                  )}
-                  {/* Fallback Gradient */}
-                  {!desktopImage && !mobileImage && (
-                    <div className="absolute inset-0 bg-gradient-to-br from-amber-900/40 via-gray-900 to-black" />
-                  )}
-                  
-                  {/* Overlay Gradients */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent lg:bg-gradient-to-r" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent lg:hidden" />
+          <div className="relative">
+            {/* Desktop: Card with Background Image */}
+            <div className="hidden md:block">
+              <div className="relative h-[600px] overflow-hidden rounded-2xl bg-black">
+                {/* Desktop Background Image */}
+                {desktopImage && (
+                  <Image
+                    key={`desktop-${desktopImage}`}
+                    src={desktopImage}
+                    alt={movie.title}
+                    width={1920}
+                    height={600}
+                    priority
+                    className="h-full w-full object-cover"
+                    sizes="100vw"
+                  />
+                )}
+                
+                {/* Fallback Gradient */}
+                {!desktopImage && (
+                  <div className="absolute inset-0 bg-gradient-to-br from-amber-900/40 via-gray-900 to-black" />
+                )}
 
-                  {/* 4K Dolby Badge */}
-                  <div className="absolute left-4 top-4 flex items-center gap-2 rounded-xl border border-white/20 bg-black/60 px-3 py-2 backdrop-blur-md sm:left-6 sm:top-6">
-                    <div className="flex items-center gap-2">
-                      <Image src="/4k.png" alt="4K" width={32} height={32} className="h-5 w-auto sm:h-6" />
-                      <Image src="/dolby.png" alt="Dolby Atmos" width={64} height={32} className="h-5 w-auto sm:h-6" />
+                {/* Gradient Overlays */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/20 to-transparent" />
+
+                {/* Content Container */}
+                <div className="absolute inset-0 mx-auto flex max-w-7xl flex-col justify-end px-6 pb-12 lg:px-8">
+                  {/* Top Section: Badges */}
+                  <div className="absolute left-6 top-6 lg:left-8 lg:top-8">
+                    <div className="flex items-center gap-2 rounded-xl border border-white/20 bg-black/70 px-3 py-2 backdrop-blur-md">
+                      <Image src="/4k.png" alt="4K" width={32} height={32} className="h-6 w-auto" />
+                      <Image src="/dolby.png" alt="Dolby Atmos" width={64} height={32} className="h-6 w-auto" />
                     </div>
                   </div>
 
-                  {/* Playing Badge - Mobile Only */}
-                  <div className="absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full border border-gold/40 bg-black/70 px-4 py-2 text-xs font-bold uppercase tracking-wider text-gold backdrop-blur-md lg:hidden">
-                    Now Playing
+                  {/* Bottom Section: Movie Info */}
+                  <div className="space-y-4">
+                    {/* Featured Badge */}
+                    <div className="inline-flex w-fit items-center gap-2 rounded-full bg-gold/20 px-4 py-1.5 backdrop-blur-md">
+                      <span className="relative flex h-2 w-2">
+                        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-gold opacity-75"></span>
+                        <span className="relative inline-flex h-2 w-2 rounded-full bg-gold"></span>
+                      </span>
+                      <span className="text-sm font-bold uppercase tracking-wider text-gold">
+                        Featured Film
+                      </span>
+                    </div>
+
+                    {/* Movie Title - Single Line with Truncate */}
+                    <h3 className="truncate font-[family-name:var(--font-cormorant)] text-6xl font-bold text-white lg:text-7xl">
+                      {movie.title}
+                    </h3>
+
+                    {/* Movie Info Pills */}
+                    <div className="flex flex-wrap gap-2">
+                      {movie.certification && (
+                        <span className="rounded-full border border-white/20 bg-black/60 px-4 py-1 text-sm font-semibold text-white backdrop-blur-sm">
+                          {movie.certification}
+                        </span>
+                      )}
+                      {movie.language && (
+                        <span className="rounded-full border border-white/20 bg-black/60 px-4 py-1 text-sm font-semibold text-white backdrop-blur-sm">
+                          {movie.language}
+                        </span>
+                      )}
+                      {movie.dimension && (
+                        <span className="rounded-full border border-white/20 bg-black/60 px-4 py-1 text-sm font-semibold text-white backdrop-blur-sm">
+                          {movie.dimension}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Showtimes */}
+                    {movie.showtimes.length > 0 && (
+                      <div className="space-y-3 pt-2">
+                        <p className="text-sm font-bold uppercase tracking-wider text-gray-300">
+                          Select Showtime
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          {movie.showtimes.map((showtime) => {
+                            const active = activeTime === showtime.time;
+                            return (
+                              <button
+                                key={showtime.id}
+                                type="button"
+                                onClick={() =>
+                                  setSelectedTimes((previous) => ({
+                                    ...previous,
+                                    [movie.id]: active ? null : showtime.time,
+                                  }))
+                                }
+                                aria-pressed={active}
+                                className={`relative overflow-hidden rounded-lg border px-5 py-2.5 text-base font-bold backdrop-blur-sm transition-all duration-300 ${
+                                  active
+                                    ? "border-gold bg-gold text-black shadow-lg shadow-gold/30"
+                                    : "border-white/30 bg-black/60 text-white hover:border-gold hover:bg-gold hover:text-black"
+                                }`}
+                              >
+                                {to12h(showtime.time)}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Book Tickets Button */}
+                    <div className="pt-2">
+                      <Link
+                        href="https://in.bookmyshow.com/cinemas/COIM/murugan-cinemas-ac-4k-atmos-thudiyalur/buytickets/MCTC/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="group/btn inline-flex items-center gap-3 rounded-xl bg-gradient-to-r from-gold to-amber-500 px-8 py-4 text-base font-bold uppercase tracking-wide text-black shadow-lg shadow-gold/30 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-gold/40"
+                      >
+                        <span>Book Tickets</span>
+                        <svg
+                          className="h-5 w-5 transition-transform group-hover/btn:translate-x-1"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M17 8l4 4m0 0l-4 4m4-4H3"
+                          />
+                        </svg>
+                      </Link>
+                    </div>
                   </div>
                 </div>
+              </div>
+            </div>
 
-                {/* Movie Details */}
-                <div className="flex flex-col justify-center px-6 py-8 sm:px-8 sm:py-10 lg:px-10 lg:py-12 xl:px-14">
-                  {/* Featured Badge */}
-                  <div className="inline-flex w-fit items-center gap-2 rounded-full bg-gold/10 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-gold">
-                    <span className="relative flex h-2 w-2">
-                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-gold opacity-75"></span>
-                      <span className="relative inline-flex h-2 w-2 rounded-full bg-gold"></span>
-                    </span>
+            {/* Mobile: Full-Screen Background */}
+            <div className="md:hidden">
+              <div className="space-y-6">
+                {/* 4K Dolby Badge */}
+                <div className="flex items-center gap-2 rounded-xl border border-white/20 bg-black/70 px-3 py-2 backdrop-blur-md w-fit">
+                  <Image src="/4k.png" alt="4K" width={32} height={32} className="h-5 w-auto" />
+                  <Image src="/dolby.png" alt="Dolby Atmos" width={64} height={32} className="h-5 w-auto" />
+                </div>
+
+                {/* Featured Badge */}
+                <div className="inline-flex w-fit items-center gap-2 rounded-full bg-gold/20 px-3 py-1.5 backdrop-blur-md">
+                  <span className="relative flex h-1.5 w-1.5">
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-gold opacity-75"></span>
+                    <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-gold"></span>
+                  </span>
+                  <span className="text-xs font-bold uppercase tracking-wider text-gold">
                     Featured Film
-                  </div>
+                  </span>
+                </div>
 
-                  {/* Movie Title */}
-                  <h3 className="mt-6 font-[family-name:var(--font-cormorant)] text-4xl font-bold leading-tight text-white sm:text-5xl lg:text-6xl xl:text-7xl">
-                    {movie.title}
-                  </h3>
+                {/* Movie Title - Single Line with Truncate */}
+                <h3 className="truncate font-[family-name:var(--font-cormorant)] text-4xl font-bold text-white sm:text-5xl">
+                  {movie.title}
+                </h3>
 
-                  {/* Movie Info Pills */}
-                  <div className="mt-6 flex flex-wrap gap-2">
-                    {movie.certification && (
-                      <span className="rounded-full border border-gray-700 bg-gray-800/50 px-4 py-1.5 text-sm font-semibold text-gray-300">
-                        {movie.certification}
-                      </span>
-                    )}
-                    {movie.language && (
-                      <span className="rounded-full border border-gray-700 bg-gray-800/50 px-4 py-1.5 text-sm font-semibold text-gray-300">
-                        {movie.language}
-                      </span>
-                    )}
-                    {movie.dimension && (
-                      <span className="rounded-full border border-gray-700 bg-gray-800/50 px-4 py-1.5 text-sm font-semibold text-gray-300">
-                        {movie.dimension}
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Showtimes */}
-                  {movie.showtimes.length > 0 && (
-                    <div className="mt-8">
-                      <p className="mb-4 text-sm font-bold uppercase tracking-wider text-gray-400">
-                        Select Showtime
-                      </p>
-                      <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 lg:grid-cols-3 xl:grid-cols-4">
-                        {movie.showtimes.map((showtime) => {
-                          const active = activeTime === showtime.time;
-                          return (
-                            <button
-                              key={showtime.id}
-                              type="button"
-                              onClick={() =>
-                                setSelectedTimes((previous) => ({
-                                  ...previous,
-                                  [movie.id]: active ? null : showtime.time,
-                                }))
-                              }
-                              aria-pressed={active}
-                              className={`group/time relative overflow-hidden rounded-lg border px-3 py-3 text-center font-semibold transition-all duration-300 ${
-                                active
-                                  ? "border-gold bg-gold text-black shadow-lg shadow-gold/20"
-                                  : "border-gray-700 bg-gray-800/50 text-gray-300 hover:border-gold hover:bg-gray-800 hover:text-gold"
-                              }`}
-                            >
-                              <span className="relative z-10 text-sm sm:text-base">
-                                {to12h(showtime.time)}
-                              </span>
-                              {!active && (
-                                <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-gold/10 to-transparent transition-transform duration-500 group-hover/time:translate-x-full" />
-                              )}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
+                {/* Movie Info Pills */}
+                <div className="flex flex-wrap gap-2">
+                  {movie.certification && (
+                    <span className="rounded-full border border-white/20 bg-black/60 px-3 py-1 text-xs font-semibold text-white backdrop-blur-sm">
+                      {movie.certification}
+                    </span>
                   )}
+                  {movie.language && (
+                    <span className="rounded-full border border-white/20 bg-black/60 px-3 py-1 text-xs font-semibold text-white backdrop-blur-sm">
+                      {movie.language}
+                    </span>
+                  )}
+                  {movie.dimension && (
+                    <span className="rounded-full border border-white/20 bg-black/60 px-3 py-1 text-xs font-semibold text-white backdrop-blur-sm">
+                      {movie.dimension}
+                    </span>
+                  )}
+                </div>
 
-                  {/* Book Tickets Button */}
+                {/* Showtimes */}
+                {movie.showtimes.length > 0 && (
+                  <div className="space-y-3">
+                    <p className="text-xs font-bold uppercase tracking-wider text-gray-300">
+                      Select Showtime
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {movie.showtimes.map((showtime) => {
+                        const active = activeTime === showtime.time;
+                        return (
+                          <button
+                            key={showtime.id}
+                            type="button"
+                            onClick={() =>
+                              setSelectedTimes((previous) => ({
+                                ...previous,
+                                [movie.id]: active ? null : showtime.time,
+                              }))
+                            }
+                            aria-pressed={active}
+                            className={`relative overflow-hidden rounded-lg border px-4 py-2 text-sm font-bold backdrop-blur-sm transition-all duration-300 ${
+                              active
+                                ? "border-gold bg-gold text-black shadow-lg shadow-gold/30"
+                                : "border-white/30 bg-black/60 text-white hover:border-gold hover:bg-gold hover:text-black"
+                            }`}
+                          >
+                            {to12h(showtime.time)}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* Book Tickets Button */}
+                <div>
                   <Link
                     href="https://in.bookmyshow.com/cinemas/COIM/murugan-cinemas-ac-4k-atmos-thudiyalur/buytickets/MCTC/"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="group/btn mt-8 inline-flex w-full items-center justify-center gap-3 rounded-xl bg-gradient-to-r from-gold to-amber-500 px-8 py-4 text-base font-bold uppercase tracking-wide text-black shadow-lg shadow-gold/20 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-gold/30 sm:w-auto"
+                    className="group/btn inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-gold to-amber-500 px-6 py-3 text-sm font-bold uppercase tracking-wide text-black shadow-lg shadow-gold/30 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-gold/40"
                   >
                     <span>Book Tickets</span>
                     <svg
-                      className="h-5 w-5 transition-transform group-hover/btn:translate-x-1"
+                      className="h-4 w-4 transition-transform group-hover/btn:translate-x-1"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -233,60 +341,61 @@ export default function NowShowing() {
                       />
                     </svg>
                   </Link>
-
-                  {/* Movie Navigation */}
-                  {movies.length > 1 && (
-                    <div className="mt-10 flex items-center gap-4 border-t border-gray-800 pt-8">
-                      {/* Previous Button */}
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setCurrent((index) => (index - 1 + movies.length) % movies.length)
-                        }
-                        aria-label="Previous movie"
-                        className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-gray-700 bg-gray-800/50 text-xl text-gray-300 transition-all hover:border-gold hover:bg-gray-800 hover:text-gold"
-                      >
-                        ←
-                      </button>
-
-                      {/* Dots Indicator */}
-                      <div className="flex flex-1 items-center justify-center gap-2">
-                        {movies.map((item, index) => (
-                          <button
-                            key={item.id}
-                            type="button"
-                            onClick={() => setCurrent(index)}
-                            aria-label={`Show ${item.title}`}
-                            aria-current={index === current ? "true" : undefined}
-                            className="group/dot p-2"
-                          >
-                            <span
-                              className={`block rounded-full transition-all duration-300 ${
-                                index === current
-                                  ? "h-2.5 w-8 bg-gold"
-                                  : "h-2 w-2 bg-gray-600 group-hover/dot:bg-gray-400"
-                              }`}
-                            />
-                          </button>
-                        ))}
-                      </div>
-
-                      {/* Next Button */}
-                      <button
-                        type="button"
-                        onClick={() => setCurrent((index) => (index + 1) % movies.length)}
-                        aria-label="Next movie"
-                        className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-gray-700 bg-gray-800/50 text-xl text-gray-300 transition-all hover:border-gold hover:bg-gray-800 hover:text-gold"
-                      >
-                        →
-                      </button>
-                    </div>
-                  )}
                 </div>
               </div>
             </div>
+
+            {/* Movie Navigation */}
+            {movies.length > 1 && (
+              <div className="mt-6 flex items-center justify-center gap-4">
+                {/* Previous Button */}
+                <button
+                  type="button"
+                  onClick={() =>
+                    setCurrent((index) => (index - 1 + movies.length) % movies.length)
+                  }
+                  aria-label="Previous movie"
+                  className="flex h-12 w-12 items-center justify-center rounded-full border border-gray-700 bg-gray-800/80 text-xl text-gray-300 backdrop-blur-sm transition-all hover:border-gold hover:bg-gray-800 hover:text-gold"
+                >
+                  ←
+                </button>
+
+                {/* Dots Indicator */}
+                <div className="flex items-center gap-2">
+                  {movies.map((item, index) => (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => setCurrent(index)}
+                      aria-label={`Show ${item.title}`}
+                      aria-current={index === current ? "true" : undefined}
+                      className="group/dot p-2"
+                    >
+                      <span
+                        className={`block rounded-full transition-all duration-300 ${
+                          index === current
+                            ? "h-2.5 w-8 bg-gold"
+                            : "h-2 w-2 bg-gray-600 group-hover/dot:bg-gray-400"
+                        }`}
+                      />
+                    </button>
+                  ))}
+                </div>
+
+                {/* Next Button */}
+                <button
+                  type="button"
+                  onClick={() => setCurrent((index) => (index + 1) % movies.length)}
+                  aria-label="Next movie"
+                  className="flex h-12 w-12 items-center justify-center rounded-full border border-gray-700 bg-gray-800/80 text-xl text-gray-300 backdrop-blur-sm transition-all hover:border-gold hover:bg-gray-800 hover:text-gold"
+                >
+                  →
+                </button>
+              </div>
+            )}
           </div>
         )}
+        </div>
       </div>
     </section>
   );

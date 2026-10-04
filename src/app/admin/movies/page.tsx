@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { FormEvent, useCallback, useEffect, useState } from "react";
+import AdminNav from "@/components/AdminNav";
 
 interface Showtime {
   id?: number;
@@ -91,7 +91,8 @@ export default function MoviesManagement() {
   }, [activeTab]);
 
   useEffect(() => {
-    void fetchData();
+    const initial = window.setTimeout(() => void fetchData(), 0);
+    return () => window.clearTimeout(initial);
   }, [fetchData]);
 
   const saveMovie = async (e: FormEvent) => {
@@ -229,25 +230,7 @@ export default function MoviesManagement() {
 
   return (
     <main className="min-h-screen bg-gray-950 text-white">
-      {/* Header */}
-      <header className="border-b border-gray-800 bg-gray-900 px-6 py-4">
-        <div className="mx-auto max-w-7xl">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs font-bold uppercase tracking-widest text-purple-400">
-                Movie Management
-              </p>
-              <h1 className="mt-1 text-2xl font-bold">Sri Murugan Cinema</h1>
-            </div>
-            <Link
-              href="/admin/dashboard"
-              className="rounded-lg border border-gray-700 px-4 py-2 text-sm font-semibold transition-colors hover:border-purple-500"
-            >
-              ← Dashboard
-            </Link>
-          </div>
-        </div>
-      </header>
+      <AdminNav title="Movies" />
 
       <div className="mx-auto max-w-7xl px-6 py-8">
         {/* Tabs */}

@@ -6,6 +6,7 @@ import { recommendAddOns, recommendVariantUpgrade } from "../src/lib/foodRecomme
 import { isCapturedFoodPayment, verifyRazorpaySignature, verifyRazorpayWebhook } from "../src/lib/razorpay";
 import { readJsonBody, RequestTooLargeError } from "../src/lib/requestBody";
 import { createCafeSession, verifyCafeSession } from "../src/lib/cafeSession";
+import { createCustomerOrderSession, verifyCustomerOrderSession } from "../src/lib/customerOrderSession";
 import type { FoodCategory, FoodProduct } from "../src/lib/foodMenu";
 
 const categories: FoodCategory[] = [
@@ -55,6 +56,16 @@ test("cafe sessions require a valid signature and expire", () => {
   assert.equal(verifyCafeSession(token, "secret", now + 12 * 60 * 60 * 1000 + 1), null);
   assert.equal(verifyCafeSession(token.replace(/^3/, "4"), "secret", now), null);
   assert.equal(verifyCafeSession("3:1234", "secret", now), null);
+});
+
+test("customer order sessions only grant access to the signed order and expire", () => {
+  const now = Date.now();
+  const token = createCustomerOrderSession(25, "secret", now);
+  assert.equal(verifyCustomerOrderSession(token, "secret", now), 25);
+  assert.equal(verifyCustomerOrderSession(token, "wrong-secret", now), null);
+  assert.equal(verifyCustomerOrderSession(token.replace(/^25/, "26"), "secret", now), null);
+  assert.equal(verifyCustomerOrderSession(token, "secret", now + 24 * 60 * 60 * 1000 + 1), null);
+  assert.equal(verifyCustomerOrderSession(undefined, "secret", now), null);
 });
 
 test("Razorpay signatures are checked against trusted order IDs and raw webhook bodies", () => {

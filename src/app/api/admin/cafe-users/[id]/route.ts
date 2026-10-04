@@ -49,7 +49,7 @@ export async function PATCH(
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    return NextResponse.json({ user });
+    return NextResponse.json({ user: { id: user.id, name: user.name, isActive: user.isActive } });
   } catch (error: unknown) {
     console.error("Error updating cafe user:", error);
     if (error && typeof error === "object" && "code" in error && error.code === "23505") {

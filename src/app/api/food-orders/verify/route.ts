@@ -5,6 +5,7 @@ import { foodOrders } from "@/lib/schema";
 import { verifyRazorpaySignature } from "@/lib/razorpay";
 import { confirmFoodPayment, foodOrderConfirmation } from "@/lib/foodPayment";
 import { readJsonBody, RequestTooLargeError } from "@/lib/requestBody";
+import { attachCustomerOrderSession } from "@/lib/customerOrderSession";
 
 export async function POST(request: NextRequest) {
   let body: unknown;
@@ -31,14 +32,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "This order has already been paid." }, { status: 409 });
     }
     if (order.paymentStatus === "paid" && order.razorpayPaymentId === paymentId) {
-      return NextResponse.json(foodOrderConfirmation(order), { headers: { "Cache-Control": "no-store" } });
+      return attachCustomerOrderSession(NextResponse.json(foodOrderConfirmation(order), { headers: { "Cache-Control": "no-store" } }), order.id);
     }
 
     const confirmed = await confirmFoodPayment(order.id, order.razorpayOrderId, paymentId, order.amountPaise);
     if (!confirmed || !confirmed.paidAt) {
       return NextResponse.json({ error: "Payment was received, but the order could not be confirmed. Please contact the cinema with your payment ID." }, { status: 409 });
     }
-    return NextResponse.json(foodOrderConfirmation(confirmed), { headers: { "Cache-Control": "no-store" } });
+    return attachCustomerOrderSession(NextResponse.json(foodOrderConfirmation(confirmed), { headers: { "Cache-Control": "no-store" } }), confirmed.id);
   } catch (error) {
     console.error("Food payment verification failed", error instanceof Error ? error.name : "UnknownError");
     return NextResponse.json({ error: "Payment confirmation is delayed. Please keep your payment ID and contact the cinema if your order does not appear." }, { status: 503 });

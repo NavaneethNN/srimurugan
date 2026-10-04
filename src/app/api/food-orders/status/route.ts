@@ -5,6 +5,7 @@ import { foodOrders } from "@/lib/schema";
 import { confirmFoodPayment, foodOrderConfirmation } from "@/lib/foodPayment";
 import { fetchRazorpayOrderPayments, isCapturedFoodPayment, razorpayKeyId } from "@/lib/razorpay";
 import { readJsonBody, RequestTooLargeError } from "@/lib/requestBody";
+import { attachCustomerOrderSession } from "@/lib/customerOrderSession";
 
 export async function POST(request: NextRequest) {
   let body: unknown;
@@ -19,7 +20,7 @@ export async function POST(request: NextRequest) {
     const [order] = await getDb().select().from(foodOrders).where(eq(foodOrders.checkoutKey, checkoutKey)).limit(1);
     if (!order) return NextResponse.json({ error: "Checkout not found." }, { status: 404 });
     if (order.paymentStatus === "paid") {
-      return NextResponse.json({ paymentStatus: "paid", ...foodOrderConfirmation(order) }, { headers: { "Cache-Control": "no-store" } });
+      return attachCustomerOrderSession(NextResponse.json({ paymentStatus: "paid", ...foodOrderConfirmation(order) }, { headers: { "Cache-Control": "no-store" } }), order.id);
     }
     if (!order.razorpayOrderId || !order.amountPaise) {
       if (order.paymentStatus === "create_failed") return NextResponse.json({ error: "Checkout can be retried." }, { status: 404 });
@@ -33,7 +34,7 @@ export async function POST(request: NextRequest) {
     if (successful) {
       const confirmed = await confirmFoodPayment(order.id, order.razorpayOrderId, successful.id, order.amountPaise);
       if (confirmed) {
-        return NextResponse.json({ paymentStatus: "paid", ...foodOrderConfirmation(confirmed) }, { headers: { "Cache-Control": "no-store" } });
+        return attachCustomerOrderSession(NextResponse.json({ paymentStatus: "paid", ...foodOrderConfirmation(confirmed) }, { headers: { "Cache-Control": "no-store" } }), confirmed.id);
       }
       return NextResponse.json({ error: "Payment confirmation is delayed. Please try again shortly." }, { status: 503 });
     }

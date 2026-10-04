@@ -30,3 +30,9 @@ export async function POST(request: NextRequest) {
 
   return NextResponse.json({ error: "Invalid password" }, { status: 401 });
 }
+
+export async function DELETE() {
+  const response = NextResponse.json({ success: true });
+  response.cookies.delete("admin-session");
+  return response;
+}

@@ -1,278 +1,133 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useCallback, useEffect, useRef, useState } from "react";
+import AdminNav from "@/components/AdminNav";
+import { formatPrice } from "@/lib/foodMenu";
 
-interface Stats {
-  nowShowing: number;
-  upcoming: number;
-  pendingOrders: number;
-  preparingOrders: number;
-  cafeStaff: number;
-  foodItems: number;
-}
+type QueueOrder = {
+  id: number;
+  seat: string;
+  customerName: string | null;
+  status: string;
+  amountPaise: number | null;
+  createdAt: string;
+  items: { name: string; variantName?: string; quantity: number }[];
+};
+type Overview = {
+  orders: Record<string, number>;
+  queue: QueueOrder[];
+  movies: { showing: number; upcoming: number };
+  activeStaff: number;
+  availableProducts: number;
+};
+type QueueView = "active" | "pending" | "preparing";
 
 export default function AdminDashboard() {
-  const router = useRouter();
-  const [stats, setStats] = useState<Stats>({
-    nowShowing: 0,
-    upcoming: 0,
-    pendingOrders: 0,
-    preparingOrders: 0,
-    cafeStaff: 0,
-    foodItems: 0,
-  });
-  const [loading, setLoading] = useState(true);
+  const [overview, setOverview] = useState<Overview | null>(null);
+  const [queueView, setQueueView] = useState<QueueView>("active");
+  const [error, setError] = useState("");
+  const [updatedAt, setUpdatedAt] = useState<Date | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
+  const [savingId, setSavingId] = useState<number | null>(null);
+  const requestId = useRef(0);
+  const savingRef = useRef(false);
 
-  useEffect(() => {
-    const loadStats = async () => {
-      try {
-        const [moviesRes, upcomingRes, ordersRes, staffRes, menuRes] = await Promise.all([
-          fetch("/api/admin/movies"),
-          fetch("/api/admin/upcoming"),
-          fetch("/api/admin/food-orders?status=all&limit=100"),
-          fetch("/api/admin/cafe-users"),
-          fetch("/api/admin/food-menu/categories"),
-        ]);
-
-        const [moviesData, upcomingData, ordersData, staffData, menuData] = await Promise.all([
-          moviesRes.json(),
-          upcomingRes.json(),
-          ordersRes.json(),
-          staffRes.json(),
-          menuRes.json(),
-        ]);
-
-        setStats({
-          nowShowing: moviesData.movies?.filter((m: { isNowShowing: boolean }) => m.isNowShowing).length || 0,
-          upcoming: upcomingData.upcoming?.length || 0,
-          pendingOrders: ordersData.counts?.pending || 0,
-          preparingOrders: ordersData.counts?.preparing || 0,
-          cafeStaff: staffData.users?.filter((u: { isActive: boolean }) => u.isActive).length || 0,
-          foodItems: menuData.products?.filter((p: { isAvailable: boolean }) => p.isAvailable).length || 0,
-        });
-      } catch (error) {
-        console.error("Failed to load stats:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    void loadStats();
-    const interval = setInterval(loadStats, 10000); // Refresh every 10 seconds
-    return () => clearInterval(interval);
+  const refresh = useCallback(async () => {
+    const id = ++requestId.current;
+    try {
+      const response = await fetch("/api/admin/overview", { cache: "no-store" });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Could not load the dashboard.");
+      if (id !== requestId.current) return;
+      setOverview(data);
+      setUpdatedAt(new Date());
+      setError("");
+    } catch (cause) {
+      if (id === requestId.current) setError(cause instanceof Error ? cause.message : "Could not load the dashboard.");
+    } finally {
+      if (id === requestId.current) setRefreshing(false);
+    }
   }, []);
 
-  const logout = () => {
-    document.cookie = "admin-session=; path=/; max-age=0";
-    router.push("/admin/login");
-    router.refresh();
-  };
+  useEffect(() => {
+    const initial = window.setTimeout(() => void refresh(), 0);
+    const timer = window.setInterval(() => { if (document.visibilityState === "visible" && !savingRef.current) void refresh(); }, 10_000);
+    const onVisible = () => { if (document.visibilityState === "visible" && !savingRef.current) void refresh(); };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => { window.clearTimeout(initial); window.clearInterval(timer); document.removeEventListener("visibilitychange", onVisible); requestId.current += 1; };
+  }, [refresh]);
 
-  const modules = [
-    {
-      title: "Movies",
-      icon: "🎬",
-      description: "Manage now showing & upcoming",
-      stats: `${stats.nowShowing} showing, ${stats.upcoming} upcoming`,
-      href: "/admin/movies",
-      color: "from-purple-500 to-indigo-600",
-      badge: stats.nowShowing,
-    },
-    {
-      title: "Food Orders",
-      icon: "🍿",
-      description: "Monitor cafe orders in real-time",
-      stats: `${stats.pendingOrders} new, ${stats.preparingOrders} preparing`,
-      href: "/admin/orders",
-      color: "from-amber-500 to-orange-600",
-      badge: stats.pendingOrders,
-      urgent: stats.pendingOrders > 0,
-    },
-    {
-      title: "Cafe Menu",
-      icon: "📋",
-      description: "Manage products & categories",
-      stats: `${stats.foodItems} items available`,
-      href: "/admin/cafe",
-      color: "from-green-500 to-emerald-600",
-      badge: stats.foodItems,
-    },
-    {
-      title: "Cafe Staff",
-      icon: "👥",
-      description: "Manage POS user accounts",
-      stats: `${stats.cafeStaff} active staff members`,
-      href: "/admin/cafe-users",
-      color: "from-blue-500 to-cyan-600",
-      badge: stats.cafeStaff,
-    },
-  ];
+  async function updateStatus(order: QueueOrder, next: "preparing" | "completed" | "cancelled") {
+    if (next === "cancelled" && !window.confirm(`Cancel order #${order.id}? The customer will see this status.`)) return;
+    requestId.current += 1;
+    savingRef.current = true;
+    setRefreshing(false);
+    setSavingId(order.id);
+    setError("");
+    try {
+      const response = await fetch(`/api/admin/food-orders/${order.id}`, {
+        method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: next }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Could not update the order.");
+      setOverview((current) => {
+        if (!current) return current;
+        const counts = { ...current.orders };
+        counts[order.status] = Math.max(0, (counts[order.status] || 0) - 1);
+        counts[next] = (counts[next] || 0) + 1;
+        return {
+          ...current,
+          orders: counts,
+          queue: next === "preparing"
+            ? current.queue.map((item) => item.id === order.id ? { ...item, status: next } : item)
+            : current.queue.filter((item) => item.id !== order.id),
+        };
+      });
+      await refresh();
+    } catch (cause) {
+      await refresh();
+      setError(cause instanceof Error ? cause.message : "Could not update the order.");
+    } finally { savingRef.current = false; setSavingId(null); }
+  }
+
+  const newCount = overview?.orders.pending || 0;
+  const preparingCount = overview?.orders.preparing || 0;
+  const queue = overview?.queue.filter((order) => queueView === "active" || order.status === queueView) || [];
+  const management = overview ? [
+    { label: "Cafe menu", detail: `${overview.availableProducts} available products`, href: "/admin/cafe" },
+    { label: "Staff access", detail: `${overview.activeStaff} active staff`, href: "/admin/cafe-users" },
+    { label: "Movies", detail: `${overview.movies.showing} showing · ${overview.movies.upcoming} upcoming`, href: "/admin/movies" },
+  ] : [];
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-black text-white">
-      {/* Header */}
-      <header className="border-b border-gray-800 bg-gray-900/50 backdrop-blur-sm">
-        <div className="mx-auto max-w-7xl px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs font-bold uppercase tracking-widest text-amber-400">
-                Admin Control Panel
-              </p>
-              <h1 className="mt-1 text-3xl font-bold">Sri Murugan Cinema</h1>
-            </div>
-            <button
-              onClick={logout}
-              className="rounded-lg bg-red-600 px-6 py-3 text-sm font-bold uppercase transition-colors hover:bg-red-700"
-            >
-              Logout
-            </button>
-          </div>
+    <main className="min-h-screen bg-slate-950 text-slate-100">
+      <AdminNav title="Dashboard" />
+      <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 sm:px-6">
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div><h2 className="text-2xl font-semibold">Cafe operations</h2><p className="mt-1 text-sm text-slate-400">Process paid orders here. Menu, staff, and movie controls are one click away.</p></div>
+          <div className="flex items-center gap-3"><span className="text-xs text-slate-500">{updatedAt ? `Updated ${updatedAt.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}` : ""}</span><button type="button" onClick={() => { setRefreshing(true); void refresh(); }} disabled={refreshing} className="min-h-9 rounded-md border border-slate-700 px-3 text-sm hover:bg-slate-800 disabled:opacity-50">{refreshing ? "Refreshing…" : "Refresh"}</button></div>
         </div>
-      </header>
-
-      <div className="mx-auto max-w-7xl px-6 py-8">
-        {loading ? (
-          <div className="flex min-h-[60vh] items-center justify-center">
-            <div className="text-center">
-              <div className="mx-auto h-16 w-16 animate-spin rounded-full border-4 border-gray-700 border-t-amber-400" />
-              <p className="mt-4 text-gray-400">Loading dashboard...</p>
-            </div>
+        {error && <p role="alert" className="rounded-md border border-rose-800 bg-rose-950/40 px-4 py-3 text-sm text-rose-200">{error}</p>}
+        {!overview && !error && <p className="rounded-lg border border-slate-800 bg-slate-900/40 px-4 py-12 text-center text-sm text-slate-400">Loading dashboard…</p>}
+        {overview && <>
+          <section aria-label="Order summary" className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <button type="button" onClick={() => setQueueView("pending")} aria-pressed={queueView === "pending"} className={`rounded-lg border p-4 text-left hover:bg-slate-900 ${queueView === "pending" ? "border-slate-400 bg-slate-900" : "border-slate-800 bg-slate-900/50"}`}><span className="text-sm text-slate-400">New orders</span><strong className="mt-2 block text-3xl font-semibold tabular-nums">{newCount}</strong><span className="mt-1 block text-xs text-slate-500">Need attention</span></button>
+            <button type="button" onClick={() => setQueueView("preparing")} aria-pressed={queueView === "preparing"} className={`rounded-lg border p-4 text-left hover:bg-slate-900 ${queueView === "preparing" ? "border-slate-400 bg-slate-900" : "border-slate-800 bg-slate-900/50"}`}><span className="text-sm text-slate-400">Preparing</span><strong className="mt-2 block text-3xl font-semibold tabular-nums">{preparingCount}</strong><span className="mt-1 block text-xs text-slate-500">In progress</span></button>
+            <Link href="/admin/orders" className="rounded-lg border border-slate-800 bg-slate-900/50 p-4 hover:bg-slate-900"><span className="text-sm text-slate-400">Completed orders</span><strong className="mt-2 block text-3xl font-semibold tabular-nums">{overview.orders.completed || 0}</strong><span className="mt-1 block text-xs text-slate-500">All time</span></Link>
+            <Link href="/admin/cafe" className="rounded-lg border border-slate-800 bg-slate-900/50 p-4 hover:bg-slate-900"><span className="text-sm text-slate-400">Available products</span><strong className="mt-2 block text-3xl font-semibold tabular-nums">{overview.availableProducts}</strong><span className="mt-1 block text-xs text-slate-500">Cafe menu</span></Link>
+          </section>
+          <div className="grid gap-5 lg:grid-cols-[minmax(0,1.8fr)_minmax(260px,.8fr)]">
+            <section className="overflow-hidden rounded-lg border border-slate-800 bg-slate-900/50">
+              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 px-4 py-3"><div><h3 className="font-semibold">Live order queue</h3><p className="mt-0.5 text-xs text-slate-400">New paid orders first, then orders in preparation</p></div><Link href="/admin/orders" className="text-sm font-medium underline underline-offset-4">View full queue →</Link></div>
+              <div className="flex gap-1 border-b border-slate-800 px-3 py-2" aria-label="Dashboard order filter">{(["active", "pending", "preparing"] as QueueView[]).map((view) => <button key={view} type="button" onClick={() => setQueueView(view)} aria-pressed={queueView === view} className={`min-h-8 rounded-md px-3 text-xs font-medium ${queueView === view ? "bg-slate-100 text-slate-950" : "text-slate-400 hover:bg-slate-800"}`}>{view === "active" ? "All active" : view === "pending" ? "New" : "Preparing"}</button>)}</div>
+              {queue.length ? <div className="divide-y divide-slate-800">{queue.map((order) => <article key={order.id} className="px-4 py-3"><div className="flex flex-wrap items-start justify-between gap-3"><div className="min-w-0"><div className="flex items-center gap-2"><span className="font-semibold tabular-nums">#{order.id}</span><span className={`rounded px-1.5 py-0.5 text-[11px] font-medium ${order.status === "pending" ? "bg-amber-950/60 text-amber-200" : "bg-slate-800 text-slate-300"}`}>{order.status === "pending" ? "New" : "Preparing"}</span></div><p className="mt-1 truncate text-sm">{order.seat} · {order.customerName || "Guest"}</p><p className="mt-1 text-xs text-slate-400">{new Date(order.createdAt).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })} · {formatPrice(order.amountPaise)}</p></div><div className="flex gap-2">{order.status === "pending" ? <button type="button" disabled={savingId !== null} onClick={() => void updateStatus(order, "preparing")} className="min-h-9 rounded-md bg-slate-100 px-3 text-xs font-semibold text-slate-950 hover:bg-white disabled:opacity-50">{savingId === order.id ? "Saving…" : "Start preparing"}</button> : <button type="button" disabled={savingId !== null} onClick={() => void updateStatus(order, "completed")} className="min-h-9 rounded-md bg-slate-100 px-3 text-xs font-semibold text-slate-950 hover:bg-white disabled:opacity-50">{savingId === order.id ? "Saving…" : "Mark complete"}</button>}<button type="button" disabled={savingId !== null} onClick={() => void updateStatus(order, "cancelled")} className="min-h-9 rounded-md border border-slate-700 px-2 text-xs text-slate-300 hover:bg-slate-800 disabled:opacity-50">Cancel</button></div></div><p className="mt-2 truncate text-xs text-slate-400">{Array.isArray(order.items) ? order.items.map((item) => `${item.quantity} × ${item.name}${item.variantName ? ` (${item.variantName})` : ""}`).join(" · ") : ""}</p></article>)}</div> : <p className="px-4 py-10 text-center text-sm text-slate-400">{queueView === "active" ? "No active paid orders." : `No ${queueView === "pending" ? "new" : "preparing"} orders in this view.`}</p>}
+              {overview.queue.length >= 12 && <p className="border-t border-slate-800 px-4 py-3 text-xs text-slate-400">Showing the first 12 active orders. Open the full queue to see more.</p>}
+            </section>
+            <aside className="space-y-5"><section className="rounded-lg border border-slate-800 bg-slate-900/50 p-4"><h3 className="font-semibold">Management</h3><div className="mt-3 divide-y divide-slate-800 border-y border-slate-800">{management.map((item) => <Link key={item.href} href={item.href} className="flex items-center justify-between gap-3 py-3 hover:text-white"><span><span className="block text-sm font-medium">{item.label}</span><span className="text-xs text-slate-400">{item.detail}</span></span><span aria-hidden="true" className="text-slate-500">→</span></Link>)}</div><Link href="/cafe/pos" className="mt-4 inline-flex min-h-10 w-full items-center justify-center rounded-md border border-slate-700 text-sm font-medium hover:bg-slate-800">Open cafe POS</Link></section><section className="rounded-lg border border-slate-800 bg-slate-900/30 p-4"><h3 className="text-sm font-semibold">Order handling</h3><p className="mt-2 text-xs leading-5 text-slate-400">Only captured payments enter this queue. Status changes are shown to the customer on their order page.</p></section></aside>
           </div>
-        ) : (
-          <>
-            {/* Quick Stats */}
-            <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              <div className="rounded-xl border border-amber-500/30 bg-gradient-to-br from-amber-500/10 to-amber-600/5 p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-400">New Orders</p>
-                    <p className="mt-2 text-4xl font-bold text-amber-400">{stats.pendingOrders}</p>
-                  </div>
-                  <div className="text-5xl">🔔</div>
-                </div>
-              </div>
-
-              <div className="rounded-xl border border-blue-500/30 bg-gradient-to-br from-blue-500/10 to-blue-600/5 p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-400">Preparing</p>
-                    <p className="mt-2 text-4xl font-bold text-blue-400">{stats.preparingOrders}</p>
-                  </div>
-                  <div className="text-5xl">👨‍🍳</div>
-                </div>
-              </div>
-
-              <div className="rounded-xl border border-purple-500/30 bg-gradient-to-br from-purple-500/10 to-purple-600/5 p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-400">Now Showing</p>
-                    <p className="mt-2 text-4xl font-bold text-purple-400">{stats.nowShowing}</p>
-                  </div>
-                  <div className="text-5xl">🎬</div>
-                </div>
-              </div>
-
-              <div className="rounded-xl border border-green-500/30 bg-gradient-to-br from-green-500/10 to-green-600/5 p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-400">Active Staff</p>
-                    <p className="mt-2 text-4xl font-bold text-green-400">{stats.cafeStaff}</p>
-                  </div>
-                  <div className="text-5xl">👥</div>
-                </div>
-              </div>
-            </div>
-
-            {/* Main Modules */}
-            <div className="mb-8">
-              <h2 className="mb-6 text-2xl font-bold text-gray-200">Management Modules</h2>
-              <div className="grid gap-6 md:grid-cols-2">
-                {modules.map((module) => (
-                  <Link
-                    key={module.title}
-                    href={module.href}
-                    className="group relative overflow-hidden rounded-2xl border border-gray-800 bg-gradient-to-br from-gray-900 to-gray-950 p-6 transition-all hover:scale-105 hover:border-gray-700 hover:shadow-2xl"
-                  >
-                    {/* Gradient background */}
-                    <div
-                      className={`absolute inset-0 bg-gradient-to-br ${module.color} opacity-0 transition-opacity group-hover:opacity-10`}
-                    />
-
-                    {/* Content */}
-                    <div className="relative">
-                      <div className="flex items-start justify-between">
-                        <div className="flex items-center gap-4">
-                          <div className="text-6xl">{module.icon}</div>
-                          <div>
-                            <h3 className="text-2xl font-bold text-white">{module.title}</h3>
-                            <p className="mt-1 text-sm text-gray-400">{module.description}</p>
-                          </div>
-                        </div>
-                        {module.urgent && (
-                          <span className="animate-pulse rounded-full bg-red-500 px-3 py-1 text-xs font-bold text-white">
-                            URGENT
-                          </span>
-                        )}
-                        {!module.urgent && module.badge > 0 && (
-                          <span className="rounded-full bg-gray-700 px-3 py-1 text-sm font-bold text-white">
-                            {module.badge}
-                          </span>
-                        )}
-                      </div>
-
-                      <div className="mt-4 flex items-center justify-between">
-                        <p className="text-sm font-semibold text-gray-300">{module.stats}</p>
-                        <span className="text-2xl transition-transform group-hover:translate-x-2">→</span>
-                      </div>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </div>
-
-            {/* Quick Actions */}
-            <div className="rounded-2xl border border-gray-800 bg-gray-900/50 p-6">
-              <h2 className="mb-4 text-xl font-bold text-gray-200">Quick Actions</h2>
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                <Link
-                  href="/admin/movies"
-                  className="rounded-lg border border-gray-700 bg-gray-800 px-4 py-3 text-center text-sm font-semibold transition-colors hover:border-purple-500 hover:bg-gray-750"
-                >
-                  + Add Movie
-                </Link>
-                <Link
-                  href="/admin/cafe"
-                  className="rounded-lg border border-gray-700 bg-gray-800 px-4 py-3 text-center text-sm font-semibold transition-colors hover:border-green-500 hover:bg-gray-750"
-                >
-                  + Add Food Item
-                </Link>
-                <Link
-                  href="/admin/cafe-users"
-                  className="rounded-lg border border-gray-700 bg-gray-800 px-4 py-3 text-center text-sm font-semibold transition-colors hover:border-blue-500 hover:bg-gray-750"
-                >
-                  + Add Staff User
-                </Link>
-                <Link
-                  href="/admin/orders"
-                  className="rounded-lg border border-gray-700 bg-gray-800 px-4 py-3 text-center text-sm font-semibold transition-colors hover:border-amber-500 hover:bg-gray-750"
-                >
-                  View All Orders
-                </Link>
-              </div>
-            </div>
-          </>
-        )}
+        </>}
       </div>
-
-      {/* Footer */}
-      <footer className="mt-12 border-t border-gray-800 bg-gray-900/30 py-6">
-        <div className="mx-auto max-w-7xl px-6 text-center text-sm text-gray-500">
-          <p>Sri Murugan Cinema - Admin Control Panel v2.0</p>
-          <p className="mt-1">Vista POS Style Management System</p>
-        </div>
-      </footer>
     </main>
   );
 }

@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { cafeUsers } from "@/lib/schema";
-import { eq } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { verifyAdminSession } from "@/lib/adminSession";
 
@@ -20,7 +19,6 @@ export async function GET() {
     const users = await db.select({
       id: cafeUsers.id,
       name: cafeUsers.name,
-      pin: cafeUsers.pin,
       isActive: cafeUsers.isActive,
       lastLoginAt: cafeUsers.lastLoginAt,
       createdAt: cafeUsers.createdAt,
@@ -58,7 +56,7 @@ export async function POST(request: NextRequest) {
       .values({ name, pin })
       .returning();
 
-    return NextResponse.json({ user });
+    return NextResponse.json({ user: { id: user.id, name: user.name, isActive: user.isActive } });
   } catch (error: unknown) {
     console.error("Error creating cafe user:", error);
     if (error && typeof error === "object" && "code" in error && error.code === "23505") {

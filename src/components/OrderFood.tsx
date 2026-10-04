@@ -10,6 +10,7 @@ type Status = "idle" | "submitting" | "paying" | "verifying" | "error";
 type CartLine = { product: FoodProduct; variant: FoodProduct["variants"][number]; quantity: number; key: string };
 type Confirmation = {
   id: number;
+  status: string;
   customerName: string;
   seat: string;
   items: FoodOrderItem[];
@@ -17,6 +18,23 @@ type Confirmation = {
   editDeadline: number;
   editWindowMs: number;
 };
+type ConfirmationPayload = {
+  order: { id: number; status: string; customerName: string; seat: string; items: FoodOrderItem[] };
+  editToken: string;
+  editRemainingMs: number;
+  editWindowMs: number;
+};
+const orderStatusText: Record<string, string> = {
+  pending: "Received by the cafe",
+  preparing: "Preparing your order",
+  completed: "Order completed",
+  cancelled: "Order cancelled",
+};
+function confirmationFrom(result: ConfirmationPayload, receivedAt: number): Confirmation {
+  return { id: result.order.id, status: result.order.status, customerName: result.order.customerName,
+    seat: result.order.seat, items: result.order.items, editToken: result.editToken,
+    editDeadline: receivedAt + result.editRemainingMs, editWindowMs: result.editWindowMs };
+}
 const storageKey = "srimurugan-food-cart-v2";
 const lineKey = (productId: number, variantId: string) => `${productId}:${variantId}`;
 const currentTime = () => Date.now();
@@ -121,6 +139,28 @@ export default function OrderFood() {
 
   useEffect(() => {
     let cancelled = false;
+    async function refreshOrderStatus() {
+      try {
+        const response = await fetch("/api/food-orders/current", { cache: "no-store" });
+        if (!response.ok) return;
+        const result = await response.json() as ConfirmationPayload;
+        if (cancelled) return;
+        const receivedAt = currentTime();
+        setNow(receivedAt);
+        setConfirmation((current) => {
+          if (current && current.id > result.order.id) return current;
+          if (current?.id === result.order.id && current.status === result.order.status && current.seat === result.order.seat) return current;
+          return confirmationFrom(result, receivedAt);
+        });
+      } catch { /* Keep the last known status while the connection is unavailable. */ }
+    }
+    void refreshOrderStatus();
+    const interval = confirmation?.id ? window.setInterval(() => void refreshOrderStatus(), 5_000) : null;
+    return () => { cancelled = true; if (interval !== null) window.clearInterval(interval); };
+  }, [confirmation?.id]);
+
+  useEffect(() => {
+    let cancelled = false;
     async function loadMenu() {
       try {
         const response = await fetch("/api/food-menu", { cache: "no-store" });
@@ -212,9 +252,9 @@ export default function OrderFood() {
     setQuantities((current) => ({ ...current, [lineKey(productId, fromId)]: 0, [lineKey(productId, toId)]: 1 }));
   }
 
-  function showConfirmation(result: { order: { id: number; customerName: string; seat: string; items: FoodOrderItem[] }; editToken: string; editRemainingMs: number; editWindowMs: number }) {
+  function showConfirmation(result: ConfirmationPayload) {
     const receivedAt = currentTime();
-    setConfirmation({ id: result.order.id, customerName: result.order.customerName, seat: result.order.seat, items: result.order.items, editToken: result.editToken, editDeadline: receivedAt + result.editRemainingMs, editWindowMs: result.editWindowMs });
+    setConfirmation(confirmationFrom(result, receivedAt));
     setNow(receivedAt);
     setSeatDraft(result.order.seat);
     setEditingSeat(false);
@@ -428,7 +468,7 @@ export default function OrderFood() {
         <div className="pointer-events-none absolute inset-x-0 top-0 h-[420px] bg-[radial-gradient(ellipse_at_top,rgba(201,153,58,.13),transparent_70%)]" />
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mb-9 max-w-2xl sm:mb-12"><p className="text-[0.68rem] font-bold uppercase tracking-[0.25em] text-gold">Sri Murugan Cinema · Food & drinks</p><h1 className="mt-3 font-[family-name:var(--font-cormorant)] text-5xl font-semibold leading-none text-foreground sm:text-6xl">Good food. Great film.</h1><p className="mt-4 max-w-xl text-sm leading-relaxed text-muted sm:text-base">Choose your cinema favourites, pay online, and tell us your screen and seat. We’ll bring your order to you.</p></div>
-          {confirmation && <div role="status" className="mb-7 rounded-2xl border border-gold/40 bg-[#f3e5cf] p-4 text-foreground sm:p-5"><div className="flex flex-wrap items-start justify-between gap-4"><div><p className="text-xs font-bold uppercase tracking-[0.18em] text-gold">Order placed · #{confirmation.id}</p><h2 className="mt-1 text-xl font-bold">Thank you, {confirmation.customerName}.</h2><p className="mt-1 text-sm text-foreground/75">Screen and seat: <strong>{confirmation.seat}</strong></p></div><div className="flex gap-2"><button type="button" onClick={() => setConfirmationOpen(true)} className="min-h-10 rounded-lg border border-gold px-3 text-xs font-bold text-gold">View order</button><button type="button" onClick={() => { setConfirmation(null); setName(""); setSeat(""); }} className="min-h-10 rounded-lg border border-surface-border px-3 text-xs font-bold">Start another</button></div></div></div>}
+          {confirmation && <div role="status" className="mb-7 rounded-2xl border border-gold/40 bg-[#f3e5cf] p-4 text-foreground sm:p-5"><div className="flex flex-wrap items-start justify-between gap-4"><div><p className="text-xs font-bold uppercase tracking-[0.18em] text-gold">Your order · #{confirmation.id}</p><h2 className="mt-1 text-xl font-bold">{orderStatusText[confirmation.status] || "Order received"}</h2><p className="mt-1 text-sm text-foreground/75">{confirmation.customerName} · Screen and seat: <strong>{confirmation.seat}</strong></p><p className="mt-2 text-xs text-muted">Status updates automatically.</p></div><div className="flex gap-2"><button type="button" onClick={() => setConfirmationOpen(true)} className="min-h-10 rounded-lg border border-gold px-3 text-xs font-bold text-gold">View order</button><button type="button" onClick={() => { setConfirmationOpen(false); setName(""); setSeat(""); }} className="min-h-10 rounded-lg border border-surface-border px-3 text-xs font-bold">Order again</button></div></div></div>}
           {menuError && <p role="alert" className="mb-7 rounded-xl border border-red-300 bg-red-50 p-4 text-sm text-red-700">{menuError} <button type="button" onClick={() => window.location.reload()} className="ml-2 font-bold underline">Try again</button></p>}
           <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_350px] lg:items-start xl:gap-10">
             <div className="min-w-0">
@@ -445,7 +485,7 @@ export default function OrderFood() {
       </section>
       <div className="fixed inset-x-0 bottom-0 z-40 border-t border-gold/30 bg-card/95 px-4 py-3 shadow-[0_-8px_30px_rgba(56,35,14,.15)] backdrop-blur lg:hidden" style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}><div className="mx-auto flex max-w-2xl items-center gap-3"><div className="min-w-0 flex-1"><p className="text-[0.65rem] font-bold uppercase tracking-[0.15em] text-gold">Your cart</p><p className="text-sm font-semibold text-foreground">{itemCount} {itemCount === 1 ? "item" : "items"} selected</p></div><button ref={cartButtonRef} type="button" onClick={() => setCartOpen(true)} className="btn-gold min-h-11 justify-center px-5">View cart <span className="rounded-full bg-black/15 px-1.5">{itemCount}</span></button></div></div>
       {cartOpen && <div className="fixed inset-0 z-[70] lg:hidden" role="presentation"><button type="button" onClick={() => setCartOpen(false)} aria-label="Close cart" className="absolute inset-0 bg-black/75" /><div role="dialog" aria-modal="true" aria-labelledby="mobile-cart-title" className="absolute inset-x-0 bottom-0 max-h-[92dvh] overflow-y-auto rounded-t-3xl border-t border-gold/40 bg-card p-5 shadow-2xl sm:mx-auto sm:max-w-xl" style={{ paddingBottom: "max(1.25rem, env(safe-area-inset-bottom))" }}><div className="mx-auto mb-4 h-1 w-10 rounded-full bg-[#dfd2bd]" /><div className="mb-5 flex items-center justify-between border-b border-surface-border pb-4"><div><p className="text-[0.65rem] font-bold uppercase tracking-[0.2em] text-gold">Your cart</p><h2 id="mobile-cart-title" className="mt-1 text-xl font-bold text-foreground">Your order · {itemCount} {itemCount === 1 ? "item" : "items"}</h2></div><button ref={cartCloseRef} type="button" onClick={() => setCartOpen(false)} aria-label="Close cart" className="flex h-10 w-10 items-center justify-center rounded-full border border-surface-border text-xl text-foreground">×</button></div>{cartContents()}<div className="mt-5 border-t border-surface-border pt-5">{orderForm(true)}</div></div></div>}
-      {confirmation && confirmationOpen && <div className="fixed inset-0 z-[80] flex items-end justify-center bg-black/80 sm:items-center sm:p-5"><div role="dialog" aria-modal="true" aria-labelledby="order-confirmation-title" className="max-h-[94dvh] w-full max-w-lg overflow-y-auto rounded-t-3xl border border-gold/35 bg-card p-5 shadow-2xl sm:rounded-3xl sm:p-7" style={{ paddingBottom: "max(1.25rem, env(safe-area-inset-bottom))" }}><div className="flex items-start justify-between gap-3"><div><p className="text-xs font-bold uppercase tracking-[0.2em] text-gold">Order #{confirmation.id}</p><h2 id="order-confirmation-title" className="mt-1 text-2xl font-bold text-foreground">Order placed</h2><p className="mt-1 text-sm text-muted">Thank you, {confirmation.customerName}. Your request was sent to cinema staff.</p></div><button ref={confirmationCloseRef} type="button" onClick={() => setConfirmationOpen(false)} aria-label="Close order confirmation" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-surface-border text-xl text-foreground">×</button></div><div className="mt-5 rounded-xl border border-gold/35 bg-[#f9edda] p-4"><p className="text-xs font-bold uppercase tracking-[0.18em] text-gold">Your screen and seat</p><p className="mt-1 text-2xl font-bold text-foreground">{confirmation.seat}</p>{secondsLeft > 0 ? <><p className="mt-3 text-sm text-muted">Seat changes close in <strong className="text-gold">{secondsLeft}s</strong></p>{editingSeat ? <form onSubmit={saveSeat} className="mt-4 space-y-3"><label className="block text-xs font-semibold text-foreground">Correct screen and seat<input required maxLength={120} autoFocus value={seatDraft} onChange={(event) => setSeatDraft(event.target.value)} className="order-input" placeholder="For example, Screen 1 · E12" /></label><div className="flex gap-2"><button type="submit" disabled={savingSeat || secondsLeft === 0} className="btn-gold min-h-11 flex-1 justify-center disabled:opacity-50">{savingSeat ? "Saving…" : "Save seat"}</button><button type="button" onClick={() => { setEditingSeat(false); setSeatError(""); }} className="min-h-11 rounded-lg border border-surface-border px-4 text-sm text-foreground">Cancel</button></div>{seatError && <p role="alert" className="text-xs text-red-700">{seatError}</p>}</form> : <button type="button" onClick={() => { setSeatDraft(confirmation.seat); setEditingSeat(true); setSeatError(""); }} className="mt-4 min-h-11 rounded-lg border border-gold px-4 text-sm font-bold text-gold">Edit seat number</button>}</> : <p className="mt-3 text-xs text-muted">The seat edit window has closed.</p>}</div><div className="mt-5"><h3 className="text-sm font-bold uppercase tracking-wide text-foreground">Your items</h3><ul className="mt-3 space-y-2">{confirmation.items.map((item) => <li key={lineKey(item.productId, item.variantId)} className="flex items-center justify-between gap-3 rounded-xl border border-surface-border bg-surface p-3"><span className="text-sm font-semibold text-foreground">{item.name} · {item.variantName}</span><span className="text-sm font-bold text-gold">{formatPrice(item.unitPricePaise)} × {item.quantity}</span></li>)}</ul></div><button type="button" onClick={() => setConfirmationOpen(false)} className="btn-gold mt-4 min-h-11 w-full justify-center">Done</button></div></div>}
+      {confirmation && confirmationOpen && <div className="fixed inset-0 z-[80] flex items-end justify-center bg-black/80 sm:items-center sm:p-5"><div role="dialog" aria-modal="true" aria-labelledby="order-confirmation-title" className="max-h-[94dvh] w-full max-w-lg overflow-y-auto rounded-t-3xl border border-gold/35 bg-card p-5 shadow-2xl sm:rounded-3xl sm:p-7" style={{ paddingBottom: "max(1.25rem, env(safe-area-inset-bottom))" }}><div className="flex items-start justify-between gap-3"><div><p className="text-xs font-bold uppercase tracking-[0.2em] text-gold">Order #{confirmation.id}</p><h2 id="order-confirmation-title" className="mt-1 text-2xl font-bold text-foreground">{orderStatusText[confirmation.status] || "Order received"}</h2><p className="mt-1 text-sm text-muted">Thank you, {confirmation.customerName}. Your request was sent to cinema staff.</p></div><button ref={confirmationCloseRef} type="button" onClick={() => setConfirmationOpen(false)} aria-label="Close order confirmation" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-surface-border text-xl text-foreground">×</button></div><div className="mt-5 rounded-xl border border-gold/35 bg-[#f9edda] p-4"><p className="text-xs font-bold uppercase tracking-[0.18em] text-gold">Your screen and seat</p><p className="mt-1 text-2xl font-bold text-foreground">{confirmation.seat}</p>{secondsLeft > 0 ? <><p className="mt-3 text-sm text-muted">Seat changes close in <strong className="text-gold">{secondsLeft}s</strong></p>{editingSeat ? <form onSubmit={saveSeat} className="mt-4 space-y-3"><label className="block text-xs font-semibold text-foreground">Correct screen and seat<input required maxLength={120} autoFocus value={seatDraft} onChange={(event) => setSeatDraft(event.target.value)} className="order-input" placeholder="For example, Screen 1 · E12" /></label><div className="flex gap-2"><button type="submit" disabled={savingSeat || secondsLeft === 0} className="btn-gold min-h-11 flex-1 justify-center disabled:opacity-50">{savingSeat ? "Saving…" : "Save seat"}</button><button type="button" onClick={() => { setEditingSeat(false); setSeatError(""); }} className="min-h-11 rounded-lg border border-surface-border px-4 text-sm text-foreground">Cancel</button></div>{seatError && <p role="alert" className="text-xs text-red-700">{seatError}</p>}</form> : <button type="button" onClick={() => { setSeatDraft(confirmation.seat); setEditingSeat(true); setSeatError(""); }} className="mt-4 min-h-11 rounded-lg border border-gold px-4 text-sm font-bold text-gold">Edit seat number</button>}</> : <p className="mt-3 text-xs text-muted">The seat edit window has closed.</p>}</div><div className="mt-5"><h3 className="text-sm font-bold uppercase tracking-wide text-foreground">Your items</h3><ul className="mt-3 space-y-2">{confirmation.items.map((item) => <li key={lineKey(item.productId, item.variantId)} className="flex items-center justify-between gap-3 rounded-xl border border-surface-border bg-surface p-3"><span className="text-sm font-semibold text-foreground">{item.name} · {item.variantName}</span><span className="text-sm font-bold text-gold">{formatPrice(item.unitPricePaise)} × {item.quantity}</span></li>)}</ul></div><button type="button" onClick={() => setConfirmationOpen(false)} className="btn-gold mt-4 min-h-11 w-full justify-center">Done</button></div></div>}
     </>
   );
 }

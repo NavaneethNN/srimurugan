@@ -138,7 +138,7 @@ export default function ComingSoon() {
         {!loading && upcoming.length > 0 && upcoming.length <= visible && (
           <div className="flex flex-wrap justify-center gap-5">
             {upcoming.map((m, i) => (
-              <div key={m.id} className="w-full max-w-[280px] sm:w-[calc(50%-10px)] lg:w-[calc(25%-15px)]">
+              <div key={m.id} className="w-full max-w-[200px] sm:max-w-[280px] sm:w-[calc(50%-10px)] lg:w-[calc(25%-15px)]">
                 <MovieCard movie={m} index={i} />
               </div>
             ))}
