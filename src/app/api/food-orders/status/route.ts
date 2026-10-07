@@ -28,6 +28,9 @@ export async function POST(request: NextRequest) {
         { status: 202, headers: { "Retry-After": "2", "Cache-Control": "no-store" } });
     }
     const payments = await fetchRazorpayOrderPayments(order.razorpayOrderId);
+    // Check captured payments first; fall back to authorized (confirmFoodPayment will capture it server-side).
+    // This path is server-to-server only — no client signature is available here, so we rely on
+    // Razorpay's own payment record rather than a webhook signature.
     const successful = payments.items.find((payment) => isCapturedFoodPayment(payment, order.razorpayOrderId!, payment.id, order.amountPaise!)) ||
       payments.items.find((payment) => payment.status === "authorized" && payment.id &&
         payment.order_id === order.razorpayOrderId && payment.amount === order.amountPaise && payment.currency === "INR");

@@ -1,6 +1,6 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 
-export const SEAT_EDIT_WINDOW_MS = 25_000;
+export const SEAT_EDIT_WINDOW_MS = 300_000; // 5 minutes
 
 function secret() {
   const value = process.env.SESSION_SECRET;

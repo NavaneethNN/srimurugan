@@ -122,9 +122,14 @@ export default function OrderFood() {
   useEffect(() => {
     try {
       const saved = JSON.parse(localStorage.getItem(pendingPaymentKey) || "null") as PendingPayment | null;
-      if (saved && Number.isSafeInteger(saved.orderId) && saved.payment?.razorpay_payment_id) {
+      if (saved && Number.isSafeInteger(saved.orderId) && saved.orderId >= 1 &&
+          typeof saved.payment?.razorpay_payment_id === "string" &&
+          /^pay_[A-Za-z0-9]+$/.test(saved.payment.razorpay_payment_id)) {
         // eslint-disable-next-line react-hooks/set-state-in-effect
         setPendingPayment(saved);
+      } else if (saved) {
+        // Stored data is malformed — remove it so the user isn't silently stuck.
+        try { localStorage.removeItem(pendingPaymentKey); } catch { /* Storage is optional. */ }
       }
     } catch { /* Payment recovery storage is optional. */ }
     try {
@@ -303,7 +308,7 @@ export default function OrderFood() {
       body: JSON.stringify({ checkoutKey: attempt.checkoutKey }),
     });
     const result = await response.json();
-    if (response.status === 404 && !attempt.checkout) return null;
+    if (response.status === 404) return null;
     if (response.status === 202) throw new Error("Checkout is still being prepared. Please retry in a moment.");
     if (!response.ok) throw new Error(result.error || "Could not check payment status.");
     if (result.paymentStatus === "paid") { showConfirmation(result); return "paid"; }
@@ -327,14 +332,17 @@ export default function OrderFood() {
         await confirmPayment({ orderId: details.orderId, payment });
       },
       modal: { ondismiss: () => {
-        if (!paymentCallbackStarted) {
+        if (!paymentCallbackStarted && !paymentFailed) {
           setError("Checkout closed. Check payment status before trying again.");
           setStatus("error");
           submittingRef.current = false;
         }
       } },
     });
+    let paymentFailed = false;
     checkout.on("payment.failed", () => {
+      paymentFailed = true;
+      submittingRef.current = false;
       setError("Payment failed. Retry in checkout or check payment status before trying again.");
       setStatus("error");
     });
@@ -364,7 +372,13 @@ export default function OrderFood() {
       savePendingCheckout({ ...pendingCheckout, checkout: details });
       await openCheckout(details, pendingCheckout.payload.customerName);
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "Could not resume checkout.");
+      const message = cause instanceof Error ? cause.message : "Could not resume checkout.";
+      // If the menu changed, the pending checkout can never succeed — clear it so the user can start fresh.
+      if (message.includes("menu has changed") || message.includes("menu changed")) {
+        setPendingCheckout(null);
+        try { localStorage.removeItem(pendingCheckoutKey); } catch { /* Checkout recovery storage is optional. */ }
+      }
+      setError(message);
       setStatus("error");
       submittingRef.current = false;
     }

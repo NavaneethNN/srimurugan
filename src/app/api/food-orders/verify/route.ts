@@ -24,15 +24,20 @@ export async function POST(request: NextRequest) {
   try {
     const db = getDb();
     const [order] = await db.select().from(foodOrders).where(eq(foodOrders.id, orderId)).limit(1);
-    if (!order || !order.razorpayOrderId || !order.amountPaise || order.razorpayOrderId !== razorpayOrderId ||
-        !verifyRazorpaySignature(order.razorpayOrderId, paymentId, signature)) {
+    if (!order || !order.razorpayOrderId || !order.amountPaise || order.razorpayOrderId !== razorpayOrderId) {
       return NextResponse.json({ error: "Payment verification failed. Please contact the cinema with your payment ID." }, { status: 400 });
+    }
+    // Idempotency check first — if the order is already paid with the same payment ID, return
+    // the confirmation immediately without requiring the signature again (handles browser-crash retries).
+    if (order.paymentStatus === "paid" && order.razorpayPaymentId === paymentId) {
+      return attachCustomerOrderSession(NextResponse.json(foodOrderConfirmation(order), { headers: { "Cache-Control": "no-store" } }), order.id);
     }
     if (order.paymentStatus === "paid" && order.razorpayPaymentId !== paymentId) {
       return NextResponse.json({ error: "This order has already been paid." }, { status: 409 });
     }
-    if (order.paymentStatus === "paid" && order.razorpayPaymentId === paymentId) {
-      return attachCustomerOrderSession(NextResponse.json(foodOrderConfirmation(order), { headers: { "Cache-Control": "no-store" } }), order.id);
+    // Verify cryptographic signature before confirming a new payment.
+    if (!verifyRazorpaySignature(order.razorpayOrderId, paymentId, signature)) {
+      return NextResponse.json({ error: "Payment verification failed. Please contact the cinema with your payment ID." }, { status: 400 });
     }
 
     const confirmed = await confirmFoodPayment(order.id, order.razorpayOrderId, paymentId, order.amountPaise);
