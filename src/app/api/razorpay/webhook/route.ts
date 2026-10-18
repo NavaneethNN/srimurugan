@@ -40,7 +40,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ ok: true });
     }
     const confirmed = await confirmFoodPayment(order.id, razorpayOrderId, paymentId, order.amountPaise);
-    if (!confirmed) return NextResponse.json({ error: "Payment has not been captured." }, { status: 409 });
+    // Return 200 even when the payment isn't captured yet — a non-2xx response causes Razorpay
+    // to retry indefinitely. The payment.captured event will confirm it once capture completes.
+    if (!confirmed) return NextResponse.json({ ok: true });
     return NextResponse.json({ ok: true });
   } catch (error) {
     console.error("Razorpay webhook processing failed", error instanceof Error ? error.name : "UnknownError");

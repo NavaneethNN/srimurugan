@@ -28,5 +28,5 @@ export type FoodOrderItem = {
 };
 
 export function formatPrice(pricePaise: number | null) {
-  return pricePaise === null ? "Price coming soon" : `₹${(pricePaise / 100).toFixed(2).replace(/\.00$/, "")}`;
+  return pricePaise === null || pricePaise <= 0 ? "Price coming soon" : `₹${(pricePaise / 100).toFixed(2).replace(/\.00$/, "")}`;
 }

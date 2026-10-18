@@ -44,27 +44,43 @@ export default function CafePOSPage() {
     setNoticeId(next);
   }, []);
 
-  const loadOrders = useCallback(async () => {
+  const loadOrders = useCallback(async (cursor?: number) => {
     const id = ++requestId.current;
     try {
-      const response = await fetch("/api/cafe/food-orders?status=active&limit=100", { cache: "no-store" });
+      const url = cursor
+        ? `/api/cafe/food-orders?status=active&limit=100&cursor=${cursor}`
+        : "/api/cafe/food-orders?status=active&limit=100";
+      const response = await fetch(url, { cache: "no-store" });
       const data = await response.json();
       if (response.status === 401) { router.replace("/cafe/login"); return; }
       if (!response.ok) throw new Error(data.error || "Unable to load orders.");
       if (id !== requestId.current) return;
-      const active = (data.orders as Order[]).slice().sort((a, b) =>
+      const incoming = (data.orders as Order[]).slice().sort((a, b) =>
         Number(b.status === "pending") - Number(a.status === "pending") || a.id - b.id);
-      if (hasLoaded.current) for (const order of active) {
+      const active = cursor
+        ? [...incoming] // merge handled below in setOrders
+        : incoming;
+      if (hasLoaded.current) for (const order of incoming) {
         if (order.status === "pending" && !knownIds.current.has(order.id)) noticeQueue.current.push(order.id);
       }
-      for (const order of active) knownIds.current.add(order.id);
+      for (const order of incoming) knownIds.current.add(order.id);
       hasLoaded.current = true;
       if (activeNoticeId.current !== null && !active.some((order) => order.id === activeNoticeId.current && order.status === "pending")) {
         activeNoticeId.current = null;
         setNoticeId(null);
       }
-      showNextNotice(active);
-      setOrders(active);
+      if (cursor) {
+        // Append new page, re-sort, then deduplicate by id.
+        setOrders((prev) => {
+          const merged = [...prev, ...incoming].sort((a, b) =>
+            Number(b.status === "pending") - Number(a.status === "pending") || a.id - b.id);
+          return merged.filter((order, index, arr) => arr.findIndex((o) => o.id === order.id) === index);
+        });
+        showNextNotice(incoming);
+      } else {
+        showNextNotice(active);
+        setOrders(active);
+      }
       setCounts(data.counts || {});
       setHasMore(data.nextCursor !== null);
       setUpdatedAt(new Date());
@@ -119,7 +135,7 @@ export default function CafePOSPage() {
       setOrders((current) => current.map((item) => item.id === order.id ? data.order : item));
       if (next === "completed" || next === "cancelled") setSelectedId(null);
       if (activeNoticeId.current === order.id) dismissNotice();
-      await loadOrders();
+      // The 3-second polling interval keeps the queue in sync — no need for an immediate re-fetch here.
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Unable to update order.");
     } finally { setSavingId(null); }
@@ -136,7 +152,7 @@ export default function CafePOSPage() {
       <div className="mx-auto w-full max-w-7xl flex-1 px-4 py-5 sm:px-6">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3"><div className="flex gap-2"><span className="rounded-md border border-slate-700 px-3 py-2 text-sm"><strong className="tabular-nums">{counts.pending || 0}</strong> new</span><span className="rounded-md border border-slate-700 px-3 py-2 text-sm"><strong className="tabular-nums">{counts.preparing || 0}</strong> preparing</span></div><div className="flex items-center gap-3"><span className="text-xs text-slate-500">{updatedAt ? `Updated ${updatedAt.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}` : ""}</span><button type="button" onClick={() => void loadOrders()} className="min-h-9 rounded-md border border-slate-700 px-3 text-sm hover:bg-slate-800">Refresh</button></div></div>
         {error && <p role="alert" className="mb-4 rounded-md border border-rose-800 bg-rose-950/40 px-4 py-3 text-sm text-rose-200">{error}</p>}
-        {hasMore && <p className="mb-4 rounded-md border border-amber-800 bg-amber-950/30 px-4 py-3 text-sm text-amber-200">More than 100 active orders are waiting. Ask an administrator to review the full queue.</p>}
+        {hasMore && <div className="mb-4 flex items-center justify-between gap-3 rounded-md border border-amber-800 bg-amber-950/30 px-4 py-3 text-sm text-amber-200"><span>More than 100 active orders — showing oldest first.</span><button type="button" onClick={() => void loadOrders(orders[orders.length - 1]?.id)} className="min-h-9 rounded-md border border-amber-700 px-3 text-sm font-semibold hover:bg-amber-950/60">Load more orders</button></div>}
         <div className="grid min-h-[65vh] gap-4 lg:grid-cols-[minmax(300px,360px)_minmax(0,1fr)]">
           <section aria-label="Active orders" className="overflow-hidden rounded-lg border border-slate-800 bg-slate-900/50"><div className="border-b border-slate-800 p-3"><div className="flex gap-1">{(["all", "pending", "preparing"] as View[]).map((item) => <button type="button" key={item} onClick={() => setView(item)} aria-pressed={view === item} className={`min-h-9 flex-1 rounded-md px-2 text-sm capitalize ${view === item ? "bg-slate-100 font-semibold text-slate-950" : "text-slate-400 hover:bg-slate-800"}`}>{item === "pending" ? "New" : item}</button>)}</div><label htmlFor="pos-search" className="sr-only">Search orders</label><input id="pos-search" type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Order #, customer or seat" className="mt-3 h-10 w-full rounded-md border border-slate-700 bg-slate-950 px-3 text-sm outline-none focus:border-slate-400" /></div>
             {loading && orders.length === 0 ? <p className="p-8 text-center text-sm text-slate-400">Loading orders…</p> : visibleOrders.length ? <div className="max-h-[70vh] divide-y divide-slate-800 overflow-y-auto">{visibleOrders.map((order) => <button type="button" key={order.id} onClick={() => setSelectedId(order.id)} aria-pressed={selectedId === order.id} className={`w-full px-4 py-3 text-left hover:bg-slate-800 ${selectedId === order.id ? "bg-slate-800" : ""}`}><div className="flex items-center justify-between gap-2"><span className="font-semibold tabular-nums">#{order.id} · {order.seat}</span><span className={`rounded px-2 py-0.5 text-xs ${order.status === "pending" ? "bg-amber-950/60 text-amber-200" : "bg-slate-700 text-slate-200"}`}>{order.status === "pending" ? "New" : "Preparing"}</span></div><p className="mt-1 truncate text-xs text-slate-400">{order.customerName || "Guest"} · {order.items.reduce((sum, item) => sum + item.quantity, 0)} items · {formatPrice(order.amountPaise)}</p></button>)}</div> : <p className="p-8 text-center text-sm text-slate-400">No orders in this view.</p>}

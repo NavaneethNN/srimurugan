@@ -37,5 +37,7 @@ export function invalidatePublicFoodMenu() {
   publicMenuVersion += 1;
   publicMenu = null;
   publicMenuExpiresAt = 0;
-  publicMenuInflight = null;
+  // Do NOT null out publicMenuInflight here. The version bump above already ensures the in-flight
+  // result won't be cached (see the version check in loadFoodMenu's .then()). Clearing it would
+  // cause any concurrent call to start a second parallel DB fetch unnecessarily.
 }

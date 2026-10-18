@@ -154,8 +154,11 @@ export default function OrderFood() {
         setNow(receivedAt);
         setConfirmation((current) => {
           if (current && current.id > result.order.id) return current;
-          if (current?.id === result.order.id && current.status === result.order.status && current.seat === result.order.seat) return current;
-          return confirmationFrom(result, receivedAt);
+          // First time seeing this order — compute the deadline from the server's remaining time.
+          if (!current || current.id !== result.order.id) return confirmationFrom(result, receivedAt);
+          // Same order: preserve the original editDeadline so the countdown isn't extended by polling.
+          if (current.status === result.order.status && current.seat === result.order.seat) return current;
+          return { ...current, status: result.order.status, seat: result.order.seat, items: result.order.items };
         });
       } catch { /* Keep the last known status while the connection is unavailable. */ }
     }
@@ -254,7 +257,11 @@ export default function OrderFood() {
 
   function applyUpgrade(productId: number, fromId: string, toId: string) {
     setStatus("idle");
-    setQuantities((current) => ({ ...current, [lineKey(productId, fromId)]: 0, [lineKey(productId, toId)]: 1 }));
+    setQuantities((current) => ({
+      ...current,
+      [lineKey(productId, toId)]: current[lineKey(productId, fromId)] || 1,
+      [lineKey(productId, fromId)]: 0,
+    }));
   }
 
   function showConfirmation(result: ConfirmationPayload) {
