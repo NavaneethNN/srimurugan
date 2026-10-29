@@ -1,10 +1,12 @@
+import type { Metadata } from "next";
 import Header from "@/components/Header";
 import OrderFood from "@/components/OrderFood";
 import Footer from "@/components/Footer";
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "Order Food",
   description: "Order snacks, beverages and desserts for your movie at Sri Murugan Cinema.",
+  alternates: { canonical: "/order-food" },
 };
 
 export default function OrderFoodPage() {

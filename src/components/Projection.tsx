@@ -92,7 +92,6 @@ export default function Projection() {
                 alt="4K Barco Laser Projection"
                 width={800}
                 height={500}
-                unoptimized
                 className="h-auto w-full object-cover"
                 sizes="(max-width:1024px) 100vw, 50vw"
               />

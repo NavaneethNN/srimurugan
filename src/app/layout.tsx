@@ -46,9 +46,6 @@ export const metadata: Metadata = {
   publisher: "Sri Murugan Cinema",
   applicationName: "Sri Murugan Cinema",
   category: "Entertainment",
-  alternates: {
-    canonical: "/",
-  },
   openGraph: {
     type: "website",
     locale: "en_IN",
@@ -128,7 +125,6 @@ export default function RootLayout({
               url: siteUrl,
               image: `${siteUrl}/logo.png`,
               logo: `${siteUrl}/logo.png`,
-              telephone: "+91-422-000-0000",
               priceRange: "₹₹",
               address: {
                 "@type": "PostalAddress",

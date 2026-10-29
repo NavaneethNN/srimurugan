@@ -234,6 +234,7 @@ export default function NowShowing() {
                           />
                         </svg>
                       </Link>
+                      <p className="text-xs text-gray-400">Seat selection &amp; payment finalize on BookMyShow</p>
                     </div>
                   </div>
                 </div>
@@ -341,6 +342,7 @@ export default function NowShowing() {
                       />
                     </svg>
                   </Link>
+                  <p className="mt-2 text-center text-xs text-gray-400">Seat selection &amp; payment finalize on BookMyShow</p>
                 </div>
               </div>
             </div>

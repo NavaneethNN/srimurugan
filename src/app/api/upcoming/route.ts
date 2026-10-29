@@ -12,7 +12,7 @@ export async function GET() {
 
     return NextResponse.json({ upcoming });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Unknown error";
-    return NextResponse.json({ error: message }, { status: 500 });
+    console.error("Unable to load upcoming movies:", error);
+    return NextResponse.json({ error: "Unable to load upcoming movies." }, { status: 500 });
   }
 }

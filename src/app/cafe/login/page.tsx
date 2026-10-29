@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 
 export default function CafeLoginPage() {
   const router = useRouter();
-  const [pin, setPin] = useState("");
+  const [digits, setDigits] = useState<string[]>(["", "", "", "", "", ""]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
@@ -14,46 +14,83 @@ export default function CafeLoginPage() {
     inputRefs.current[0]?.focus();
   }, []);
 
-  const handlePinInput = (index: number, value: string) => {
-    if (!/^\d*$/.test(value)) return;
+  const pin = digits.join("");
 
-    const newPin = pin.split("");
-    newPin[index] = value;
-    const updatedPin = newPin.join("").slice(0, 6);
-    setPin(updatedPin);
-
-    // Auto-focus next input
-    if (value && index < 5) {
-      inputRefs.current[index + 1]?.focus();
+  const handleDigitChange = (index: number, value: string) => {
+    const cleaned = value.replace(/\D/g, "");
+    if (!cleaned) {
+      const updated = [...digits];
+      updated[index] = "";
+      setDigits(updated);
+      return;
     }
 
-    // Auto-submit when 6 digits entered
-    if (updatedPin.length === 6) {
-      void handleLogin(updatedPin);
+    if (cleaned.length === 1) {
+      const updated = [...digits];
+      updated[index] = cleaned;
+      setDigits(updated);
+
+      if (index < 5) {
+        inputRefs.current[index + 1]?.focus();
+      }
+
+      const fullPin = updated.join("");
+      if (fullPin.length === 6) {
+        void handleLogin(fullPin);
+      }
+    } else {
+      // Pasted or autofilled multiple digits
+      const chars = cleaned.slice(0, 6).split("");
+      const updated = [...digits];
+      for (let i = 0; i < 6; i++) {
+        if (chars[i]) updated[i] = chars[i];
+      }
+      setDigits(updated);
+      const nextIndex = Math.min(chars.length, 5);
+      inputRefs.current[nextIndex]?.focus();
+
+      const fullPin = updated.join("");
+      if (fullPin.length === 6) {
+        void handleLogin(fullPin);
+      }
     }
   };
 
   const handleKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Backspace" && !pin[index] && index > 0) {
-      inputRefs.current[index - 1]?.focus();
+    if (e.key === "Backspace") {
+      if (!digits[index] && index > 0) {
+        e.preventDefault();
+        const updated = [...digits];
+        updated[index - 1] = "";
+        setDigits(updated);
+        inputRefs.current[index - 1]?.focus();
+      }
     }
   };
 
   const handlePaste = (e: React.ClipboardEvent) => {
     e.preventDefault();
-    const pastedData = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
-    setPin(pastedData);
-    
-    if (pastedData.length === 6) {
-      void handleLogin(pastedData);
-    } else if (pastedData.length > 0) {
-      inputRefs.current[pastedData.length]?.focus();
+    const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
+    if (!pasted) return;
+
+    const chars = pasted.split("");
+    const updated = ["", "", "", "", "", ""];
+    for (let i = 0; i < chars.length; i++) {
+      updated[i] = chars[i];
+    }
+    setDigits(updated);
+
+    const nextIndex = Math.min(chars.length, 5);
+    inputRefs.current[nextIndex]?.focus();
+
+    if (pasted.length === 6) {
+      void handleLogin(pasted);
     }
   };
 
   const handleLogin = async (pinValue: string) => {
     if (pinValue.length < 4) {
-      setError("Enter your PIN");
+      setError("PIN must be 4–6 digits");
       return;
     }
 
@@ -71,7 +108,7 @@ export default function CafeLoginPage() {
 
       if (!response.ok) {
         setError(data.error || "Invalid PIN");
-        setPin("");
+        setDigits(["", "", "", "", "", ""]);
         inputRefs.current[0]?.focus();
         return;
       }
@@ -79,7 +116,7 @@ export default function CafeLoginPage() {
       router.push("/cafe/pos");
     } catch {
       setError("Connection error. Please try again.");
-      setPin("");
+      setDigits(["", "", "", "", "", ""]);
       inputRefs.current[0]?.focus();
     } finally {
       setLoading(false);
@@ -92,7 +129,7 @@ export default function CafeLoginPage() {
   };
 
   const clearPin = () => {
-    setPin("");
+    setDigits(["", "", "", "", "", ""]);
     setError("");
     inputRefs.current[0]?.focus();
   };
@@ -119,8 +156,8 @@ export default function CafeLoginPage() {
                 type="text"
                 inputMode="numeric"
                 maxLength={1}
-                value={pin[index] || ""}
-                onChange={(e) => handlePinInput(index, e.target.value)}
+                value={digits[index]}
+                onChange={(e) => handleDigitChange(index, e.target.value)}
                 onKeyDown={(e) => handleKeyDown(index, e)}
                 onPaste={handlePaste}
                 disabled={loading}

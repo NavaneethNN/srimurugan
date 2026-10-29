@@ -86,7 +86,7 @@ export const foodProducts = pgTable("food_products", {
 export const cafeUsers = pgTable("cafe_users", {
   id: serial("id").primaryKey(),
   name: varchar("name", { length: 120 }).notNull(),
-  pin: varchar("pin", { length: 6 }).notNull().unique(),
+  pin: varchar("pin", { length: 255 }).notNull(),
   isActive: boolean("is_active").default(true).notNull(),
   lastLoginAt: timestamp("last_login_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),

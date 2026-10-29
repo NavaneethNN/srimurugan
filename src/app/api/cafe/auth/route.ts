@@ -1,11 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/lib/db";
+import { getDb } from "@/lib/db";
 import { cafeUsers } from "@/lib/schema";
 import { eq } from "drizzle-orm";
 import { createCafeSession } from "@/lib/cafeSession";
 import { readJsonBody, RequestTooLargeError } from "@/lib/requestBody";
+import { checkLoginRateLimit, clearLoginFailures, hashPin, recordFailedLogin, verifyPin } from "@/lib/cafeAuth";
 
 export async function POST(request: NextRequest) {
+  const ip = request.headers.get("x-forwarded-for")?.split(",")[0].trim() || "local";
+  const rateLimit = checkLoginRateLimit(ip, 5, 60_000);
+  if (!rateLimit.allowed) {
+    return NextResponse.json(
+      { error: "Too many failed attempts. Please try again in a minute." },
+      { status: 429, headers: { "Retry-After": String(rateLimit.retryAfterSeconds) } }
+    );
+  }
+
   try {
     const body = await readJsonBody(request, 1_024) as { pin?: unknown } | null;
     const pin = body?.pin;
@@ -15,30 +25,38 @@ export async function POST(request: NextRequest) {
     }
     if (!process.env.SESSION_SECRET) return NextResponse.json({ error: "Cafe access is unavailable." }, { status: 503 });
 
-    const [user] = await db.select()
+    const db = getDb();
+    const users = await db.select()
       .from(cafeUsers)
-      .where(eq(cafeUsers.pin, pin))
-      .limit(1);
+      .where(eq(cafeUsers.isActive, true));
 
-    if (!user) {
+    const matchedUser = users.find((user) => verifyPin(pin, user.pin));
+
+    if (!matchedUser) {
+      recordFailedLogin(ip, 60_000);
+      // Small artificial delay to slow down automated attempts
+      await new Promise((resolve) => setTimeout(resolve, 150));
       return NextResponse.json({ error: "Invalid PIN" }, { status: 401 });
     }
 
-    if (!user.isActive) {
-      return NextResponse.json({ error: "Account inactive" }, { status: 403 });
+    clearLoginFailures(ip);
+
+    // Auto-upgrade legacy plaintext PINs to secure hash on successful login
+    if (!matchedUser.pin.startsWith("s1:")) {
+      await db.update(cafeUsers)
+        .set({ pin: hashPin(pin), lastLoginAt: new Date() })
+        .where(eq(cafeUsers.id, matchedUser.id));
+    } else {
+      await db.update(cafeUsers)
+        .set({ lastLoginAt: new Date() })
+        .where(eq(cafeUsers.id, matchedUser.id));
     }
 
-    // Update last login
-    await db.update(cafeUsers)
-      .set({ lastLoginAt: new Date() })
-      .where(eq(cafeUsers.id, user.id));
-
     const response = NextResponse.json({ 
-      user: { id: user.id, name: user.name } 
+      user: { id: matchedUser.id, name: matchedUser.name } 
     });
 
-    // Set session cookie
-    response.cookies.set("cafe-session", createCafeSession(user.id, process.env.SESSION_SECRET), {
+    response.cookies.set("cafe-session", createCafeSession(matchedUser.id, process.env.SESSION_SECRET), {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",

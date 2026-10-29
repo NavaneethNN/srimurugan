@@ -15,4 +15,9 @@ export function getDb() {
   return cachedDb;
 }
 
-export const db = getDb();
+// Lazy proxy so importing db does not throw during builds or tests without DATABASE_URL
+export const db = new Proxy({} as ReturnType<typeof drizzle<typeof schema>>, {
+  get(_target, prop) {
+    return (getDb() as unknown as Record<string | symbol, unknown>)[prop];
+  },
+});

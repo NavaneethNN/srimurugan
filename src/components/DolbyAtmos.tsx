@@ -66,7 +66,6 @@ export default function DolbyAtmos() {
                 alt="64-Channel Dolby Atmos Sound System"
                 width={800}
                 height={500}
-                unoptimized
                 className="h-auto w-full object-cover"
                 sizes="(max-width:1024px) 100vw, 50vw"
               />

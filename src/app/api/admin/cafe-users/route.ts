@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/lib/db";
+import { getDb } from "@/lib/db";
 import { cafeUsers } from "@/lib/schema";
 import { cookies } from "next/headers";
 import { verifyAdminSession } from "@/lib/adminSession";
+import { hashPin } from "@/lib/cafeAuth";
 
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 const SESSION_SECRET = process.env.SESSION_SECRET;
@@ -16,7 +17,7 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const users = await db.select({
+    const users = await getDb().select({
       id: cafeUsers.id,
       name: cafeUsers.name,
       isActive: cafeUsers.isActive,
@@ -44,7 +45,7 @@ export async function POST(request: NextRequest) {
 
     const { name, pin } = await request.json();
 
-    if (!name || !pin) {
+    if (!name || typeof name !== "string" || !name.trim() || !pin || typeof pin !== "string") {
       return NextResponse.json({ error: "Name and PIN are required" }, { status: 400 });
     }
 
@@ -52,8 +53,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "PIN must be 4-6 digits" }, { status: 400 });
     }
 
-    const [user] = await db.insert(cafeUsers)
-      .values({ name, pin })
+    const hashedPin = hashPin(pin);
+    const [user] = await getDb().insert(cafeUsers)
+      .values({ name: name.trim(), pin: hashedPin })
       .returning();
 
     return NextResponse.json({ user: { id: user.id, name: user.name, isActive: user.isActive } });

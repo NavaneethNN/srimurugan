@@ -301,29 +301,36 @@ export default function MoviesManagement() {
                     <input
                       type="text"
                       placeholder="Language"
-                      value={movieForm.language}
+                      value={movieForm.language || ""}
                       onChange={(e) => setMovieForm({ ...movieForm, language: e.target.value })}
                       className="w-full rounded-lg border border-gray-700 bg-gray-800 px-4 py-3 text-sm outline-none focus:border-purple-500"
                     />
                     <input
                       type="text"
                       placeholder="Certification"
-                      value={movieForm.certification}
+                      value={movieForm.certification || ""}
                       onChange={(e) => setMovieForm({ ...movieForm, certification: e.target.value })}
                       className="w-full rounded-lg border border-gray-700 bg-gray-800 px-4 py-3 text-sm outline-none focus:border-purple-500"
                     />
                   </div>
                   <input
-                    type="url"
-                    placeholder="Mobile Background URL"
-                    value={movieForm.mobileBgUrl}
+                    type="text"
+                    placeholder="Poster URL (e.g. /hero-cinema.png or https://...)"
+                    value={movieForm.posterUrl || ""}
+                    onChange={(e) => setMovieForm({ ...movieForm, posterUrl: e.target.value })}
+                    className="w-full rounded-lg border border-gray-700 bg-gray-800 px-4 py-3 text-sm outline-none focus:border-purple-500"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Mobile Background URL (optional, e.g. /image.png or https://...)"
+                    value={movieForm.mobileBgUrl || ""}
                     onChange={(e) => setMovieForm({ ...movieForm, mobileBgUrl: e.target.value })}
                     className="w-full rounded-lg border border-gray-700 bg-gray-800 px-4 py-3 text-sm outline-none focus:border-purple-500"
                   />
                   <input
-                    type="url"
-                    placeholder="Desktop Background URL"
-                    value={movieForm.desktopBgUrl}
+                    type="text"
+                    placeholder="Desktop Background URL (optional, e.g. /image.png or https://...)"
+                    value={movieForm.desktopBgUrl || ""}
                     onChange={(e) => setMovieForm({ ...movieForm, desktopBgUrl: e.target.value })}
                     className="w-full rounded-lg border border-gray-700 bg-gray-800 px-4 py-3 text-sm outline-none focus:border-purple-500"
                   />
@@ -399,20 +406,20 @@ export default function MoviesManagement() {
                   <input
                     type="text"
                     placeholder="Language"
-                    value={upcomingForm.language}
+                    value={upcomingForm.language || ""}
                     onChange={(e) => setUpcomingForm({ ...upcomingForm, language: e.target.value })}
                     className="w-full rounded-lg border border-gray-700 bg-gray-800 px-4 py-3 text-sm outline-none focus:border-purple-500"
                   />
                   <input
                     type="date"
-                    value={upcomingForm.releaseDate}
+                    value={upcomingForm.releaseDate || ""}
                     onChange={(e) => setUpcomingForm({ ...upcomingForm, releaseDate: e.target.value })}
                     className="w-full rounded-lg border border-gray-700 bg-gray-800 px-4 py-3 text-sm outline-none focus:border-purple-500"
                   />
                   <input
-                    type="url"
-                    placeholder="Poster URL"
-                    value={upcomingForm.posterUrl}
+                    type="text"
+                    placeholder="Poster URL (e.g. /poster.jpg or https://...)"
+                    value={upcomingForm.posterUrl || ""}
                     onChange={(e) => setUpcomingForm({ ...upcomingForm, posterUrl: e.target.value })}
                     className="w-full rounded-lg border border-gray-700 bg-gray-800 px-4 py-3 text-sm outline-none focus:border-purple-500"
                   />

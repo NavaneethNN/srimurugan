@@ -12,17 +12,22 @@ export async function PUT(request: NextRequest, { params }: Params) {
     const db = getDb();
     const { id } = await params;
     const movieId = Number(id);
+
+    if (!Number.isSafeInteger(movieId) || movieId < 1) {
+      return NextResponse.json({ error: "Invalid movie ID" }, { status: 400 });
+    }
+
     const body = await request.json();
     const { title, language, releaseDate, posterUrl } = body;
 
-    if (!title) {
+    if (!title || typeof title !== "string" || !title.trim()) {
       return NextResponse.json({ error: "Title is required" }, { status: 400 });
     }
 
     const [updated] = await db
       .update(upcomingMovies)
       .set({
-        title,
+        title: title.trim(),
         language,
         releaseDate: releaseDate ? new Date(releaseDate) : null,
         posterUrl,
@@ -30,10 +35,14 @@ export async function PUT(request: NextRequest, { params }: Params) {
       .where(eq(upcomingMovies.id, movieId))
       .returning();
 
+    if (!updated) {
+      return NextResponse.json({ error: "Movie not found" }, { status: 404 });
+    }
+
     return NextResponse.json({ movie: updated });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Unknown error";
-    return NextResponse.json({ error: message }, { status: 500 });
+    console.error("Admin upcoming update failed:", error);
+    return NextResponse.json({ error: "Failed to update upcoming movie" }, { status: 500 });
   }
 }
 
@@ -43,11 +52,18 @@ export async function DELETE(_request: NextRequest, { params }: Params) {
     const { id } = await params;
     const movieId = Number(id);
 
-    await db.delete(upcomingMovies).where(eq(upcomingMovies.id, movieId));
+    if (!Number.isSafeInteger(movieId) || movieId < 1) {
+      return NextResponse.json({ error: "Invalid movie ID" }, { status: 400 });
+    }
+
+    const [deleted] = await db.delete(upcomingMovies).where(eq(upcomingMovies.id, movieId)).returning({ id: upcomingMovies.id });
+    if (!deleted) {
+      return NextResponse.json({ error: "Movie not found" }, { status: 404 });
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Unknown error";
-    return NextResponse.json({ error: message }, { status: 500 });
+    console.error("Admin upcoming delete failed:", error);
+    return NextResponse.json({ error: "Failed to delete upcoming movie" }, { status: 500 });
   }
 }

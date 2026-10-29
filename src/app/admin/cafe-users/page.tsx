@@ -6,7 +6,7 @@ import { FormEvent, useCallback, useEffect, useState } from "react";
 type CafeUser = {
   id: number;
   name: string;
-  pin: string;
+  pin?: string;
   isActive: boolean;
   lastLoginAt: string | null;
   createdAt: string;
@@ -29,7 +29,7 @@ export default function CafeUsersPage() {
       
       if (!response.ok) throw new Error(data.error || "Failed to load users");
       
-      setUsers(data.users);
+      setUsers(data.users || []);
       setMessage(null);
     } catch (err) {
       setMessage({ 
@@ -48,12 +48,17 @@ export default function CafeUsersPage() {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     
-    if (!formName.trim() || !formPin.trim()) {
-      setMessage({ type: "error", text: "Name and PIN are required" });
+    if (!formName.trim()) {
+      setMessage({ type: "error", text: "Name is required" });
       return;
     }
 
-    if (!/^\d{4,6}$/.test(formPin)) {
+    if (!editingId && !formPin.trim()) {
+      setMessage({ type: "error", text: "PIN is required for new staff" });
+      return;
+    }
+
+    if (formPin.trim() && !/^\d{4,6}$/.test(formPin.trim())) {
       setMessage({ type: "error", text: "PIN must be 4-6 digits" });
       return;
     }
@@ -66,10 +71,15 @@ export default function CafeUsersPage() {
         ? `/api/admin/cafe-users/${editingId}` 
         : "/api/admin/cafe-users";
       
+      const payload: { name: string; pin?: string } = { name: formName.trim() };
+      if (formPin.trim()) {
+        payload.pin = formPin.trim();
+      }
+
       const response = await fetch(url, {
         method: editingId ? "PATCH" : "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: formName.trim(), pin: formPin }),
+        body: JSON.stringify(payload),
       });
 
       const data = await response.json();
@@ -95,7 +105,7 @@ export default function CafeUsersPage() {
   const handleEdit = (user: CafeUser) => {
     setEditingId(user.id);
     setFormName(user.name);
-    setFormPin(user.pin);
+    setFormPin(""); // Leave empty to preserve current PIN
     setMessage(null);
   };
 
@@ -216,16 +226,15 @@ export default function CafeUsersPage() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-300">
-                    PIN (4-6 digits)
+                    PIN {editingId ? "(leave blank to keep unchanged)" : "(4-6 digits)"}
                   </label>
                   <input
                     type="text"
                     inputMode="numeric"
                     value={formPin}
                     onChange={(e) => setFormPin(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                    placeholder="Enter 4-6 digit PIN"
-                    pattern="\d{4,6}"
-                    required
+                    placeholder={editingId ? "Leave blank to keep existing PIN" : "Enter 4-6 digit PIN"}
+                    required={!editingId}
                     className="mt-2 w-full rounded-lg border border-gray-700 bg-gray-800 px-4 py-3 text-sm outline-none focus:border-blue-500"
                   />
                   <p className="mt-1 text-xs text-gray-500">
@@ -259,7 +268,7 @@ export default function CafeUsersPage() {
                 <h3 className="text-sm font-bold text-blue-400">Quick Guide</h3>
                 <ul className="mt-2 space-y-1 text-xs text-gray-400">
                   <li>• Staff login at /cafe/login</li>
-                  <li>• PIN must be unique</li>
+                  <li>• PIN is hashed securely</li>
                   <li>• Disable to revoke access</li>
                   <li>• Delete removes permanently</li>
                 </ul>
@@ -306,7 +315,7 @@ export default function CafeUsersPage() {
                           </div>
                           
                           <div className="mt-2 flex items-center gap-4 text-sm text-gray-400">
-                            <span className="font-mono">PIN: {user.pin}</span>
+                            <span className="font-mono text-xs">PIN: ••••</span>
                             <span>•</span>
                             <span>
                               Added {new Date(user.createdAt).toLocaleDateString("en-IN")}

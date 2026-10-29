@@ -145,6 +145,7 @@ export default function Footer() {
                   key={s.label}
                   href={s.href}
                   aria-label={s.label}
+                  onClick={s.href === "#" ? (e) => e.preventDefault() : undefined}
                   className="flex h-9 w-9 items-center justify-center rounded-full border border-card-border bg-background text-muted transition-all duration-200 hover:border-gold/40 hover:text-gold"
                 >
                   {s.icon}

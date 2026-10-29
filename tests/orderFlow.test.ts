@@ -11,6 +11,7 @@ import { createSeatEditToken, verifySeatEditToken, SEAT_EDIT_WINDOW_MS } from ".
 import { formatPrice } from "../src/lib/foodMenu";
 import { parseCategoryInput, parseProductInput, assignVariantIds } from "../src/lib/foodMenuValidation";
 import type { FoodCategory, FoodProduct } from "../src/lib/foodMenu";
+import { hashPin, verifyPin, checkLoginRateLimit, recordFailedLogin, clearLoginFailures } from "../src/lib/cafeAuth";
 
 // ─── Shared fixtures ──────────────────────────────────────────────────────────
 
@@ -575,4 +576,35 @@ test("variantId must be a non-empty string under 100 characters", () => {
   assert.equal(validId(""), false);
   assert.equal(validId("x".repeat(101)), false);
   assert.equal(validId(123), false);
+});
+
+test("hashPin creates secure salted hash and verifyPin validates matching PIN", () => {
+  const pin = "123456";
+  const hashed = hashPin(pin);
+  assert.equal(hashed.startsWith("s1:"), true);
+  assert.notEqual(hashed, pin);
+  assert.equal(verifyPin("123456", hashed), true);
+  assert.equal(verifyPin("654321", hashed), false);
+  assert.equal(verifyPin("1234", hashed), false);
+});
+
+test("verifyPin handles legacy plaintext PINs safely", () => {
+  const legacyPin = "4321";
+  assert.equal(verifyPin("4321", legacyPin), true);
+  assert.equal(verifyPin("1234", legacyPin), false);
+});
+
+test("cafe login rate limiter enforces maximum attempts and resets", () => {
+  const testKey = "test-ip-123";
+  clearLoginFailures(testKey);
+  assert.equal(checkLoginRateLimit(testKey, 3).allowed, true);
+  recordFailedLogin(testKey);
+  recordFailedLogin(testKey);
+  assert.equal(checkLoginRateLimit(testKey, 3).allowed, true);
+  recordFailedLogin(testKey);
+  const limited = checkLoginRateLimit(testKey, 3);
+  assert.equal(limited.allowed, false);
+  assert.ok(limited.retryAfterSeconds > 0);
+  clearLoginFailures(testKey);
+  assert.equal(checkLoginRateLimit(testKey, 3).allowed, true);
 });

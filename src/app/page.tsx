@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
 import NowShowing from "@/components/NowShowing";
@@ -9,6 +10,12 @@ import About from "@/components/About";
 import Gallery from "@/components/Gallery";
 import Footer from "@/components/Footer";
 import SectionScrollHandler from "@/components/SectionScrollHandler";
+
+export const metadata: Metadata = {
+  alternates: {
+    canonical: "/",
+  },
+};
 
 export default function Home() {
   return (
