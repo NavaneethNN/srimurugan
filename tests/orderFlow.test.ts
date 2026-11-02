@@ -163,7 +163,8 @@ test("seat-edit token is rejected when the signature is tampered", () => {
   const expiresAt = Date.now() + SEAT_EDIT_WINDOW_MS;
   const token = createSeatEditToken(42, expiresAt);
   const parts = token.split(".");
-  parts[2] = parts[2].replace(/[a-z]/, "x"); // corrupt signature
+  // Guaranteed to corrupt signature by inverting the first character
+  parts[2] = (parts[2][0] === "a" ? "b" : "a") + parts[2].slice(1);
   assert.equal(verifySeatEditToken(parts.join("."), 42), false);
 });
 
