@@ -800,17 +800,33 @@ export default function FoodOrdersPage() {
                                     {isPlaced
                                       ? "Order Placed & Confirmed"
                                       : isAccepted
-                                      ? `Accepted by ${event.actorName}`
+                                      ? "Accepted & Prep Started"
                                       : isCompletedEvent
-                                      ? `Completed & Delivered by ${event.actorName}`
+                                      ? "Delivered & Fulfilled"
                                       : isCancelledEvent
-                                      ? `Cancelled by ${event.actorName}`
-                                      : `Seat Location Updated`}
+                                      ? "Order Cancelled"
+                                      : "Seat Location Updated"}
                                   </span>
 
-                                  <span className="rounded bg-[#161410] px-1.5 py-0.5 text-[10px] font-semibold uppercase text-[#b8b2aa] border border-[#2c2820]">
-                                    {event.actorType}
-                                  </span>
+                                  {/* Prominent Staff Attribution Pill */}
+                                  {(isAccepted || isCompletedEvent || isCancelledEvent) && (
+                                    <span className="inline-flex items-center gap-1.5 rounded-lg border border-sky-500/40 bg-sky-500/10 px-2.5 py-0.5 text-xs text-sky-200">
+                                      <svg className="h-3 w-3 text-sky-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                                        <circle cx="12" cy="7" r="4" />
+                                      </svg>
+                                      <span>
+                                        Staff Member: <strong className="font-bold text-white text-xs">{event.actorName || (isAccepted ? order.acceptedBy : isCompletedEvent ? order.completedBy : order.cancelledBy) || "Staff"}</strong>
+                                      </span>
+                                      <span className="text-[10px] text-sky-300/70 uppercase">({event.actorType})</span>
+                                    </span>
+                                  )}
+
+                                  {isPlaced && (
+                                    <span className="rounded bg-[#161410] px-2 py-0.5 text-[11px] font-semibold text-[#b8b2aa] border border-[#2c2820]">
+                                      Customer: <strong className="text-white">{event.actorName || order.customerName || "Customer"}</strong>
+                                    </span>
+                                  )}
                                 </div>
 
                                 <div className="text-[11px] font-mono text-[#b8b2aa]">

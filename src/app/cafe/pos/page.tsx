@@ -562,20 +562,22 @@ export default function CafePOSPage() {
                   <p className="text-[10px] font-bold uppercase tracking-wider text-[#b8b2aa]">
                     Staff Handling Status
                   </p>
-                  <div className="mt-1 flex flex-wrap items-center gap-2 text-xs">
+                  <div className="mt-2 flex flex-wrap items-center gap-2.5 text-xs">
                     {selectedOrder.acceptedBy ? (
-                      <div className="flex items-center gap-1.5 text-sky-300">
+                      <div className="flex items-center gap-2 rounded-lg border border-sky-500/40 bg-sky-500/10 px-2.5 py-1 text-sky-200">
                         <svg className="h-3.5 w-3.5 text-sky-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                           <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
                           <circle cx="12" cy="7" r="4" />
                         </svg>
                         <span>
-                          Accepted by <strong className="text-white">{selectedOrder.acceptedBy}</strong>
-                          {selectedOrder.acceptedAt && ` at ${formatOrderTime(selectedOrder.acceptedAt)}`}
+                          Accepted by Staff: <strong className="font-bold text-white text-sm">{selectedOrder.acceptedBy}</strong>
+                          {selectedOrder.acceptedAt && (
+                            <span className="text-sky-300/80 text-[11px] ml-1.5">• {formatOrderTime(selectedOrder.acceptedAt)}</span>
+                          )}
                         </span>
                       </div>
                     ) : (
-                      <div className="flex items-center gap-1.5 text-[#e8be6a]">
+                      <div className="flex items-center gap-1.5 rounded-lg border border-[#c9993a]/30 bg-[#c9993a]/10 px-2.5 py-1 text-[#e8be6a]">
                         <svg className="h-3.5 w-3.5 text-[#c9993a]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                           <circle cx="12" cy="12" r="10" />
                           <polyline points="12 6 12 12 16 14" />
@@ -585,12 +587,31 @@ export default function CafePOSPage() {
                     )}
 
                     {selectedOrder.completedBy && (
-                      <div className="flex items-center gap-1.5 text-emerald-300 border-l border-[#2c2820] pl-2">
+                      <div className="flex items-center gap-2 rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-2.5 py-1 text-emerald-200">
                         <svg className="h-3.5 w-3.5 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                           <polyline points="20 6 9 17 4 12" />
                         </svg>
                         <span>
-                          Delivered by <strong className="text-white">{selectedOrder.completedBy}</strong>
+                          Delivered by Staff: <strong className="font-bold text-white text-sm">{selectedOrder.completedBy}</strong>
+                          {selectedOrder.completedAt && (
+                            <span className="text-emerald-300/80 text-[11px] ml-1.5">• {formatOrderTime(selectedOrder.completedAt)}</span>
+                          )}
+                        </span>
+                      </div>
+                    )}
+
+                    {selectedOrder.cancelledBy && (
+                      <div className="flex items-center gap-2 rounded-lg border border-rose-500/40 bg-rose-500/10 px-2.5 py-1 text-rose-200">
+                        <svg className="h-3.5 w-3.5 text-rose-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <circle cx="12" cy="12" r="10" />
+                          <line x1="15" y1="9" x2="9" y2="15" />
+                          <line x1="9" y1="9" x2="15" y2="15" />
+                        </svg>
+                        <span>
+                          Cancelled by: <strong className="font-bold text-white text-sm">{selectedOrder.cancelledBy}</strong>
+                          {selectedOrder.cancelledAt && (
+                            <span className="text-rose-300/80 text-[11px] ml-1.5">• {formatOrderTime(selectedOrder.cancelledAt)}</span>
+                          )}
                         </span>
                       </div>
                     )}
@@ -632,23 +653,93 @@ export default function CafePOSPage() {
                   </strong>
                 </div>
 
-                {/* Activity Log / Timeline */}
+                {/* Order History Logs / Staff Activity */}
                 <div>
-                  <h3 className="mb-2 text-xs font-bold uppercase tracking-wider text-[#b8b2aa]">
-                    Order Activity Log
-                  </h3>
+                  <div className="mb-2 flex items-center justify-between">
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-[#b8b2aa]">
+                      Order History Logs &amp; Staff Attribution
+                    </h3>
+                    <span className="text-[10px] text-[#7d7871]">Chronological audit</span>
+                  </div>
                   <div className="space-y-2 rounded-xl border border-[#222018] bg-[#0c0a08] p-3 text-xs">
-                    {getOrderTimeline(selectedOrder).map((log, idx) => (
-                      <div key={idx} className="flex items-baseline justify-between gap-2 border-b border-[#161410] pb-2 last:border-0 last:pb-0">
-                        <div>
-                          <span className="font-bold text-[#f4efe8]">{log.note || log.action}</span>
-                          <span className="ml-2 text-[10px] text-[#b8b2aa]">({log.actorType}: {log.actorName})</span>
+                    {getOrderTimeline(selectedOrder).map((log, idx) => {
+                      const isAccepted = log.action === "accepted";
+                      const isCompleted = log.action === "completed";
+                      const isCancelled = log.action === "cancelled";
+                      const isSeatUpdated = log.action === "seat_updated";
+                      const isPlaced = log.action === "placed";
+
+                      const staffName =
+                        isAccepted
+                          ? log.actorName || selectedOrder.acceptedBy || "Staff"
+                          : isCompleted
+                          ? log.actorName || selectedOrder.completedBy || "Staff"
+                          : isCancelled
+                          ? log.actorName || selectedOrder.cancelledBy || "Staff"
+                          : log.actorName;
+
+                      return (
+                        <div
+                          key={idx}
+                          className="rounded-lg border border-[#1e1c16] bg-[#14120e] p-2.5 space-y-1.5"
+                        >
+                          <div className="flex flex-wrap items-center justify-between gap-2">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span
+                                className={`rounded px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
+                                  isAccepted
+                                    ? "bg-sky-500/20 text-sky-300 border border-sky-500/40"
+                                    : isCompleted
+                                    ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40"
+                                    : isCancelled
+                                    ? "bg-rose-500/20 text-rose-300 border border-rose-500/40"
+                                    : isSeatUpdated
+                                    ? "bg-amber-500/20 text-amber-300 border border-amber-500/40"
+                                    : "bg-[#c9993a]/20 text-[#e8be6a] border border-[#c9993a]/40"
+                                }`}
+                              >
+                                {isPlaced
+                                  ? "Order Placed"
+                                  : isAccepted
+                                  ? "Order Accepted"
+                                  : isCompleted
+                                  ? "Delivered"
+                                  : isCancelled
+                                  ? "Cancelled"
+                                  : "Seat Updated"}
+                              </span>
+
+                              {/* Prominent Staff Badge */}
+                              {(isAccepted || isCompleted || isCancelled) && (
+                                <span className="inline-flex items-center gap-1.5 rounded-md border border-sky-500/30 bg-sky-500/10 px-2 py-0.5 text-xs text-sky-200">
+                                  <svg className="h-3 w-3 text-sky-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                                    <circle cx="12" cy="7" r="4" />
+                                  </svg>
+                                  <span>Staff: <strong className="font-bold text-white text-xs">{staffName}</strong></span>
+                                </span>
+                              )}
+
+                              {isPlaced && (
+                                <span className="inline-flex items-center gap-1 text-xs text-[#b8b2aa]">
+                                  Customer: <strong className="font-semibold text-white">{selectedOrder.customerName || "Customer"}</strong>
+                                </span>
+                              )}
+                            </div>
+
+                            <span className="text-[11px] font-mono text-[#b8b2aa] shrink-0">
+                              {formatOrderTime(log.timestamp)}
+                            </span>
+                          </div>
+
+                          {log.note && (
+                            <p className="text-[11px] text-[#b8b2aa] pl-0.5 leading-relaxed">
+                              {log.note}
+                            </p>
+                          )}
                         </div>
-                        <span className="text-[11px] font-mono text-[#b8b2aa] shrink-0">
-                          {formatOrderTime(log.timestamp)}
-                        </span>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
 
@@ -666,9 +757,7 @@ export default function CafePOSPage() {
                         <polyline points="12 6 12 12 16 14" />
                       </svg>
                       <span>
-                        {savingId === selectedOrder.id
-                          ? "Accepting…"
-                          : `Accept as ${user?.name || "Staff"}`}
+                        {savingId === selectedOrder.id ? "Accepting…" : "Accept Order"}
                       </span>
                     </button>
                   )}
@@ -684,9 +773,7 @@ export default function CafePOSPage() {
                         <polyline points="20 6 9 17 4 12" />
                       </svg>
                       <span>
-                        {savingId === selectedOrder.id
-                          ? "Saving…"
-                          : `Mark Delivered as ${user?.name || "Staff"}`}
+                        {savingId === selectedOrder.id ? "Saving…" : "Mark Delivered"}
                       </span>
                     </button>
                   )}
@@ -769,7 +856,7 @@ export default function CafePOSPage() {
             disabled={savingId === noticeOrder.id}
             className="mt-4 min-h-10 w-full rounded-xl bg-gradient-to-r from-[#c9993a] via-[#e8be6a] to-[#c9993a] px-4 text-xs font-black uppercase tracking-wider text-[#080808] disabled:opacity-50"
           >
-            {savingId === noticeOrder.id ? "Accepting…" : `Accept as ${user?.name || "Staff"}`}
+            {savingId === noticeOrder.id ? "Accepting…" : "Accept Order"}
           </button>
         </aside>
       )}

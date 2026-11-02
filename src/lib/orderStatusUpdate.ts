@@ -150,16 +150,16 @@ export async function updateOrderStatus({
 
   if (nextStatus === "preparing") {
     action = "accepted";
-    eventNote = eventNote || `Order accepted & prep started by ${actor.name}`;
+    eventNote = eventNote || `Order accepted and preparation started by staff: ${actor.name}`;
   } else if (nextStatus === "completed") {
     action = "completed";
-    eventNote = eventNote || `Order fulfilled & delivered by ${actor.name}`;
+    eventNote = eventNote || `Order fulfilled and delivered to seat by staff: ${actor.name}`;
   } else if (nextStatus === "cancelled") {
     action = "cancelled";
     eventNote =
       reason?.trim()
-        ? `Cancelled by ${actor.name} (${reason.trim()})`
-        : eventNote || `Cancelled by ${actor.name}`;
+        ? `Order cancelled by staff: ${actor.name} (Reason: ${reason.trim()})`
+        : eventNote || `Order cancelled by staff: ${actor.name}`;
   }
 
   const newLogEntry: OrderStatusLog = {
