@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { formatPrice } from "@/lib/foodMenu";
 import type { OrderStatusLog } from "@/lib/schema";
+import KitchenOrderTicketModal, { KotOrder } from "@/components/KitchenOrderTicket";
 
 type Order = {
   id: number;
@@ -97,6 +98,36 @@ export default function CafePOSPage() {
   const [error, setError] = useState("");
   const [updatedAt, setUpdatedAt] = useState<Date | null>(null);
   const [hasMore, setHasMore] = useState(false);
+  const [printOrder, setPrintOrder] = useState<KotOrder | null>(null);
+  const [printedOrderIds, setPrintedOrderIds] = useState<Set<number>>(new Set());
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem("cafe_kot_printed_order_ids");
+      if (raw) {
+        const arr = JSON.parse(raw);
+        if (Array.isArray(arr)) {
+          setPrintedOrderIds(new Set(arr));
+        }
+      }
+    } catch {
+      /* optional */
+    }
+  }, []);
+
+  const handleTogglePrinted = useCallback((orderId: number, printed: boolean) => {
+    setPrintedOrderIds((prev) => {
+      const next = new Set(prev);
+      if (printed) next.add(orderId);
+      else next.delete(orderId);
+      try {
+        localStorage.setItem("cafe_kot_printed_order_ids", JSON.stringify(Array.from(next)));
+      } catch {
+        /* optional */
+      }
+      return next;
+    });
+  }, []);
   const requestId = useRef(0);
   const hasLoaded = useRef(false);
   const knownIds = useRef(new Set<number>());
@@ -254,6 +285,10 @@ export default function CafePOSPage() {
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Unable to update order.");
       setOrders((current) => current.map((item) => (item.id === order.id ? data.order : item)));
+      if (next === "preparing") {
+        setPrintOrder(data.order);
+        handleTogglePrinted(order.id, true);
+      }
       if (next === "completed" || next === "cancelled") setSelectedId(null);
       if (activeNoticeId.current === order.id) dismissNotice();
     } catch (cause) {
@@ -421,16 +456,56 @@ export default function CafePOSPage() {
                         <span className="font-bold text-[#e8be6a]">{formatPrice(order.amountPaise)}</span>
                       </div>
 
-                      {/* Staff Handling Tag */}
-                      {order.acceptedBy && (
-                        <div className="mt-2 flex items-center gap-1.5 text-[11px] text-sky-300">
-                          <svg className="h-3 w-3 shrink-0 text-sky-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                            <circle cx="12" cy="7" r="4" />
-                          </svg>
-                          <span>Prep by: <strong className="text-white">{order.acceptedBy}</strong></span>
+                      {/* Staff Handling Tag & KOT Print Status */}
+                      <div className="mt-2.5 flex flex-wrap items-center justify-between gap-1.5 pt-2 border-t border-[#1e1c16]">
+                        {order.acceptedBy ? (
+                          <div className="flex items-center gap-1.5 text-[11px] text-sky-300">
+                            <svg className="h-3 w-3 shrink-0 text-sky-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                              <circle cx="12" cy="7" r="4" />
+                            </svg>
+                            <span>Prep: <strong className="text-white">{order.acceptedBy}</strong></span>
+                          </div>
+                        ) : (
+                          <span className="text-[11px] text-[#7d7871]">Awaiting prep</span>
+                        )}
+
+                        <div className="flex items-center gap-1.5">
+                          {printedOrderIds.has(order.id) ? (
+                            <span className="inline-flex items-center gap-1 rounded border border-emerald-500/30 bg-emerald-500/10 px-1.5 py-0.5 text-[10px] font-bold text-emerald-300">
+                              <span>KOT Printed</span>
+                            </span>
+                          ) : (
+                            order.status === "preparing" && (
+                              <span className="inline-flex items-center gap-1 rounded border border-amber-500/30 bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-bold text-amber-300">
+                                <span>KOT Pending</span>
+                              </span>
+                            )
+                          )}
+                          <span
+                            role="button"
+                            tabIndex={0}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setPrintOrder(order);
+                            }}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter" || e.key === " ") {
+                                e.stopPropagation();
+                                setPrintOrder(order);
+                              }
+                            }}
+                            title="Print Kitchen Order Ticket"
+                            className="inline-flex items-center justify-center rounded-lg border border-[#2c2820] bg-[#161410] p-1.5 text-[#b8b2aa] hover:border-[#c9993a] hover:text-[#e8be6a] transition cursor-pointer"
+                          >
+                            <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <polyline points="6 9 6 2 18 2 18 9" />
+                              <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+                              <rect x="6" y="14" width="12" height="8" />
+                            </svg>
+                          </span>
                         </div>
-                      )}
+                      </div>
                     </button>
                   );
                 })}
@@ -618,6 +693,22 @@ export default function CafePOSPage() {
 
                   <button
                     type="button"
+                    onClick={() => setPrintOrder(selectedOrder)}
+                    className="inline-flex min-h-11 items-center gap-1.5 rounded-xl border border-[#2c2820] bg-[#161410] px-3.5 text-xs font-bold text-[#f4efe8] hover:border-[#c9993a] hover:text-[#e8be6a] transition"
+                  >
+                    <svg className="h-4 w-4 text-[#e8be6a]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                      <polyline points="6 9 6 2 18 2 18 9" />
+                      <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+                      <rect x="6" y="14" width="12" height="8" />
+                    </svg>
+                    <span>Print KOT</span>
+                    {printedOrderIds.has(selectedOrder.id) && (
+                      <span className="rounded bg-emerald-500/20 px-1 text-[10px] font-bold text-emerald-300">Printed</span>
+                    )}
+                  </button>
+
+                  <button
+                    type="button"
                     disabled={savingId === selectedOrder.id}
                     onClick={() => void updateStatus(selectedOrder, "cancelled")}
                     className="min-h-11 rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 text-xs font-semibold text-rose-300 hover:bg-rose-500/20 disabled:opacity-50"
@@ -681,6 +772,16 @@ export default function CafePOSPage() {
             {savingId === noticeOrder.id ? "Accepting…" : `Accept as ${user?.name || "Staff"}`}
           </button>
         </aside>
+      )}
+      {/* Kitchen Order Ticket (KOT) Print Modal */}
+      {printOrder && (
+        <KitchenOrderTicketModal
+          order={printOrder}
+          currentStaffName={user?.name}
+          isPrinted={printedOrderIds.has(printOrder.id)}
+          onTogglePrinted={handleTogglePrinted}
+          onClose={() => setPrintOrder(null)}
+        />
       )}
     </main>
   );

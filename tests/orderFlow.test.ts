@@ -608,3 +608,43 @@ test("cafe login rate limiter enforces maximum attempts and resets", () => {
   clearLoginFailures(testKey);
   assert.equal(checkLoginRateLimit(testKey, 3).allowed, true);
 });
+
+test("formatKotDateTime formats ISO string to DD/MM, hh:mm a matching ticket format", async () => {
+  const { formatKotDateTime } = await import("../src/components/KitchenOrderTicket");
+  const formatted = formatKotDateTime("2026-10-21T13:38:00.000Z");
+  assert.ok(formatted.includes("21/10"));
+  assert.ok(formatted.includes("pm") || formatted.includes("am"));
+});
+
+test("generateKotRawText matches required thermal KOT structure", async () => {
+  const { generateKotRawText } = await import("../src/components/KitchenOrderTicket");
+  const raw = generateKotRawText(
+    {
+      id: 31,
+      customerName: "Navaneeth",
+      seat: "Screen 2 Seat N17",
+      status: "preparing",
+      amountPaise: 19000,
+      createdAt: "2026-11-02T13:14:21.262Z",
+      items: [
+        { name: "Popcorn", variantName: "Regular", quantity: 1 },
+        { name: "Coke", variantName: "Regular", quantity: 1 },
+      ],
+    },
+    "Canon G2010 series",
+    "Ramesh"
+  );
+
+  assert.ok(raw.includes("================================="));
+  assert.ok(raw.includes("SRI MURUGAN CINEMA"));
+  assert.ok(raw.includes("KITCHEN KOT"));
+  assert.ok(raw.includes("*** SCREEN 2 SEAT N17 ***"));
+  assert.ok(raw.includes("Order: #31"));
+  assert.ok(raw.includes("Device: Canon G2010 series"));
+  assert.ok(raw.includes("Staff:  Ramesh"));
+  assert.ok(raw.includes("QTY  ITEM"));
+  assert.ok(raw.includes("1 x Popcorn (Regular)"));
+  assert.ok(raw.includes("1 x Coke (Regular)"));
+  assert.ok(raw.includes("KITCHEN ORDER TICKET"));
+  assert.ok(raw.includes("NOT A TAX INVOICE"));
+});

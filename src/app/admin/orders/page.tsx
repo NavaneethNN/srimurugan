@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import AdminNav from "@/components/AdminNav";
 import { formatPrice } from "@/lib/foodMenu";
+import KitchenOrderTicketModal, { KotOrder } from "@/components/KitchenOrderTicket";
 
 type Filter = "active" | "pending" | "preparing" | "completed" | "cancelled" | "all";
 
@@ -124,6 +125,7 @@ export default function FoodOrdersPage() {
   const [filter, setFilter] = useState<Filter>("active");
   const [search, setSearch] = useState("");
   const [orders, setOrders] = useState<Order[]>([]);
+  const [printOrder, setPrintOrder] = useState<KotOrder | null>(null);
   const [counts, setCounts] = useState<Record<string, number>>({});
   const [nextCursor, setNextCursor] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
@@ -632,6 +634,19 @@ export default function FoodOrdersPage() {
                           </button>
                         )}
 
+                        <button
+                          type="button"
+                          onClick={() => setPrintOrder(order)}
+                          className="inline-flex items-center gap-1.5 rounded-xl border border-[#2c2820] bg-[#161410] px-3 py-2 text-xs font-semibold text-[#f4efe8] hover:border-[#c9993a] hover:text-[#e8be6a] transition"
+                        >
+                          <svg className="h-3.5 w-3.5 text-[#e8be6a]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                            <polyline points="6 9 6 2 18 2 18 9" />
+                            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+                            <rect x="6" y="14" width="12" height="8" />
+                          </svg>
+                          <span>Print KOT</span>
+                        </button>
+
                         {(isPending || isPreparing) && (
                           <button
                             type="button"
@@ -875,6 +890,14 @@ export default function FoodOrdersPage() {
           </div>
         )}
       </div>
+
+      {/* Kitchen Order Ticket (KOT) Modal */}
+      {printOrder && (
+        <KitchenOrderTicketModal
+          order={printOrder}
+          onClose={() => setPrintOrder(null)}
+        />
+      )}
     </main>
   );
 }
