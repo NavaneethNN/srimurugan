@@ -13,7 +13,6 @@ const testSuites = [
     label: "Food Ordering",
     description: "Menu loading, cart, checkout, payment, verification and order editing.",
     count: 37,
-    icon: "🍿",
   },
 ];
 
@@ -41,7 +40,14 @@ export default function TestIndexPage() {
               className="group block rounded-xl border border-[var(--card-border)] bg-[var(--card)] p-6 transition-all hover:border-[var(--gold)] hover:shadow-[0_0_24px_rgba(201,153,58,0.12)]"
             >
               <div className="flex items-start gap-4">
-                <span className="text-4xl leading-none">{suite.icon}</span>
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[var(--surface)] text-[var(--gold)]">
+                  <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M18 2v6a3 3 0 0 1-3 3 3 3 0 0 1-3-3V2" />
+                    <path d="M15 2v19" />
+                    <path d="M6 2v7a3 3 0 0 0 6 0V2" />
+                    <path d="M9 2v19" />
+                  </svg>
+                </div>
                 <div className="flex-1">
                   <div className="flex items-center justify-between gap-2">
                     <h2 className="font-semibold text-lg text-[var(--foreground)] group-hover:text-[var(--gold)] transition-colors">

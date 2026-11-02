@@ -44,7 +44,9 @@ export async function POST(request: NextRequest) {
         !/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(checkoutKey)) {
       return NextResponse.json({ error: "Enter your name and screen and seat, then choose items from the menu." }, { status: 400 });
     }
-    if (!process.env.SESSION_SECRET || !process.env.RAZORPAY_TEST_API_KEY || !process.env.RAZORPAY_TEST_API_SECRET) {
+    const keyId = (process.env.RAZORPAY_KEY_ID || process.env.RAZORPAY_TEST_API_KEY)?.trim();
+    const keySecret = (process.env.RAZORPAY_KEY_SECRET || process.env.RAZORPAY_TEST_API_SECRET)?.trim();
+    if (!process.env.SESSION_SECRET || !keyId || !keySecret) {
       return NextResponse.json({ error: "Ordering is temporarily unavailable." }, { status: 503 });
     }
 

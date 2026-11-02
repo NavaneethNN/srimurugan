@@ -24,6 +24,18 @@ export default function Hero() {
             >
               Book Tickets <span aria-hidden="true">↗</span>
             </Link>
+            <Link
+              href="/order-food"
+              className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded border border-gold/50 bg-gold/15 px-5 text-center text-sm font-bold text-gold transition hover:bg-gold hover:text-white sm:w-auto"
+            >
+              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M18 2v6a3 3 0 0 1-3 3 3 3 0 0 1-3-3V2" />
+                <path d="M15 2v19" />
+                <path d="M6 2v7a3 3 0 0 0 6 0V2" />
+                <path d="M9 2v19" />
+              </svg>
+              <span>Order Snacks</span>
+            </Link>
             <a href="#now-showing" className="inline-flex min-h-12 w-full items-center justify-center rounded border border-surface-border px-6 text-center text-sm font-semibold text-foreground transition hover:border-gold hover:text-gold sm:w-auto">
               Explore what’s on <span className="ml-2" aria-hidden="true">→</span>
             </a>
@@ -39,7 +51,7 @@ export default function Hero() {
           <div className="absolute -bottom-5 -right-4 h-full w-full rounded-[2rem] border border-gold/25 bg-[#e9d7b9] sm:-bottom-7 sm:-right-7" />
           <div className="relative aspect-[5/4] overflow-hidden rounded-[2rem] bg-[#21170e] shadow-[0_30px_70px_rgba(56,35,14,.2)] lg:aspect-[4/5]">
             <Image src="/hero-cinema.png" alt="Auditorium at Sri Murugan Cinema" fill priority className="object-cover" sizes="(max-width: 1024px) 100vw, 50vw" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-transparent to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/45 to-transparent" />
             <div className="absolute bottom-5 left-5 right-5 flex items-end justify-between gap-4 text-white sm:bottom-8 sm:left-8 sm:right-8">
               <div>
                 <p className="text-xs font-bold uppercase tracking-[.2em] text-[#efd7a5]">The big screen awaits</p>

@@ -7,7 +7,6 @@ const SECTION_PATHS = [
   "/now-showing",
   "/coming-soon",
   "/features",
-  "/order-food",
   "/about",
   "/gallery",
   "/contact",
@@ -27,6 +26,11 @@ export function scrollToSection(id: string) {
 
 export function useSectionNav() {
   const handleNav = useCallback((e: React.MouseEvent<HTMLAnchorElement>, path: string) => {
+    // If navigating to standalone pages like /order-food, don't intercept with section scroll
+    if (path === "/order-food") {
+      return;
+    }
+
     if (window.location.pathname !== "/") {
       e.preventDefault();
       const id = pathToId(path);
@@ -44,8 +48,10 @@ export function useSectionNav() {
 }
 
 export function navigateToSectionFromPath(pathname: string) {
-  if (pathname === "/" || pathname === "") {
-    window.scrollTo({ top: 0, behavior: "smooth" });
+  if (pathname === "/" || pathname === "" || pathname.startsWith("/order-food")) {
+    if (pathname === "/" || pathname === "") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
     return;
   }
   const id = pathToId(pathname);

@@ -64,6 +64,7 @@ export async function POST(request: NextRequest) {
     if (error && typeof error === "object" && "code" in error && error.code === "23505") {
       return NextResponse.json({ error: "PIN already exists" }, { status: 409 });
     }
-    return NextResponse.json({ error: "Failed to create cafe user" }, { status: 500 });
+    const message = error instanceof Error ? error.message : "Failed to create cafe user";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

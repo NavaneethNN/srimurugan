@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import Image from "next/image";
 import Link from "next/link";
 import { useSectionNav, navigateToSectionFromPath } from "@/lib/sectionNav";
+import { lockBodyScroll, unlockBodyScroll } from "@/lib/scrollLock";
 
 const navLinks = [
   { label: "Home",        href: "/home" },
@@ -25,6 +26,28 @@ export default function Header() {
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const { handleNav } = useSectionNav();
 
+  const [cartCount,  setCartCount]  = useState(0);
+
+  /* listen for cart updates */
+  useEffect(() => {
+    const updateCartCount = () => {
+      try {
+        const saved = JSON.parse(localStorage.getItem("srimurugan-food-cart-v2") || "{}");
+        const total = Object.values(saved).reduce((sum: number, q) => sum + (typeof q === "number" ? q : 0), 0);
+        setCartCount(total);
+      } catch {
+        setCartCount(0);
+      }
+    };
+    updateCartCount();
+    window.addEventListener("storage", updateCartCount);
+    window.addEventListener("srimurugan-cart-updated", updateCartCount);
+    return () => {
+      window.removeEventListener("storage", updateCartCount);
+      window.removeEventListener("srimurugan-cart-updated", updateCartCount);
+    };
+  }, []);
+
   /* scroll-aware background */
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 32);
@@ -36,8 +59,8 @@ export default function Header() {
   /* lock body scroll when drawer is open */
   useEffect(() => {
     if (!open) return;
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+    lockBodyScroll();
+
     closeButtonRef.current?.focus();
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
@@ -62,7 +85,7 @@ export default function Header() {
     window.addEventListener("keydown", onKeyDown);
     window.addEventListener("resize", onResize);
     return () => {
-      document.body.style.overflow = previousOverflow;
+      unlockBodyScroll();
       window.removeEventListener("keydown", onKeyDown);
       window.removeEventListener("resize", onResize);
     };
@@ -146,7 +169,24 @@ export default function Header() {
         </nav>
 
         {/* Desktop CTA */}
-        <div className="hidden items-center xl:flex">
+        <div className="hidden items-center gap-3 xl:flex">
+          <Link
+            href="/order-food"
+            className="group flex items-center gap-2 rounded border border-gold/50 bg-gold/15 px-3.5 py-1.5 text-[0.7rem] font-bold uppercase tracking-wider text-gold transition-all duration-200 hover:bg-gold hover:text-white"
+          >
+            <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M18 2v6a3 3 0 0 1-3 3 3 3 0 0 1-3-3V2" />
+              <path d="M15 2v19" />
+              <path d="M6 2v7a3 3 0 0 0 6 0V2" />
+              <path d="M9 2v19" />
+            </svg>
+            <span>Order Snacks</span>
+            {cartCount > 0 && (
+              <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-gold px-1.5 text-[0.62rem] font-black text-white group-hover:bg-white group-hover:text-gold">
+                {cartCount}
+              </span>
+            )}
+          </Link>
           <Link
             href="https://in.bookmyshow.com/cinemas/COIM/murugan-cinemas-ac-4k-atmos-thudiyalur/buytickets/MCTC/"
             target="_blank"
@@ -161,7 +201,25 @@ export default function Header() {
           </Link>
         </div>
 
-        {/* Hamburger */}
+        {/* Mobile Actions */}
+        <div className="flex items-center gap-2 xl:hidden">
+          <Link
+            href="/order-food"
+            className="flex items-center gap-1.5 rounded-full border border-gold/50 bg-gold/15 px-3 py-1.5 text-xs font-bold text-gold transition hover:bg-gold hover:text-white"
+          >
+            <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M18 2v6a3 3 0 0 1-3 3 3 3 0 0 1-3-3V2" />
+              <path d="M15 2v19" />
+              <path d="M6 2v7a3 3 0 0 0 6 0V2" />
+              <path d="M9 2v19" />
+            </svg>
+            <span>Food</span>
+            {cartCount > 0 && (
+              <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-gold px-1 text-[0.6rem] font-black text-white">
+                {cartCount}
+              </span>
+            )}
+          </Link>
         <button
           ref={menuButtonRef}
           type="button"
@@ -175,6 +233,7 @@ export default function Header() {
             <path d="M4 6h16" /><path d="M4 12h16" /><path d="M4 18h16" />
           </svg>
         </button>
+        </div>
       </div>
 
       {/* Mobile drawer */}
@@ -203,8 +262,19 @@ export default function Header() {
                 }`}
               >
                 <span className={`h-4 w-0.5 shrink-0 rounded-full ${isActive ? "bg-gold" : "bg-transparent"}`} />
-                {link.label}
-              </a>
+                <span className="flex-1">{link.label}</span>
+                {link.label === "Order Food" && (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-gold/20 px-2 py-0.5 text-[0.65rem] font-bold text-gold">
+                    <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <path d="M18 2v6a3 3 0 0 1-3 3 3 3 0 0 1-3-3V2" />
+                      <path d="M15 2v19" />
+                      <path d="M6 2v7a3 3 0 0 0 6 0V2" />
+                      <path d="M9 2v19" />
+                    </svg>
+                    <span>Seat Delivery</span>
+                  </span>
+                )}
+                </a>
             );
           })}
         </nav>

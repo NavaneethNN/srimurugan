@@ -9,9 +9,9 @@ export class RazorpayBusyError extends Error {
 }
 
 function credentials() {
-  const keyId = process.env.RAZORPAY_TEST_API_KEY?.trim();
-  const keySecret = process.env.RAZORPAY_TEST_API_SECRET?.trim();
-  if (!keyId || !keySecret) throw new Error("Razorpay test credentials are missing");
+  const keyId = (process.env.RAZORPAY_KEY_ID || process.env.RAZORPAY_TEST_API_KEY)?.trim();
+  const keySecret = (process.env.RAZORPAY_KEY_SECRET || process.env.RAZORPAY_TEST_API_SECRET)?.trim();
+  if (!keyId || !keySecret) throw new Error("Razorpay credentials are missing");
   return { keyId, keySecret };
 }
 

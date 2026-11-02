@@ -84,7 +84,7 @@ export default function NowShowing() {
           <h2 className="mt-3 font-[family-name:var(--font-cormorant)] text-3xl font-bold text-white sm:mt-4 sm:text-5xl lg:text-6xl xl:text-7xl">
             Now Showing
           </h2>
-          <p className="mx-auto mt-3 max-w-2xl text-sm text-gray-400 sm:mt-4 sm:text-base lg:text-lg">
+          <p className="mx-auto mt-3 max-w-2xl text-sm text-gray-300 sm:mt-4 sm:text-base lg:text-lg">
             Experience the magic of cinema with crystal-clear 4K projection and Dolby Atmos sound
           </p>
         </div>
@@ -93,14 +93,18 @@ export default function NowShowing() {
           <div className="flex min-h-[500px] items-center justify-center">
             <div className="text-center">
               <div className="mx-auto h-16 w-16 animate-spin rounded-full border-4 border-gray-800 border-t-gold" />
-              <p className="mt-4 text-gray-400">Loading movies...</p>
+              <p className="mt-4 text-gray-300">Loading movies...</p>
             </div>
           </div>
         ) : !movie ? (
           <div className="rounded-2xl border border-gray-800/50 bg-gradient-to-br from-gray-900/50 to-gray-900/30 px-6 py-24 text-center backdrop-blur-sm">
-            <div className="text-6xl">🎬</div>
-            <p className="mt-4 text-xl text-gray-400">No movies currently showing</p>
-            <p className="mt-2 text-sm text-gray-500">Check back soon for upcoming releases</p>
+            <svg className="mx-auto h-16 w-16 text-gold/70" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <rect width="20" height="15" x="2" y="7" rx="2" />
+              <path d="m4 7 3-4h3l-3 4" />
+              <path d="m11 7 3-4h3l-3 4" />
+            </svg>
+            <p className="mt-4 text-xl font-bold text-gray-200">No movies currently showing</p>
+            <p className="mt-2 text-sm text-gray-400">Check back soon for upcoming releases</p>
           </div>
         ) : (
           <div className="relative">
@@ -234,7 +238,7 @@ export default function NowShowing() {
                           />
                         </svg>
                       </Link>
-                      <p className="text-xs text-gray-400">Seat selection &amp; payment finalize on BookMyShow</p>
+                      <p className="text-xs text-gray-300">Seat selection &amp; payment finalize on BookMyShow</p>
                     </div>
                   </div>
                 </div>
@@ -342,7 +346,7 @@ export default function NowShowing() {
                       />
                     </svg>
                   </Link>
-                  <p className="mt-2 text-center text-xs text-gray-400">Seat selection &amp; payment finalize on BookMyShow</p>
+                  <p className="mt-2 text-center text-xs text-gray-300">Seat selection &amp; payment finalize on BookMyShow</p>
                 </div>
               </div>
             </div>

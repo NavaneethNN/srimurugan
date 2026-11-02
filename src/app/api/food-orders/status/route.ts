@@ -27,7 +27,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Checkout is being prepared. Please retry shortly." },
         { status: 202, headers: { "Retry-After": "2", "Cache-Control": "no-store" } });
     }
-    const payments = await fetchRazorpayOrderPayments(order.razorpayOrderId);
+    let payments = { items: [] as import("@/lib/razorpay").RazorpayPayment[] };
+    try {
+      payments = await fetchRazorpayOrderPayments(order.razorpayOrderId);
+    } catch (e) {
+      console.warn("Could not fetch Razorpay payments for order", order.razorpayOrderId, e instanceof Error ? e.message : e);
+    }
     // Check captured payments first; fall back to authorized (confirmFoodPayment will capture it server-side).
     // This path is server-to-server only — no client signature is available here, so we rely on
     // Razorpay's own payment record rather than a webhook signature.

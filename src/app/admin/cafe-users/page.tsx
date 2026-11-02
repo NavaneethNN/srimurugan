@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { FormEvent, useCallback, useEffect, useState } from "react";
+import AdminNav from "@/components/AdminNav";
 
 type CafeUser = {
   id: number;
@@ -17,7 +17,7 @@ export default function CafeUsersPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
-  
+
   const [formName, setFormName] = useState("");
   const [formPin, setFormPin] = useState("");
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -26,15 +26,13 @@ export default function CafeUsersPage() {
     try {
       const response = await fetch("/api/admin/cafe-users", { cache: "no-store" });
       const data = await response.json();
-      
-      if (!response.ok) throw new Error(data.error || "Failed to load users");
-      
+      if (!response.ok) throw new Error(data.error || "Failed to load staff accounts");
       setUsers(data.users || []);
       setMessage(null);
     } catch (err) {
-      setMessage({ 
-        type: "error", 
-        text: err instanceof Error ? err.message : "Failed to load users" 
+      setMessage({
+        type: "error",
+        text: err instanceof Error ? err.message : "Failed to load staff accounts",
       });
     } finally {
       setLoading(false);
@@ -47,19 +45,19 @@ export default function CafeUsersPage() {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    
+
     if (!formName.trim()) {
-      setMessage({ type: "error", text: "Name is required" });
+      setMessage({ type: "error", text: "Staff member name is required." });
       return;
     }
 
     if (!editingId && !formPin.trim()) {
-      setMessage({ type: "error", text: "PIN is required for new staff" });
+      setMessage({ type: "error", text: "A 4-6 digit numeric PIN is required for new staff." });
       return;
     }
 
     if (formPin.trim() && !/^\d{4,6}$/.test(formPin.trim())) {
-      setMessage({ type: "error", text: "PIN must be 4-6 digits" });
+      setMessage({ type: "error", text: "PIN must be between 4 and 6 numeric digits." });
       return;
     }
 
@@ -67,10 +65,7 @@ export default function CafeUsersPage() {
     setMessage(null);
 
     try {
-      const url = editingId 
-        ? `/api/admin/cafe-users/${editingId}` 
-        : "/api/admin/cafe-users";
-      
+      const url = editingId ? `/api/admin/cafe-users/${editingId}` : "/api/admin/cafe-users";
       const payload: { name: string; pin?: string } = { name: formName.trim() };
       if (formPin.trim()) {
         payload.pin = formPin.trim();
@@ -83,19 +78,18 @@ export default function CafeUsersPage() {
       });
 
       const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Failed to save staff member");
 
-      if (!response.ok) throw new Error(data.error || "Failed to save user");
-
-      setMessage({ 
-        type: "success", 
-        text: editingId ? "User updated successfully" : "User created successfully" 
+      setMessage({
+        type: "success",
+        text: editingId ? "Staff member profile updated successfully." : "New staff member account created.",
       });
       resetForm();
       await loadUsers();
     } catch (err) {
-      setMessage({ 
-        type: "error", 
-        text: err instanceof Error ? err.message : "Failed to save user" 
+      setMessage({
+        type: "error",
+        text: err instanceof Error ? err.message : "Failed to save staff member",
       });
     } finally {
       setSaving(false);
@@ -105,8 +99,9 @@ export default function CafeUsersPage() {
   const handleEdit = (user: CafeUser) => {
     setEditingId(user.id);
     setFormName(user.name);
-    setFormPin(""); // Leave empty to preserve current PIN
+    setFormPin("");
     setMessage(null);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleToggleActive = async (user: CafeUser) => {
@@ -117,37 +112,37 @@ export default function CafeUsersPage() {
         body: JSON.stringify({ isActive: !user.isActive }),
       });
 
-      if (!response.ok) throw new Error("Failed to update user");
+      if (!response.ok) throw new Error("Failed to update staff status");
 
-      setMessage({ 
-        type: "success", 
-        text: `User ${!user.isActive ? "activated" : "deactivated"}` 
+      setMessage({
+        type: "success",
+        text: `Staff member "${user.name}" ${!user.isActive ? "activated" : "deactivated"}.`,
       });
       await loadUsers();
     } catch (err) {
-      setMessage({ 
-        type: "error", 
-        text: err instanceof Error ? err.message : "Failed to update user" 
+      setMessage({
+        type: "error",
+        text: err instanceof Error ? err.message : "Failed to update staff status",
       });
     }
   };
 
   const handleDelete = async (user: CafeUser) => {
-    if (!confirm(`Delete cafe user "${user.name}"? This cannot be undone.`)) return;
+    if (!confirm(`Are you sure you want to delete staff account "${user.name}"? This cannot be undone.`)) return;
 
     try {
       const response = await fetch(`/api/admin/cafe-users/${user.id}`, {
         method: "DELETE",
       });
 
-      if (!response.ok) throw new Error("Failed to delete user");
+      if (!response.ok) throw new Error("Failed to delete staff member");
 
-      setMessage({ type: "success", text: "User deleted successfully" });
+      setMessage({ type: "success", text: `Staff account "${user.name}" removed.` });
       await loadUsers();
     } catch (err) {
-      setMessage({ 
-        type: "error", 
-        text: err instanceof Error ? err.message : "Failed to delete user" 
+      setMessage({
+        type: "error",
+        text: err instanceof Error ? err.message : "Failed to delete staff member",
       });
     }
   };
@@ -159,103 +154,137 @@ export default function CafeUsersPage() {
     setMessage(null);
   };
 
+  const activeCount = users.filter((u) => u.isActive).length;
+
   return (
-    <main className="min-h-screen bg-gray-950 text-white">
-      {/* Header */}
-      <header className="border-b border-gray-800 bg-gray-900 px-6 py-4">
-        <div className="mx-auto max-w-7xl">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs font-bold uppercase tracking-widest text-blue-400">
-                Cafe Staff Management
-              </p>
-              <h1 className="mt-1 text-2xl font-bold">Sri Murugan Cinema</h1>
+    <main className="min-h-screen bg-[#090c12] text-slate-100">
+      <AdminNav title="Staff & POS Users" />
+
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        {/* Top Header */}
+        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <div className="flex items-center gap-3">
+              <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">
+                Staff & POS Access
+              </h1>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-xs font-semibold text-amber-300">
+                <span className="h-2 w-2 rounded-full bg-emerald-400" />
+                {activeCount} Active POS Staff
+              </span>
             </div>
-            <Link
-              href="/admin/dashboard"
-              className="rounded-lg border border-gray-700 px-4 py-2 text-sm font-semibold transition-colors hover:border-blue-500"
-            >
-              ← Dashboard
-            </Link>
+            <p className="mt-1 text-sm text-slate-400">
+              Manage counter staff logins and POS terminal PINs for the cafe concessions team.
+            </p>
           </div>
         </div>
-      </header>
 
-      <div className="mx-auto max-w-7xl px-6 py-8">
-        {/* Message */}
+        {/* Message Banner */}
         {message && (
           <div
-            className={`mb-6 rounded-lg border px-4 py-3 text-sm font-semibold ${
+            className={`mb-6 flex items-start gap-3 rounded-2xl border p-4 text-xs font-semibold ${
               message.type === "error"
-                ? "border-red-500/30 bg-red-500/10 text-red-400"
-                : "border-green-500/30 bg-green-500/10 text-green-400"
+                ? "border-rose-500/40 bg-rose-950/40 text-rose-200"
+                : "border-emerald-500/40 bg-emerald-950/40 text-emerald-200"
             }`}
           >
-            {message.text}
+            <svg
+              className={`mt-0.5 h-4 w-4 shrink-0 ${message.type === "error" ? "text-rose-400" : "text-emerald-400"}`}
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              {message.type === "error" ? (
+                <>
+                  <circle cx="12" cy="12" r="10" />
+                  <line x1="12" y1="8" x2="12" y2="12" />
+                  <line x1="12" y1="16" x2="12.01" y2="16" />
+                </>
+              ) : (
+                <>
+                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                  <polyline points="22 4 12 14.01 9 11.01" />
+                </>
+              )}
+            </svg>
+            <span className="flex-1">{message.text}</span>
+            <button type="button" onClick={() => setMessage(null)} className="opacity-70 hover:opacity-100">
+              <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
           </div>
         )}
 
         {loading ? (
-          <div className="flex min-h-[50vh] items-center justify-center">
-            <div className="text-center">
-              <div className="mx-auto h-12 w-12 animate-spin rounded-full border-4 border-gray-700 border-t-blue-400" />
-              <p className="mt-4 text-gray-400">Loading staff...</p>
+          <div className="flex min-h-[360px] flex-col items-center justify-center rounded-2xl border border-slate-800 bg-slate-900/30 text-center">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-amber-500/30 bg-amber-500/10 text-amber-400">
+              <svg className="h-6 w-6 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+              </svg>
             </div>
+            <p className="mt-4 text-sm font-semibold text-white">Loading staff members...</p>
           </div>
         ) : (
           <div className="grid gap-8 lg:grid-cols-[400px_1fr]">
-            {/* Form */}
-            <div className="rounded-2xl border border-gray-800 bg-gray-900 p-6">
-              <h2 className="mb-4 text-xl font-bold text-blue-400">
-                {editingId ? "Edit Staff Member" : "Add Staff Member"}
-              </h2>
-              
+            {/* Form Box */}
+            <div className="h-fit rounded-2xl border border-slate-800/80 bg-gradient-to-b from-slate-900/90 to-[#0c101a] p-6 shadow-xl">
+              <div className="mb-5">
+                <h2 className="text-lg font-bold text-white">
+                  {editingId ? "Edit Staff Account" : "Add New Staff Member"}
+                </h2>
+                <p className="text-xs text-slate-400">Set display name and secure POS access PIN</p>
+              </div>
+
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-300">Name</label>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300">
+                    Full Name <span className="text-amber-400">*</span>
+                  </label>
                   <input
                     type="text"
                     value={formName}
                     onChange={(e) => setFormName(e.target.value)}
-                    placeholder="Enter staff name"
+                    placeholder="e.g. Ramesh K."
                     maxLength={120}
                     required
-                    className="mt-2 w-full rounded-lg border border-gray-700 bg-gray-800 px-4 py-3 text-sm outline-none focus:border-blue-500"
+                    className="mt-1.5 w-full rounded-xl border border-slate-700/80 bg-slate-900/90 px-3.5 py-2.5 text-xs text-white placeholder-slate-400 outline-none transition focus:border-amber-500"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-300">
-                    PIN {editingId ? "(leave blank to keep unchanged)" : "(4-6 digits)"}
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300">
+                    POS Login PIN {editingId ? "(Leave empty to keep existing)" : "(4-6 digits) *"}
                   </label>
                   <input
                     type="text"
                     inputMode="numeric"
                     value={formPin}
                     onChange={(e) => setFormPin(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                    placeholder={editingId ? "Leave blank to keep existing PIN" : "Enter 4-6 digit PIN"}
+                    placeholder={editingId ? "•••• (Unchanged)" : "e.g. 1234"}
                     required={!editingId}
-                    className="mt-2 w-full rounded-lg border border-gray-700 bg-gray-800 px-4 py-3 text-sm outline-none focus:border-blue-500"
+                    className="mt-1.5 w-full rounded-xl border border-slate-700/80 bg-slate-900/90 px-3.5 py-2.5 font-mono text-xs text-white placeholder-slate-400 outline-none transition focus:border-amber-500"
                   />
-                  <p className="mt-1 text-xs text-gray-500">
-                    Used for cafe POS login
+                  <p className="mt-1 text-[11px] text-slate-400">
+                    Used by staff to sign into the Cafe POS terminal.
                   </p>
                 </div>
 
-                <div className="flex gap-2 pt-2">
+                <div className="flex gap-2.5 pt-2">
                   <button
                     type="submit"
                     disabled={saving}
-                    className="flex-1 rounded-lg bg-blue-500 px-5 py-3 text-sm font-bold uppercase transition-colors hover:bg-blue-600 disabled:opacity-50"
+                    className="flex-1 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-slate-950 shadow-md shadow-amber-500/20 transition hover:brightness-110 active:scale-[0.98] disabled:opacity-50"
                   >
-                    {saving ? "Saving..." : editingId ? "Update" : "Add Staff"}
+                    {saving ? "Saving..." : editingId ? "Update Staff" : "Add Staff Member"}
                   </button>
-                  
                   {editingId && (
                     <button
                       type="button"
                       onClick={resetForm}
-                      className="rounded-lg border border-gray-700 px-5 text-sm font-bold"
+                      className="rounded-xl border border-slate-700/80 bg-slate-800 px-4 py-2.5 text-xs font-semibold text-slate-300 transition hover:bg-slate-700"
                     >
                       Cancel
                     </button>
@@ -263,101 +292,139 @@ export default function CafeUsersPage() {
                 </div>
               </form>
 
-              {/* Info Box */}
-              <div className="mt-6 rounded-lg border border-blue-500/30 bg-blue-500/10 p-4">
-                <h3 className="text-sm font-bold text-blue-400">Quick Guide</h3>
-                <ul className="mt-2 space-y-1 text-xs text-gray-400">
-                  <li>• Staff login at /cafe/login</li>
-                  <li>• PIN is hashed securely</li>
-                  <li>• Disable to revoke access</li>
-                  <li>• Delete removes permanently</li>
+              {/* Cinema Staff Guidelines */}
+              <div className="mt-6 rounded-xl border border-amber-500/20 bg-amber-500/5 p-4">
+                <div className="flex items-center gap-2 text-xs font-bold text-amber-400">
+                  <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="12" y1="16" x2="12" y2="12" />
+                    <line x1="12" y1="8" x2="12.01" y2="8" />
+                  </svg>
+                  <span>POS Access Guide</span>
+                </div>
+                <ul className="mt-2.5 space-y-1.5 text-[11px] text-slate-300">
+                  <li className="flex items-start gap-1.5">
+                    <span className="text-amber-400">•</span>
+                    <span>Staff sign into the register at <code className="rounded bg-slate-950 px-1 py-0.5 text-amber-300">/cafe/login</code></span>
+                  </li>
+                  <li className="flex items-start gap-1.5">
+                    <span className="text-amber-400">•</span>
+                    <span>All PINs are securely hashed in the database</span>
+                  </li>
+                  <li className="flex items-start gap-1.5">
+                    <span className="text-amber-400">•</span>
+                    <span>Deactivating a staff account blocks terminal access immediately</span>
+                  </li>
                 </ul>
               </div>
             </div>
 
-            {/* Users List */}
+            {/* Staff List Grid */}
             <div>
               <div className="mb-4 flex items-center justify-between">
-                <h2 className="text-xl font-bold">
-                  Staff Members ({users.length})
-                </h2>
-                <div className="text-sm text-gray-400">
-                  {users.filter(u => u.isActive).length} active
-                </div>
+                <h2 className="text-base font-bold text-white">Staff Roster ({users.length})</h2>
               </div>
 
               {users.length === 0 ? (
-                <div className="rounded-xl border border-dashed border-gray-700 py-16 text-center">
-                  <div className="text-5xl">👥</div>
-                  <p className="mt-4 text-gray-500">No staff members yet</p>
-                  <p className="mt-1 text-sm text-gray-600">Add your first cafe staff member</p>
+                <div className="flex min-h-[250px] flex-col items-center justify-center rounded-2xl border border-dashed border-slate-800 bg-slate-900/20 p-8 text-center">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-800 bg-slate-900 text-amber-400">
+                    <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
+                      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                      <circle cx="9" cy="7" r="4" />
+                      <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                    </svg>
+                  </div>
+                  <h3 className="mt-3 text-sm font-bold text-white">No staff members enrolled</h3>
+                  <p className="mt-1 text-xs text-slate-400">Use the form to create counter POS accounts for your team</p>
                 </div>
               ) : (
-                <div className="space-y-3">
-                  {users.map((user) => (
-                    <div
-                      key={user.id}
-                      className="group rounded-xl border border-gray-800 bg-gray-900 p-5 transition-colors hover:border-gray-700"
-                    >
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3">
-                            <h3 className="text-lg font-bold">{user.name}</h3>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {users.map((user) => {
+                    const initials = user.name
+                      .split(" ")
+                      .map((n) => n[0])
+                      .join("")
+                      .slice(0, 2)
+                      .toUpperCase();
+
+                    return (
+                      <div
+                        key={user.id}
+                        className="group flex flex-col justify-between rounded-2xl border border-slate-800/80 bg-gradient-to-b from-slate-900/80 to-[#0c101a] p-4 shadow-md transition hover:border-slate-700"
+                      >
+                        <div>
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="flex items-center gap-3">
+                              <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-amber-500/30 bg-amber-500/10 font-bold text-amber-300">
+                                {initials}
+                              </div>
+                              <div>
+                                <h3 className="text-sm font-bold text-white">{user.name}</h3>
+                                <p className="text-[11px] text-slate-400">POS Staff • #{user.id}</p>
+                              </div>
+                            </div>
+
                             <span
-                              className={`rounded-full px-2 py-0.5 text-xs font-bold ${
+                              className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
                                 user.isActive
-                                  ? "bg-green-500/20 text-green-400"
-                                  : "bg-red-500/20 text-red-400"
+                                  ? "bg-emerald-500/15 text-emerald-300 border border-emerald-500/30"
+                                  : "bg-rose-500/15 text-rose-300 border border-rose-500/30"
                               }`}
                             >
-                              {user.isActive ? "Active" : "Inactive"}
-                            </span>
-                          </div>
-                          
-                          <div className="mt-2 flex items-center gap-4 text-sm text-gray-400">
-                            <span className="font-mono text-xs">PIN: ••••</span>
-                            <span>•</span>
-                            <span>
-                              Added {new Date(user.createdAt).toLocaleDateString("en-IN")}
+                              {user.isActive ? "Active" : "Disabled"}
                             </span>
                           </div>
 
-                          {user.lastLoginAt && (
-                            <p className="mt-1 text-xs text-gray-500">
-                              Last login: {new Date(user.lastLoginAt).toLocaleString("en-IN")}
-                            </p>
-                          )}
+                          <div className="mt-3 space-y-1 rounded-xl border border-slate-800/60 bg-slate-950/40 p-2.5 text-xs">
+                            <div className="flex items-center justify-between text-slate-400">
+                              <span>PIN Status:</span>
+                              <span className="font-mono text-slate-200">•••• (Secured)</span>
+                            </div>
+                            <div className="flex items-center justify-between text-slate-400">
+                              <span>Added on:</span>
+                              <span className="text-slate-300">{new Date(user.createdAt).toLocaleDateString("en-IN")}</span>
+                            </div>
+                            {user.lastLoginAt && (
+                              <div className="flex items-center justify-between text-slate-400">
+                                <span>Last Login:</span>
+                                <span className="text-slate-300">{new Date(user.lastLoginAt).toLocaleString("en-IN")}</span>
+                              </div>
+                            )}
+                          </div>
                         </div>
 
-                        <div className="flex flex-col gap-2">
+                        {/* Action Toolbar */}
+                        <div className="mt-3 flex items-center gap-2 border-t border-slate-800/60 pt-3">
                           <button
+                            type="button"
                             onClick={() => handleEdit(user)}
-                            className="rounded border border-blue-500 bg-blue-500/10 px-4 py-2 text-xs font-bold text-blue-400 transition-colors hover:bg-blue-500/20"
+                            className="flex-1 rounded-xl border border-slate-700/80 bg-slate-800/80 px-3 py-1.5 text-xs font-semibold text-slate-200 transition hover:border-amber-500/50 hover:bg-slate-700 hover:text-white"
                           >
                             Edit
                           </button>
-                          
                           <button
-                            onClick={() => handleToggleActive(user)}
-                            className={`rounded border px-4 py-2 text-xs font-bold transition-colors ${
+                            type="button"
+                            onClick={() => void handleToggleActive(user)}
+                            className={`rounded-xl border px-3 py-1.5 text-xs font-semibold transition ${
                               user.isActive
-                                ? "border-yellow-500/40 bg-yellow-500/10 text-yellow-400 hover:bg-yellow-500/20"
-                                : "border-green-500/40 bg-green-500/10 text-green-400 hover:bg-green-500/20"
+                                ? "border-amber-500/40 bg-amber-500/10 text-amber-300 hover:bg-amber-500/20"
+                                : "border-emerald-500/40 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20"
                             }`}
                           >
-                            {user.isActive ? "Disable" : "Enable"}
+                            {user.isActive ? "Deactivate" : "Activate"}
                           </button>
-                          
                           <button
-                            onClick={() => handleDelete(user)}
-                            className="rounded border border-red-500/40 bg-red-500/10 px-4 py-2 text-xs font-bold text-red-400 transition-colors hover:bg-red-500/20"
+                            type="button"
+                            onClick={() => void handleDelete(user)}
+                            className="rounded-xl border border-rose-500/30 bg-rose-500/10 px-3 py-1.5 text-xs font-semibold text-rose-300 transition hover:bg-rose-500/20"
                           >
                             Delete
                           </button>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>

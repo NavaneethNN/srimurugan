@@ -406,11 +406,13 @@ export default function FoodTestPage() {
 
           {/* Summary pills */}
           <div className="mt-6 flex items-center justify-center gap-3 flex-wrap">
-            <span className="px-4 py-1.5 rounded-full text-sm font-semibold border border-green-600 bg-green-100 text-green-800">
-              ✓ {counts.pass} Pass
+            <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-semibold border border-green-600 bg-green-100 text-green-800">
+              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12" /></svg>
+              <span>{counts.pass} Pass</span>
             </span>
-            <span className="px-4 py-1.5 rounded-full text-sm font-semibold border border-red-400 bg-red-100 text-red-700">
-              ✗ {counts.fail} Fail
+            <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-semibold border border-red-400 bg-red-100 text-red-700">
+              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+              <span>{counts.fail} Fail</span>
             </span>
             <span className="px-4 py-1.5 rounded-full text-sm font-semibold border border-[var(--card-border)] text-[var(--muted)]">
               {counts.untested} Untested
@@ -472,10 +474,16 @@ export default function FoodTestPage() {
                         <span className="text-xs font-mono font-bold text-[var(--muted)] uppercase tracking-widest">{tc.id}</span>
                         <span className="text-xs px-2 py-0.5 rounded-full border border-[var(--card-border)] text-[var(--muted)]">{tc.section}</span>
                         {result === "pass" && (
-                          <span className="text-xs px-2 py-0.5 rounded-full bg-green-600 text-white font-semibold">✓ Pass</span>
+                          <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-green-600 text-white font-semibold">
+                            <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12" /></svg>
+                            <span>Pass</span>
+                          </span>
                         )}
                         {result === "fail" && (
-                          <span className="text-xs px-2 py-0.5 rounded-full bg-red-600 text-white font-semibold">✗ Fail</span>
+                          <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-red-600 text-white font-semibold">
+                            <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+                            <span>Fail</span>
+                          </span>
                         )}
                         {result === "untested" && (
                           <span className="text-xs px-2 py-0.5 rounded-full border border-[var(--card-border)] text-[var(--muted)]">Untested</span>
@@ -489,23 +497,25 @@ export default function FoodTestPage() {
                     <div className="flex gap-2 shrink-0">
                       <button
                         onClick={() => setResult(tc.id, result === "pass" ? "untested" : "pass")}
-                        className={`px-3 py-1.5 rounded-lg text-sm font-semibold border transition-all ${
+                        className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-semibold border transition-all ${
                           result === "pass"
                             ? "bg-green-600 text-white border-green-600 shadow"
                             : "border-green-500 text-green-700 hover:bg-green-50"
                         }`}
                       >
-                        ✓ Pass
+                        <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12" /></svg>
+                        <span>Pass</span>
                       </button>
                       <button
                         onClick={() => setResult(tc.id, result === "fail" ? "untested" : "fail")}
-                        className={`px-3 py-1.5 rounded-lg text-sm font-semibold border transition-all ${
+                        className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-semibold border transition-all ${
                           result === "fail"
                             ? "bg-red-600 text-white border-red-600 shadow"
                             : "border-red-400 text-red-600 hover:bg-red-50"
                         }`}
                       >
-                        ✗ Fail
+                        <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+                        <span>Fail</span>
                       </button>
                     </div>
                   </div>

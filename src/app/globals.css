@@ -3,28 +3,28 @@
 /* ── Design tokens ─────────────────────────────────────────────────── */
 :root {
   --background: #080808;
-  --foreground: #f0ece4;
+  --foreground: #f4efe8;
   --gold: #c9993a;
   --gold-light: #e8be6a;
   --gold-dark: #9a7228;
   --card: #111010;
   --card-border: #222018;
-  --muted: #8a8580;
+  --muted: #b8b2aa;
   --surface: #161410;
   --surface-border: #2c2820;
 }
 
 .site-light {
   --background: #fffdf9;
-  --foreground: #29241f;
-  --gold: #9a6324;
-  --gold-light: #b77b37;
-  --gold-dark: #714517;
+  --foreground: #1f1914;
+  --gold: #844f17;
+  --gold-light: #9c6224;
+  --gold-dark: #663b0e;
   --card: #ffffff;
-  --card-border: #e9ddcd;
-  --muted: #675f55;
+  --card-border: #ded0be;
+  --muted: #3a342c;
   --surface: #f7f1e8;
-  --surface-border: #e5d7c4;
+  --surface-border: #dbcbb5;
   background: var(--background);
   color: var(--foreground);
 }
@@ -65,9 +65,33 @@ section[id]:not(#home), footer[id] {
 }
 
 body {
+  -webkit-overflow-scrolling: touch;
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-inter), Arial, Helvetica, sans-serif;
+}
+
+/* ── Touch & Scroll utilities ───────────────────────────────────────── */
+.touch-scroll-x {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-x pan-y;
+  overscroll-behavior-x: contain;
+}
+
+.touch-scroll-y {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+  overscroll-behavior-y: contain;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 /* ── Keyframes ─────────────────────────────────────────────────────── */
@@ -249,10 +273,10 @@ body {
   background: var(--card);
   color: var(--foreground);
   font-size: 0.875rem;
-  font-weight: 400;
+  font-weight: 500;
 }
-.order-input::placeholder { color: var(--muted); }
-.order-input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(201,153,58,0.15); }
+.order-input::placeholder { color: #5a5348; opacity: 1; }
+.order-input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(132,79,23,0.18); }
 
 @media (prefers-reduced-motion: reduce) {
   .btn-gold { transition: none; }

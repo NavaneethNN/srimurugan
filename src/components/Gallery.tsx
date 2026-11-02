@@ -54,7 +54,7 @@ export default function Gallery() {
                 />
 
                 {/* Permanent soft vignette at the bottom */}
-                <div className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-black/65 to-transparent" />
+                <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/90 via-black/50 to-transparent" />
 
                 {/* Hover overlay tint */}
                 <div className="absolute inset-0 bg-black/20 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
@@ -62,7 +62,7 @@ export default function Gallery() {
 
               {/* Label — always visible, sits inside the gradient */}
               <figcaption className="absolute inset-x-0 bottom-0 px-3 py-2.5">
-                <p className="text-[0.65rem] font-semibold uppercase tracking-[0.15em] text-white/80">
+                <p className="text-[0.68rem] font-bold uppercase tracking-[0.15em] text-white">
                   {item.label}
                 </p>
               </figcaption>

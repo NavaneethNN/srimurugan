@@ -1,6 +1,7 @@
 "use client";
 
 import Reveal from "@/components/Reveal";
+import Link from "next/link";
 import AOS from "aos";
 import "aos/dist/aos.css";
 import { useEffect } from "react";
@@ -83,6 +84,21 @@ export default function Facilities() {
                 <p className="mt-1.5 text-[0.72rem] leading-relaxed text-muted">
                   {f.desc}
                 </p>
+                {f.title === "Food Court" && (
+                  <Link
+                    href="/order-food"
+                    className="mt-3 inline-flex items-center gap-1.5 text-[0.72rem] font-bold text-gold hover:underline"
+                  >
+                    <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <path d="M18 2v6a3 3 0 0 1-3 3 3 3 0 0 1-3-3V2" />
+                      <path d="M15 2v19" />
+                      <path d="M6 2v7a3 3 0 0 0 6 0V2" />
+                      <path d="M9 2v19" />
+                    </svg>
+                    <span>Order to Seat</span>
+                    <span aria-hidden="true">→</span>
+                  </Link>
+                )}
               </div>
             </div>
           ))}

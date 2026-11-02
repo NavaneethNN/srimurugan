@@ -3,6 +3,7 @@ import Header from "@/components/Header";
 import Hero from "@/components/Hero";
 import NowShowing from "@/components/NowShowing";
 import ComingSoon from "@/components/ComingSoon";
+import CafeShowcase from "@/components/CafeShowcase";
 import Features from "@/components/Facilities";
 import Projection from "@/components/Projection";
 import DolbyAtmos from "@/components/DolbyAtmos";
@@ -26,6 +27,7 @@ export default function Home() {
         <Hero />
         <NowShowing />
         <ComingSoon />
+        <CafeShowcase />
         <Projection />
         <DolbyAtmos />
         <Features />
