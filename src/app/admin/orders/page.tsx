@@ -6,6 +6,16 @@ import { formatPrice } from "@/lib/foodMenu";
 
 type Filter = "active" | "pending" | "preparing" | "completed" | "cancelled" | "all";
 
+export type OrderStatusLog = {
+  action: "placed" | "accepted" | "completed" | "cancelled" | "seat_updated";
+  status: string;
+  actorType: "customer" | "staff" | "admin" | "system";
+  actorName: string;
+  actorId?: number;
+  timestamp: string;
+  note?: string;
+};
+
 type Order = {
   id: number;
   customerName: string | null;
@@ -14,6 +24,13 @@ type Order = {
   status: string;
   amountPaise: number | null;
   razorpayPaymentId: string | null;
+  acceptedBy?: string | null;
+  acceptedAt?: string | null;
+  completedBy?: string | null;
+  completedAt?: string | null;
+  cancelledBy?: string | null;
+  cancelledAt?: string | null;
+  statusLogs?: OrderStatusLog[] | null;
   createdAt: string;
 };
 
@@ -52,6 +69,57 @@ function formatElapsed(isoString: string): string {
   }
 }
 
+function getOrderTimeline(order: Order): OrderStatusLog[] {
+  if (Array.isArray(order.statusLogs) && order.statusLogs.length > 0) {
+    return order.statusLogs;
+  }
+  const events: OrderStatusLog[] = [
+    {
+      action: "placed",
+      status: "pending",
+      actorType: "customer",
+      actorName: order.customerName?.trim() || "Customer",
+      timestamp: order.createdAt,
+      note: `Order placed online · Delivering to ${order.seat}`,
+    },
+  ];
+
+  if (order.acceptedBy && order.acceptedAt) {
+    events.push({
+      action: "accepted",
+      status: "preparing",
+      actorType: "staff",
+      actorName: order.acceptedBy,
+      timestamp: order.acceptedAt,
+      note: `Accepted & prep started by ${order.acceptedBy}`,
+    });
+  }
+
+  if (order.completedBy && order.completedAt) {
+    events.push({
+      action: "completed",
+      status: "completed",
+      actorType: "staff",
+      actorName: order.completedBy,
+      timestamp: order.completedAt,
+      note: `Fulfilled & delivered by ${order.completedBy}`,
+    });
+  }
+
+  if (order.cancelledBy && order.cancelledAt) {
+    events.push({
+      action: "cancelled",
+      status: "cancelled",
+      actorType: "staff",
+      actorName: order.cancelledBy,
+      timestamp: order.cancelledAt,
+      note: `Cancelled by ${order.cancelledBy}`,
+    });
+  }
+
+  return events;
+}
+
 export default function FoodOrdersPage() {
   const [filter, setFilter] = useState<Filter>("active");
   const [search, setSearch] = useState("");
@@ -65,6 +133,11 @@ export default function FoodOrdersPage() {
   const [updatedAt, setUpdatedAt] = useState<Date | null>(null);
   const [browsingHistory, setBrowsingHistory] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [expandedLogs, setExpandedLogs] = useState<Record<number, boolean>>({});
+
+  const toggleLogs = (id: number) => {
+    setExpandedLogs((prev) => ({ ...prev, [id]: !prev[id] }));
+  };
 
   const requestId = useRef(0);
   const loadingMoreRef = useRef(false);
@@ -374,6 +447,7 @@ export default function FoodOrdersPage() {
               const isPending = order.status === "pending";
               const isPreparing = order.status === "preparing";
               const isCompleted = order.status === "completed";
+              const timeline = getOrderTimeline(order);
 
               return (
                 <article
@@ -430,7 +504,7 @@ export default function FoodOrdersPage() {
                       </div>
 
                       {/* Primary Destination: Seat Highlight */}
-                      <div className="flex items-center gap-2">
+                      <div className="flex flex-wrap items-center gap-2">
                         <div className="flex items-center gap-2 rounded-xl border border-[#c9993a]/40 bg-[#c9993a]/15 px-3 py-1.5 shadow-sm">
                           <svg
                             className="h-4 w-4 shrink-0 text-[#e8be6a]"
@@ -457,6 +531,63 @@ export default function FoodOrdersPage() {
                             {order.customerName?.trim() || "Guest Customer"}
                           </strong>
                         </span>
+                      </div>
+
+                      {/* Staff Handling Status Badge */}
+                      <div className="flex flex-wrap items-center gap-2 pt-1">
+                        {order.acceptedBy ? (
+                          <span className="inline-flex items-center gap-1.5 rounded-lg border border-sky-500/40 bg-sky-500/10 px-2.5 py-1 text-xs text-sky-200">
+                            <svg className="h-3.5 w-3.5 text-sky-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                              <circle cx="12" cy="7" r="4" />
+                            </svg>
+                            <span>
+                              Accepted by: <strong className="font-bold text-white">{order.acceptedBy}</strong>
+                            </span>
+                            {order.acceptedAt && (
+                              <span className="text-sky-300/80">• {formatOrderTime(order.acceptedAt)}</span>
+                            )}
+                          </span>
+                        ) : isPending ? (
+                          <span className="inline-flex items-center gap-1.5 rounded-lg border border-[#c9993a]/30 bg-[#c9993a]/10 px-2.5 py-1 text-xs text-[#e8be6a]">
+                            <svg className="h-3.5 w-3.5 text-[#e8be6a]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <circle cx="12" cy="12" r="10" />
+                              <polyline points="12 6 12 12 16 14" />
+                            </svg>
+                            <span>Awaiting staff acceptance</span>
+                          </span>
+                        ) : null}
+
+                        {order.completedBy && (
+                          <span className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-2.5 py-1 text-xs text-emerald-200">
+                            <svg className="h-3.5 w-3.5 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                              <polyline points="22 4 12 14.01 9 11.01" />
+                            </svg>
+                            <span>
+                              Delivered by: <strong className="font-bold text-white">{order.completedBy}</strong>
+                            </span>
+                            {order.completedAt && (
+                              <span className="text-emerald-300/80">• {formatOrderTime(order.completedAt)}</span>
+                            )}
+                          </span>
+                        )}
+
+                        {order.cancelledBy && (
+                          <span className="inline-flex items-center gap-1.5 rounded-lg border border-rose-500/40 bg-rose-500/10 px-2.5 py-1 text-xs text-rose-200">
+                            <svg className="h-3.5 w-3.5 text-rose-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <circle cx="12" cy="12" r="10" />
+                              <line x1="15" y1="9" x2="9" y2="15" />
+                              <line x1="9" y1="9" x2="15" y2="15" />
+                            </svg>
+                            <span>
+                              Cancelled by: <strong className="font-bold text-white">{order.cancelledBy}</strong>
+                            </span>
+                            {order.cancelledAt && (
+                              <span className="text-rose-300/80">• {formatOrderTime(order.cancelledAt)}</span>
+                            )}
+                          </span>
+                        )}
                       </div>
                     </div>
 
@@ -547,17 +678,140 @@ export default function FoodOrdersPage() {
                     </div>
                   </div>
 
-                  {/* Footer metadata: Payment ID */}
-                  {order.razorpayPaymentId && (
-                    <div className="mt-3 flex items-center gap-2 text-[11px] text-[#b8b2aa]">
-                      <svg className="h-3.5 w-3.5 text-[#c9993a]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
-                        <line x1="1" y1="10" x2="23" y2="10" />
+                  {/* Footer metadata & Action Logs toggle */}
+                  <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-[#222018] pt-3 text-[11px] text-[#b8b2aa]">
+                    <div className="flex flex-wrap items-center gap-3">
+                      {order.razorpayPaymentId && (
+                        <div className="flex items-center gap-1.5">
+                          <svg className="h-3.5 w-3.5 text-[#c9993a]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
+                            <line x1="1" y1="10" x2="23" y2="10" />
+                          </svg>
+                          <span>Payment ID:</span>
+                          <code className="rounded bg-[#080808] px-1.5 py-0.5 font-mono text-[10px] text-[#e8be6a]">
+                            {order.razorpayPaymentId}
+                          </code>
+                        </div>
+                      )}
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => toggleLogs(order.id)}
+                      className="inline-flex items-center gap-1.5 rounded-xl border border-[#2c2820] bg-[#161410] px-3 py-1.5 text-xs font-semibold text-[#f4efe8] transition hover:border-[#c9993a]/60 hover:bg-[#222018]"
+                    >
+                      <svg className="h-3.5 w-3.5 text-[#e8be6a]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <circle cx="12" cy="12" r="10" />
+                        <polyline points="12 6 12 12 16 14" />
                       </svg>
-                      <span>Razorpay ID:</span>
-                      <code className="rounded bg-[#080808] px-1.5 py-0.5 font-mono text-[10px] text-[#e8be6a]">
-                        {order.razorpayPaymentId}
-                      </code>
+                      <span>
+                        {expandedLogs[order.id]
+                          ? "Hide Order Activity Logs"
+                          : `Order Logs & Staff Timeline (${timeline.length})`}
+                      </span>
+                      <svg
+                        className={`h-3 w-3 text-[#b8b2aa] transition-transform ${
+                          expandedLogs[order.id] ? "rotate-180" : ""
+                        }`}
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                      >
+                        <polyline points="6 9 12 15 18 9" />
+                      </svg>
+                    </button>
+                  </div>
+
+                  {/* Expandable Order Logs Timeline */}
+                  {expandedLogs[order.id] && (
+                    <div className="mt-3 rounded-2xl border border-[#2c2820] bg-[#0c0a08] p-4 sm:p-5">
+                      <div className="mb-4 flex flex-wrap items-center justify-between gap-2 border-b border-[#222018] pb-3">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-bold uppercase tracking-wider text-[#e8be6a]">
+                            Order Audit Log &amp; Staff Handling History
+                          </span>
+                          <span className="rounded-full bg-[#161410] px-2 py-0.5 text-[10px] font-mono text-[#b8b2aa] border border-[#2c2820]">
+                            #{order.id}
+                          </span>
+                        </div>
+                        <span className="text-[11px] text-[#b8b2aa]">
+                          {timeline.length} {timeline.length === 1 ? "event recorded" : "events recorded"}
+                        </span>
+                      </div>
+
+                      <div className="relative space-y-4 pl-6 before:absolute before:bottom-2 before:left-2 before:top-2 before:w-0.5 before:bg-[#2c2820]">
+                        {timeline.map((event, idx) => {
+                          const isPlaced = event.action === "placed";
+                          const isAccepted = event.action === "accepted";
+                          const isCompletedEvent = event.action === "completed";
+                          const isCancelledEvent = event.action === "cancelled";
+                          const isSeatUpdated = event.action === "seat_updated";
+
+                          return (
+                            <div key={idx} className="relative text-xs">
+                              {/* Timeline indicator node */}
+                              <div
+                                className={`absolute -left-6 top-0.5 flex h-4 w-4 -translate-x-1/2 items-center justify-center rounded-full border ${
+                                  isAccepted
+                                    ? "border-sky-400 bg-sky-950 text-sky-300"
+                                    : isCompletedEvent
+                                    ? "border-emerald-400 bg-emerald-950 text-emerald-300"
+                                    : isCancelledEvent
+                                    ? "border-rose-400 bg-rose-950 text-rose-300"
+                                    : isSeatUpdated
+                                    ? "border-amber-400 bg-amber-950 text-amber-300"
+                                    : "border-[#e8be6a] bg-[#161410] text-[#e8be6a]"
+                                }`}
+                              >
+                                <span className="h-1.5 w-1.5 rounded-full bg-current" />
+                              </div>
+
+                              <div className="flex flex-wrap items-baseline justify-between gap-2">
+                                <div className="flex flex-wrap items-center gap-2">
+                                  <span
+                                    className={`font-bold ${
+                                      isAccepted
+                                        ? "text-sky-300"
+                                        : isCompletedEvent
+                                        ? "text-emerald-300"
+                                        : isCancelledEvent
+                                        ? "text-rose-300"
+                                        : isSeatUpdated
+                                        ? "text-amber-300"
+                                        : "text-[#e8be6a]"
+                                    }`}
+                                  >
+                                    {isPlaced
+                                      ? "Order Placed & Confirmed"
+                                      : isAccepted
+                                      ? `Accepted by ${event.actorName}`
+                                      : isCompletedEvent
+                                      ? `Completed & Delivered by ${event.actorName}`
+                                      : isCancelledEvent
+                                      ? `Cancelled by ${event.actorName}`
+                                      : `Seat Location Updated`}
+                                  </span>
+
+                                  <span className="rounded bg-[#161410] px-1.5 py-0.5 text-[10px] font-semibold uppercase text-[#b8b2aa] border border-[#2c2820]">
+                                    {event.actorType}
+                                  </span>
+                                </div>
+
+                                <div className="text-[11px] font-mono text-[#b8b2aa]">
+                                  {formatOrderTime(event.timestamp)} ({formatElapsed(event.timestamp)})
+                                </div>
+                              </div>
+
+                              {event.note && (
+                                <p className="mt-1.5 rounded-xl border border-[#222018] bg-[#161410]/70 p-2.5 text-[11px] text-[#f4efe8]">
+                                  {event.note}
+                                </p>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
                     </div>
                   )}
                 </article>

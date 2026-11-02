@@ -34,6 +34,16 @@ export const upcomingMovies = pgTable("upcoming_movies", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+export type OrderStatusLog = {
+  action: "placed" | "accepted" | "completed" | "cancelled" | "seat_updated";
+  status: string;
+  actorType: "customer" | "staff" | "admin" | "system";
+  actorName: string;
+  actorId?: number;
+  timestamp: string;
+  note?: string;
+};
+
 export const foodOrders = pgTable("food_orders", {
   id: serial("id").primaryKey(),
   customerName: varchar("customer_name", { length: 120 }),
@@ -47,6 +57,13 @@ export const foodOrders = pgTable("food_orders", {
   checkoutKey: varchar("checkout_key", { length: 36 }),
   requestHash: varchar("request_hash", { length: 64 }),
   paidAt: timestamp("paid_at"),
+  acceptedBy: varchar("accepted_by", { length: 120 }),
+  acceptedAt: timestamp("accepted_at"),
+  completedBy: varchar("completed_by", { length: 120 }),
+  completedAt: timestamp("completed_at"),
+  cancelledBy: varchar("cancelled_by", { length: 120 }),
+  cancelledAt: timestamp("cancelled_at"),
+  statusLogs: jsonb("status_logs").$type<OrderStatusLog[]>().default([]),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 }, (table) => [

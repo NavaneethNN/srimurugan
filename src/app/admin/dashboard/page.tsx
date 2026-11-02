@@ -13,6 +13,8 @@ type QueueOrder = {
   amountPaise: number | null;
   createdAt: string;
   items: { name: string; variantName?: string; quantity: number }[];
+  acceptedBy?: string | null;
+  acceptedAt?: string | null;
 };
 
 type Overview = {
@@ -366,12 +368,24 @@ export default function AdminDashboard() {
                               </div>
 
                               {/* Customer name & Time */}
-                              <div className="flex items-center gap-3 text-xs text-[#b8b2aa]">
+                              <div className="flex flex-wrap items-center gap-2 text-xs text-[#b8b2aa]">
                                 <span className="font-semibold text-white">{order.customerName || "Guest Customer"}</span>
                                 <span>•</span>
                                 <span>{new Date(order.createdAt).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}</span>
                                 <span>•</span>
                                 <span className="font-bold text-[#e8be6a]">{formatPrice(order.amountPaise)}</span>
+                                {order.acceptedBy && (
+                                  <>
+                                    <span>•</span>
+                                    <span className="inline-flex items-center gap-1 rounded-md border border-sky-500/30 bg-sky-500/10 px-2 py-0.5 text-[11px] font-semibold text-sky-300">
+                                      <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                                        <circle cx="12" cy="7" r="4" />
+                                      </svg>
+                                      <span>Staff: <strong className="text-white">{order.acceptedBy}</strong></span>
+                                    </span>
+                                  </>
+                                )}
                               </div>
 
                               {/* Items Breakdown */}

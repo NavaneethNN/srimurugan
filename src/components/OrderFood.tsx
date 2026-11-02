@@ -535,6 +535,15 @@ export default function OrderFood() {
     });
     const result = await response.json();
     if (response.status === 404) return null;
+    if (response.status === 410 || result.expired || result.cancelled) {
+      setPendingCheckout(null);
+      try {
+        localStorage.removeItem(pendingCheckoutKey);
+      } catch {
+        /* optional */
+      }
+      throw new Error(result.error || "Earlier checkout expired. Please start a fresh order.");
+    }
     if (response.status === 202) throw new Error("Checkout is still being prepared. Please retry in a moment.");
     if (!response.ok) throw new Error(result.error || "Could not check payment status.");
     if (result.paymentStatus === "paid") {
@@ -608,7 +617,12 @@ export default function OrderFood() {
       await openCheckout(details, pendingCheckout.payload.customerName);
     } catch (cause) {
       const message = cause instanceof Error ? cause.message : "Could not resume checkout.";
-      if (message.includes("menu has changed") || message.includes("menu changed")) {
+      if (
+        message.includes("menu has changed") ||
+        message.includes("menu changed") ||
+        message.includes("expired") ||
+        message.includes("cancelled")
+      ) {
         setPendingCheckout(null);
         try {
           localStorage.removeItem(pendingCheckoutKey);

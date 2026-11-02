@@ -24,16 +24,65 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
   }
 
   try {
-    const [order] = await getDb().update(foodOrders)
-      .set({ seat, updatedAt: new Date() })
-      .where(and(
-        eq(foodOrders.id, orderId),
-        eq(foodOrders.paymentStatus, "paid"),
-        gt(foodOrders.paidAt, new Date(Date.now() - SEAT_EDIT_WINDOW_MS)),
-      ))
+    const db = getDb();
+    const [existing] = await db
+      .select()
+      .from(foodOrders)
+      .where(
+        and(
+          eq(foodOrders.id, orderId),
+          eq(foodOrders.paymentStatus, "paid"),
+          gt(foodOrders.paidAt, new Date(Date.now() - SEAT_EDIT_WINDOW_MS))
+        )
+      )
+      .limit(1);
+
+    if (!existing) {
+      return NextResponse.json(
+        { error: `The ${SEAT_EDIT_WINDOW_MS / 1000}-second seat edit window has ended.` },
+        { status: 403 }
+      );
+    }
+
+    const now = new Date();
+    const logs = Array.isArray(existing.statusLogs) && existing.statusLogs.length > 0
+      ? [...existing.statusLogs]
+      : [
+          {
+            action: "placed" as const,
+            status: "pending",
+            actorType: "customer" as const,
+            actorName: existing.customerName?.trim() || "Customer",
+            timestamp: (existing.paidAt || existing.createdAt).toISOString(),
+            note: `Order placed online · Delivering to ${existing.seat}`,
+          },
+        ];
+
+    logs.push({
+      action: "seat_updated",
+      status: existing.status,
+      actorType: "customer",
+      actorName: existing.customerName?.trim() || "Customer",
+      timestamp: now.toISOString(),
+      note: `Seat corrected from "${existing.seat}" to "${seat}"`,
+    });
+
+    const [order] = await db
+      .update(foodOrders)
+      .set({ seat, updatedAt: now, statusLogs: logs })
+      .where(
+        and(
+          eq(foodOrders.id, orderId),
+          eq(foodOrders.paymentStatus, "paid")
+        )
+      )
       .returning({ id: foodOrders.id, seat: foodOrders.seat });
+
     if (!order) {
-      return NextResponse.json({ error: `The ${SEAT_EDIT_WINDOW_MS / 1000}-second seat edit window has ended.` }, { status: 403 });
+      return NextResponse.json(
+        { error: `The ${SEAT_EDIT_WINDOW_MS / 1000}-second seat edit window has ended.` },
+        { status: 403 }
+      );
     }
     return NextResponse.json({ order }, { headers: { "Cache-Control": "no-store" } });
   } catch (error) {

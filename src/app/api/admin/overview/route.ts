@@ -11,7 +11,7 @@ export async function GET() {
       db.select({ status: foodOrders.status, total: count() }).from(foodOrders).where(paid).groupBy(foodOrders.status),
       db.select({ id: foodOrders.id, seat: foodOrders.seat, customerName: foodOrders.customerName,
         status: foodOrders.status, amountPaise: foodOrders.amountPaise, createdAt: foodOrders.createdAt,
-        items: foodOrders.items })
+        items: foodOrders.items, acceptedBy: foodOrders.acceptedBy, acceptedAt: foodOrders.acceptedAt })
         .from(foodOrders).where(and(paid, inArray(foodOrders.status, ["pending", "preparing"])))
         .orderBy(asc(foodOrders.status), asc(foodOrders.id)).limit(12),
       db.select({ total: count() }).from(movies).where(eq(movies.isNowShowing, true)),

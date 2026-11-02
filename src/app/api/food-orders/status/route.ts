@@ -19,8 +19,14 @@ export async function POST(request: NextRequest) {
   try {
     const [order] = await getDb().select().from(foodOrders).where(eq(foodOrders.checkoutKey, checkoutKey)).limit(1);
     if (!order) return NextResponse.json({ error: "Checkout not found." }, { status: 404 });
+    if (order.status === "cancelled" || order.paymentStatus === "cancelled") {
+      return NextResponse.json({ error: "This order was cancelled. Please start a fresh checkout.", cancelled: true }, { status: 410 });
+    }
     if (order.paymentStatus === "paid") {
       return attachCustomerOrderSession(NextResponse.json({ paymentStatus: "paid", ...foodOrderConfirmation(order) }, { headers: { "Cache-Control": "no-store" } }), order.id);
+    }
+    if (order.createdAt && Date.now() - new Date(order.createdAt).getTime() > 60 * 60 * 1000) {
+      return NextResponse.json({ error: "Checkout session has expired. Please start a fresh order.", expired: true }, { status: 410 });
     }
     if (!order.razorpayOrderId || !order.amountPaise) {
       if (order.paymentStatus === "create_failed") return NextResponse.json({ error: "Checkout can be retried." }, { status: 404 });
@@ -51,7 +57,7 @@ export async function POST(request: NextRequest) {
       keyId: razorpayKeyId(), amountPaise: order.amountPaise, currency: "INR",
     }, { headers: { "Cache-Control": "no-store" } });
   } catch (error) {
-    console.error("Food order status lookup failed", error instanceof Error ? error.name : "UnknownError");
+    console.error("Food order status lookup failed:", error instanceof Error ? error.message : error);
     return NextResponse.json({ error: "Could not check payment status. Please try again." }, { status: 503 });
   }
 }

@@ -30,8 +30,30 @@ export async function confirmFoodPayment(orderId: number, razorpayOrderId: strin
 
   const db = getDb();
   const now = new Date();
+  const [targetOrder] = await db
+    .select({ seat: foodOrders.seat, customerName: foodOrders.customerName })
+    .from(foodOrders)
+    .where(eq(foodOrders.id, orderId))
+    .limit(1);
+
+  const initialLogs = [
+    {
+      action: "placed" as const,
+      status: "pending",
+      actorType: "customer" as const,
+      actorName: targetOrder?.customerName?.trim() || "Customer",
+      timestamp: now.toISOString(),
+      note: `Order placed online · Payment confirmed (${paymentId})`,
+    },
+  ];
+
   const [updated] = await db.update(foodOrders).set({
-    paymentStatus: "paid", status: "pending", razorpayPaymentId: paymentId, paidAt: now, updatedAt: now,
+    paymentStatus: "paid",
+    status: "pending",
+    razorpayPaymentId: paymentId,
+    paidAt: now,
+    updatedAt: now,
+    statusLogs: initialLogs,
   }).where(and(eq(foodOrders.id, orderId), eq(foodOrders.razorpayOrderId, razorpayOrderId), eq(foodOrders.paymentStatus, "created")))
     .returning();
   const confirmed = updated || (await db.select().from(foodOrders).where(eq(foodOrders.id, orderId)).limit(1))[0];
