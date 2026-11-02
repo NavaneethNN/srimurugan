@@ -157,24 +157,24 @@ export default function CafeUsersPage() {
   const activeCount = users.filter((u) => u.isActive).length;
 
   return (
-    <main className="min-h-screen bg-[#090c12] text-slate-100">
-      <AdminNav title="Staff & POS Users" />
+    <main className="min-h-screen bg-[#080808] text-[#f4efe8]">
+      <AdminNav title="Staff & POS Access" />
 
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         {/* Top Header */}
         <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">
-                Staff & POS Access
+              <h1 className="text-2xl font-black tracking-tight text-white sm:text-3xl">
+                Staff &amp; POS Access
               </h1>
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-xs font-semibold text-amber-300">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-[#c9993a]/40 bg-[#c9993a]/10 px-3 py-1 text-xs font-semibold text-[#e8be6a]">
                 <span className="h-2 w-2 rounded-full bg-emerald-400" />
                 {activeCount} Active POS Staff
               </span>
             </div>
-            <p className="mt-1 text-sm text-slate-400">
-              Manage counter staff logins and POS terminal PINs for the cafe concessions team.
+            <p className="mt-0.5 font-dancing text-lg text-[#c9993a]">
+              Counter staff credentials and POS register authorizations
             </p>
           </div>
         </div>
@@ -219,8 +219,8 @@ export default function CafeUsersPage() {
         )}
 
         {loading ? (
-          <div className="flex min-h-[360px] flex-col items-center justify-center rounded-2xl border border-slate-800 bg-slate-900/30 text-center">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-amber-500/30 bg-amber-500/10 text-amber-400">
+          <div className="flex min-h-[360px] flex-col items-center justify-center rounded-3xl border border-[#222018] bg-[#111010]/50 text-center">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-[#c9993a]/30 bg-[#c9993a]/10 text-[#e8be6a]">
               <svg className="h-6 w-6 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                 <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
               </svg>
@@ -230,18 +230,18 @@ export default function CafeUsersPage() {
         ) : (
           <div className="grid gap-8 lg:grid-cols-[400px_1fr]">
             {/* Form Box */}
-            <div className="h-fit rounded-2xl border border-slate-800/80 bg-gradient-to-b from-slate-900/90 to-[#0c101a] p-6 shadow-xl">
+            <div className="h-fit rounded-3xl border border-[#222018] bg-gradient-to-b from-[#111010] to-[#0c0a08] p-6 shadow-2xl">
               <div className="mb-5">
                 <h2 className="text-lg font-bold text-white">
                   {editingId ? "Edit Staff Account" : "Add New Staff Member"}
                 </h2>
-                <p className="text-xs text-slate-400">Set display name and secure POS access PIN</p>
+                <p className="text-xs text-[#b8b2aa]">Set display name and secure POS access PIN</p>
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300">
-                    Full Name <span className="text-amber-400">*</span>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-[#b8b2aa]">
+                    Full Name <span className="text-[#e8be6a]">*</span>
                   </label>
                   <input
                     type="text"
@@ -250,12 +250,12 @@ export default function CafeUsersPage() {
                     placeholder="e.g. Ramesh K."
                     maxLength={120}
                     required
-                    className="mt-1.5 w-full rounded-xl border border-slate-700/80 bg-slate-900/90 px-3.5 py-2.5 text-xs text-white placeholder-slate-400 outline-none transition focus:border-amber-500"
+                    className="mt-1.5 w-full rounded-xl border border-[#2c2820] bg-[#161410] px-3.5 py-2.5 text-xs text-[#f4efe8] placeholder-[#b8b2aa]/50 outline-none transition focus:border-[#c9993a]"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300">
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-[#b8b2aa]">
                     POS Login PIN {editingId ? "(Leave empty to keep existing)" : "(4-6 digits) *"}
                   </label>
                   <input
@@ -265,9 +265,9 @@ export default function CafeUsersPage() {
                     onChange={(e) => setFormPin(e.target.value.replace(/\D/g, "").slice(0, 6))}
                     placeholder={editingId ? "•••• (Unchanged)" : "e.g. 1234"}
                     required={!editingId}
-                    className="mt-1.5 w-full rounded-xl border border-slate-700/80 bg-slate-900/90 px-3.5 py-2.5 font-mono text-xs text-white placeholder-slate-400 outline-none transition focus:border-amber-500"
+                    className="mt-1.5 w-full rounded-xl border border-[#2c2820] bg-[#161410] px-3.5 py-2.5 font-mono text-xs text-[#f4efe8] placeholder-[#b8b2aa]/50 outline-none transition focus:border-[#c9993a]"
                   />
-                  <p className="mt-1 text-[11px] text-slate-400">
+                  <p className="mt-1 text-[11px] text-[#b8b2aa]">
                     Used by staff to sign into the Cafe POS terminal.
                   </p>
                 </div>
@@ -276,7 +276,7 @@ export default function CafeUsersPage() {
                   <button
                     type="submit"
                     disabled={saving}
-                    className="flex-1 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-slate-950 shadow-md shadow-amber-500/20 transition hover:brightness-110 active:scale-[0.98] disabled:opacity-50"
+                    className="flex-1 rounded-xl bg-gradient-to-r from-[#c9993a] via-[#e8be6a] to-[#c9993a] px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-[#080808] shadow-md shadow-[#c9993a]/20 transition hover:brightness-110 active:scale-95 disabled:opacity-50"
                   >
                     {saving ? "Saving..." : editingId ? "Update Staff" : "Add Staff Member"}
                   </button>
@@ -284,7 +284,7 @@ export default function CafeUsersPage() {
                     <button
                       type="button"
                       onClick={resetForm}
-                      className="rounded-xl border border-slate-700/80 bg-slate-800 px-4 py-2.5 text-xs font-semibold text-slate-300 transition hover:bg-slate-700"
+                      className="rounded-xl border border-[#2c2820] bg-[#161410] px-4 py-2.5 text-xs font-semibold text-[#b8b2aa] transition hover:bg-[#222018] hover:text-white"
                     >
                       Cancel
                     </button>
@@ -293,8 +293,8 @@ export default function CafeUsersPage() {
               </form>
 
               {/* Cinema Staff Guidelines */}
-              <div className="mt-6 rounded-xl border border-amber-500/20 bg-amber-500/5 p-4">
-                <div className="flex items-center gap-2 text-xs font-bold text-amber-400">
+              <div className="mt-6 rounded-2xl border border-[#c9993a]/30 bg-[#c9993a]/10 p-4">
+                <div className="flex items-center gap-2 text-xs font-bold text-[#e8be6a]">
                   <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <circle cx="12" cy="12" r="10" />
                     <line x1="12" y1="16" x2="12" y2="12" />
@@ -302,17 +302,17 @@ export default function CafeUsersPage() {
                   </svg>
                   <span>POS Access Guide</span>
                 </div>
-                <ul className="mt-2.5 space-y-1.5 text-[11px] text-slate-300">
+                <ul className="mt-2.5 space-y-1.5 text-[11px] text-[#f4efe8]">
                   <li className="flex items-start gap-1.5">
-                    <span className="text-amber-400">•</span>
-                    <span>Staff sign into the register at <code className="rounded bg-slate-950 px-1 py-0.5 text-amber-300">/cafe/login</code></span>
+                    <span className="text-[#e8be6a]">•</span>
+                    <span>Staff sign into the register at <code className="rounded bg-[#080808] px-1 py-0.5 text-[#e8be6a]">/cafe/login</code></span>
                   </li>
                   <li className="flex items-start gap-1.5">
-                    <span className="text-amber-400">•</span>
+                    <span className="text-[#e8be6a]">•</span>
                     <span>All PINs are securely hashed in the database</span>
                   </li>
                   <li className="flex items-start gap-1.5">
-                    <span className="text-amber-400">•</span>
+                    <span className="text-[#e8be6a]">•</span>
                     <span>Deactivating a staff account blocks terminal access immediately</span>
                   </li>
                 </ul>
@@ -326,8 +326,8 @@ export default function CafeUsersPage() {
               </div>
 
               {users.length === 0 ? (
-                <div className="flex min-h-[250px] flex-col items-center justify-center rounded-2xl border border-dashed border-slate-800 bg-slate-900/20 p-8 text-center">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-800 bg-slate-900 text-amber-400">
+                <div className="flex min-h-[250px] flex-col items-center justify-center rounded-3xl border border-dashed border-[#222018] bg-[#111010]/30 p-8 text-center">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-[#2c2820] bg-[#161410] text-[#c9993a]">
                     <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
                       <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
                       <circle cx="9" cy="7" r="4" />
@@ -336,7 +336,7 @@ export default function CafeUsersPage() {
                     </svg>
                   </div>
                   <h3 className="mt-3 text-sm font-bold text-white">No staff members enrolled</h3>
-                  <p className="mt-1 text-xs text-slate-400">Use the form to create counter POS accounts for your team</p>
+                  <p className="mt-1 text-xs text-[#b8b2aa]">Use the form to create counter POS accounts for your team</p>
                 </div>
               ) : (
                 <div className="grid gap-3 sm:grid-cols-2">
@@ -351,55 +351,55 @@ export default function CafeUsersPage() {
                     return (
                       <div
                         key={user.id}
-                        className="group flex flex-col justify-between rounded-2xl border border-slate-800/80 bg-gradient-to-b from-slate-900/80 to-[#0c101a] p-4 shadow-md transition hover:border-slate-700"
+                        className="group flex flex-col justify-between rounded-2xl border border-[#222018] bg-gradient-to-b from-[#111010] to-[#0c0a08] p-4 shadow-md transition hover:border-[#c9993a]/50"
                       >
                         <div>
                           <div className="flex items-start justify-between gap-3">
                             <div className="flex items-center gap-3">
-                              <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-amber-500/30 bg-amber-500/10 font-bold text-amber-300">
+                              <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#c9993a]/40 bg-[#c9993a]/15 font-bold text-[#e8be6a]">
                                 {initials}
                               </div>
                               <div>
                                 <h3 className="text-sm font-bold text-white">{user.name}</h3>
-                                <p className="text-[11px] text-slate-400">POS Staff • #{user.id}</p>
+                                <p className="text-[11px] text-[#b8b2aa]">POS Staff • #{user.id}</p>
                               </div>
                             </div>
 
                             <span
                               className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
                                 user.isActive
-                                  ? "bg-emerald-500/15 text-emerald-300 border border-emerald-500/30"
-                                  : "bg-rose-500/15 text-rose-300 border border-rose-500/30"
+                                  ? "bg-emerald-500/15 text-emerald-300 border border-emerald-500/40"
+                                  : "bg-rose-500/15 text-rose-300 border border-rose-500/40"
                               }`}
                             >
                               {user.isActive ? "Active" : "Disabled"}
                             </span>
                           </div>
 
-                          <div className="mt-3 space-y-1 rounded-xl border border-slate-800/60 bg-slate-950/40 p-2.5 text-xs">
-                            <div className="flex items-center justify-between text-slate-400">
+                          <div className="mt-3 space-y-1 rounded-xl border border-[#222018] bg-[#161410] p-2.5 text-xs">
+                            <div className="flex items-center justify-between text-[#b8b2aa]">
                               <span>PIN Status:</span>
-                              <span className="font-mono text-slate-200">•••• (Secured)</span>
+                              <span className="font-mono text-[#f4efe8]">•••• (Secured)</span>
                             </div>
-                            <div className="flex items-center justify-between text-slate-400">
+                            <div className="flex items-center justify-between text-[#b8b2aa]">
                               <span>Added on:</span>
-                              <span className="text-slate-300">{new Date(user.createdAt).toLocaleDateString("en-IN")}</span>
+                              <span className="text-[#f4efe8]">{new Date(user.createdAt).toLocaleDateString("en-IN")}</span>
                             </div>
                             {user.lastLoginAt && (
-                              <div className="flex items-center justify-between text-slate-400">
+                              <div className="flex items-center justify-between text-[#b8b2aa]">
                                 <span>Last Login:</span>
-                                <span className="text-slate-300">{new Date(user.lastLoginAt).toLocaleString("en-IN")}</span>
+                                <span className="text-[#e8be6a]">{new Date(user.lastLoginAt).toLocaleString("en-IN")}</span>
                               </div>
                             )}
                           </div>
                         </div>
 
                         {/* Action Toolbar */}
-                        <div className="mt-3 flex items-center gap-2 border-t border-slate-800/60 pt-3">
+                        <div className="mt-3 flex items-center gap-2 border-t border-[#222018] pt-3">
                           <button
                             type="button"
                             onClick={() => handleEdit(user)}
-                            className="flex-1 rounded-xl border border-slate-700/80 bg-slate-800/80 px-3 py-1.5 text-xs font-semibold text-slate-200 transition hover:border-amber-500/50 hover:bg-slate-700 hover:text-white"
+                            className="flex-1 rounded-xl border border-[#2c2820] bg-[#161410] px-3 py-1.5 text-xs font-semibold text-[#f4efe8] transition hover:border-[#c9993a]/50 hover:text-white"
                           >
                             Edit
                           </button>
@@ -408,7 +408,7 @@ export default function CafeUsersPage() {
                             onClick={() => void handleToggleActive(user)}
                             className={`rounded-xl border px-3 py-1.5 text-xs font-semibold transition ${
                               user.isActive
-                                ? "border-amber-500/40 bg-amber-500/10 text-amber-300 hover:bg-amber-500/20"
+                                ? "border-[#c9993a]/40 bg-[#c9993a]/15 text-[#e8be6a] hover:bg-[#c9993a]/25"
                                 : "border-emerald-500/40 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20"
                             }`}
                           >

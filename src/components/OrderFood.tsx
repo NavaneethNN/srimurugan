@@ -60,6 +60,7 @@ type PendingCheckout = {
   checkoutKey: string;
   payload: { customerName: string; seat: string; items: { productId: number; variantId: string; quantity: number }[] };
   checkout?: CheckoutDetails;
+  createdAt?: number;
 };
 const pendingCheckoutKey = "srimurugan-pending-checkout-v1";
 const customerProfileKey = "srimurugan-customer-profile-v1";
@@ -216,8 +217,11 @@ export default function OrderFood() {
 
     try {
       const savedCheckout = JSON.parse(localStorage.getItem(pendingCheckoutKey) || "null") as PendingCheckout | null;
+      // Stale or legacy checkouts without createdAt or checkouts older than 45 minutes should not block user
+      const isExpired = !savedCheckout?.createdAt || (Date.now() - savedCheckout.createdAt > 45 * 60 * 1000);
       if (
         savedCheckout &&
+        !isExpired &&
         typeof savedCheckout.checkoutKey === "string" &&
         savedCheckout.payload?.customerName &&
         savedCheckout.payload?.seat
@@ -225,6 +229,13 @@ export default function OrderFood() {
         setPendingCheckout(savedCheckout);
         setName(savedCheckout.payload.customerName);
         setSeat(savedCheckout.payload.seat);
+      } else if (savedCheckout) {
+        // Clean up stale or expired checkout from localStorage so it never blocks the user
+        try {
+          localStorage.removeItem(pendingCheckoutKey);
+        } catch {
+          /* optional */
+        }
       }
     } catch {
       /* Checkout recovery optional */
@@ -507,9 +518,10 @@ export default function OrderFood() {
   }
 
   function savePendingCheckout(attempt: PendingCheckout) {
-    setPendingCheckout(attempt);
+    const withTimestamp = { ...attempt, createdAt: attempt.createdAt || Date.now() };
+    setPendingCheckout(withTimestamp);
     try {
-      localStorage.setItem(pendingCheckoutKey, JSON.stringify(attempt));
+      localStorage.setItem(pendingCheckoutKey, JSON.stringify(withTimestamp));
     } catch {
       /* optional */
     }
@@ -835,8 +847,8 @@ export default function OrderFood() {
       )}
 
       {pendingCheckout && !pendingPayment && (
-        <div className="rounded-xl border border-gold/35 bg-[#f9edda] p-3 text-xs text-foreground">
-          <p className="font-bold">An earlier checkout is still open</p>
+        <div className="rounded-xl border border-gold/35 bg-surface p-3 text-xs text-foreground">
+          <p className="font-bold text-foreground">An earlier checkout is still open</p>
           <p className="mt-1 text-muted">
             {pendingCheckout.payload.seat}
             {pendingCheckout.checkout ? ` · ${formatPrice(pendingCheckout.checkout.amountPaise)}` : ""}. Check its payment before starting another order.
@@ -846,7 +858,7 @@ export default function OrderFood() {
               type="button"
               disabled={status === "submitting" || status === "verifying" || status === "paying"}
               onClick={() => void resumeCheckout()}
-              className="min-h-10 rounded-lg bg-gold px-3 font-bold text-white disabled:opacity-50"
+              className="min-h-10 rounded-lg bg-gold px-3 font-bold text-slate-950 disabled:opacity-50"
             >
               Check or resume payment
             </button>
@@ -854,7 +866,7 @@ export default function OrderFood() {
               type="button"
               disabled={status === "submitting" || status === "verifying" || status === "paying"}
               onClick={() => void abandonCheckout()}
-              className="min-h-10 rounded-lg border border-gold px-3 font-bold text-gold disabled:opacity-50"
+              className="min-h-10 rounded-lg border border-gold/60 px-3 font-bold text-gold hover:bg-gold/10 disabled:opacity-50"
             >
               Start fresh checkout
             </button>
@@ -863,7 +875,7 @@ export default function OrderFood() {
       )}
 
       {status === "error" && (
-        <p role="alert" className="rounded-lg bg-red-500/10 p-3 text-center text-xs text-red-700">
+        <p role="alert" className="rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-center text-xs text-red-400 font-medium">
           {error}
         </p>
       )}

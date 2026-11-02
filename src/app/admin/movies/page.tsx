@@ -321,30 +321,33 @@ export default function MoviesManagement() {
   };
 
   return (
-    <main className="min-h-screen bg-[#090c12] text-slate-100">
+    <main className="min-h-screen bg-[#080808] text-[#f4efe8]">
       <AdminNav title="Movies" />
 
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         {/* Top Header */}
         <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">
-              Cinema Movies & Showtimes
-            </h1>
-            <p className="mt-1 text-sm text-slate-400">
+            <div className="flex flex-wrap items-baseline gap-2">
+              <h1 className="text-2xl font-bold tracking-tight text-[#f4efe8] sm:text-3xl">
+                Cinema Movies & Showtimes
+              </h1>
+              <span className="font-dancing text-lg text-[#c9993a]">Theatrical Schedules</span>
+            </div>
+            <p className="mt-1 text-sm text-[#b8b2aa]">
               Control the current theatrical schedule, screening formats, Dolby Atmos badges, and upcoming releases.
             </p>
           </div>
 
           {/* Tab Switcher */}
-          <div className="flex items-center gap-2 rounded-xl border border-slate-800 bg-slate-900/80 p-1">
+          <div className="flex items-center gap-2 rounded-xl border border-[#222018] bg-[#111010] p-1">
             <button
               type="button"
               onClick={() => setActiveTab("now")}
               className={`flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-bold transition ${
                 activeTab === "now"
-                  ? "bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 shadow-md shadow-amber-500/20"
-                  : "text-slate-400 hover:text-white"
+                  ? "bg-gradient-to-r from-[#c9993a] via-[#e8be6a] to-[#c9993a] text-[#080808] shadow-md shadow-[#c9993a]/20"
+                  : "text-[#b8b2aa] hover:text-[#f4efe8]"
               }`}
             >
               <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -364,8 +367,8 @@ export default function MoviesManagement() {
               onClick={() => setActiveTab("upcoming")}
               className={`flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-bold transition ${
                 activeTab === "upcoming"
-                  ? "bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 shadow-md shadow-amber-500/20"
-                  : "text-slate-400 hover:text-white"
+                  ? "bg-gradient-to-r from-[#c9993a] via-[#e8be6a] to-[#c9993a] text-[#080808] shadow-md shadow-[#c9993a]/20"
+                  : "text-[#b8b2aa] hover:text-[#f4efe8]"
               }`}
             >
               <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -419,21 +422,21 @@ export default function MoviesManagement() {
         )}
 
         {loading ? (
-          <div className="flex min-h-[400px] flex-col items-center justify-center rounded-2xl border border-slate-800 bg-slate-900/30 text-center">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-amber-500/30 bg-amber-500/10 text-amber-400">
+          <div className="flex min-h-[400px] flex-col items-center justify-center rounded-2xl border border-[#222018] bg-[#111010]/40 text-center">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-[#c9993a]/30 bg-[#c9993a]/10 text-[#e8be6a]">
               <svg className="h-6 w-6 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                 <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
               </svg>
             </div>
-            <p className="mt-4 text-sm font-semibold text-white">Loading theatrical listings...</p>
+            <p className="mt-4 text-sm font-semibold text-[#f4efe8]">Loading theatrical listings...</p>
           </div>
         ) : (
           <div className="grid gap-8 lg:grid-cols-[440px_1fr]">
             {/* Form Editor Card */}
-            <div className="h-fit rounded-2xl border border-slate-800/80 bg-gradient-to-b from-slate-900/90 to-[#0c101a] p-6 shadow-xl">
+            <div className="h-fit rounded-2xl border border-[#222018] bg-[#111010] p-6 shadow-xl">
               <div className="mb-5 flex items-center justify-between">
                 <div>
-                  <h2 className="text-lg font-bold text-white">
+                  <h2 className="text-lg font-bold text-[#f4efe8]">
                     {activeTab === "now"
                       ? editingMovieId
                         ? "Edit Screening"
@@ -442,7 +445,7 @@ export default function MoviesManagement() {
                       ? "Edit Upcoming Title"
                       : "Add Upcoming Release"}
                   </h2>
-                  <p className="text-xs text-slate-400">
+                  <p className="text-xs text-[#b8b2aa]">
                     {activeTab === "now"
                       ? "Configure show timings, poster artwork & screening format"
                       : "Set title, language, release date & poster artwork"}
@@ -454,8 +457,8 @@ export default function MoviesManagement() {
                 <form onSubmit={saveMovie} className="space-y-4">
                   {/* Movie Title */}
                   <div>
-                    <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300">
-                      Movie Title <span className="text-amber-400">*</span>
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-[#b8b2aa]">
+                      Movie Title <span className="text-[#e8be6a]">*</span>
                     </label>
                     <input
                       type="text"
@@ -463,14 +466,14 @@ export default function MoviesManagement() {
                       value={movieForm.title}
                       onChange={(e) => setMovieForm({ ...movieForm, title: e.target.value })}
                       required
-                      className="mt-1.5 w-full rounded-xl border border-slate-700/80 bg-slate-900/90 px-3.5 py-2.5 text-xs text-white placeholder-slate-400 outline-none transition focus:border-amber-500"
+                      className="mt-1.5 w-full rounded-xl border border-[#2c2820] bg-[#161410] px-3.5 py-2.5 text-xs text-[#f4efe8] placeholder-[#7d7871] outline-none transition focus:border-[#c9993a]"
                     />
                   </div>
 
                   {/* Language & Certification */}
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300">
+                      <label className="block text-xs font-semibold uppercase tracking-wider text-[#b8b2aa]">
                         Language
                       </label>
                       <input
@@ -478,11 +481,11 @@ export default function MoviesManagement() {
                         placeholder="Tamil, Telugu, Hindi"
                         value={movieForm.language || ""}
                         onChange={(e) => setMovieForm({ ...movieForm, language: e.target.value })}
-                        className="mt-1.5 w-full rounded-xl border border-slate-700/80 bg-slate-900/90 px-3 py-2.5 text-xs text-white placeholder-slate-400 outline-none transition focus:border-amber-500"
+                        className="mt-1.5 w-full rounded-xl border border-[#2c2820] bg-[#161410] px-3 py-2.5 text-xs text-[#f4efe8] placeholder-[#7d7871] outline-none transition focus:border-[#c9993a]"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300">
+                      <label className="block text-xs font-semibold uppercase tracking-wider text-[#b8b2aa]">
                         Certification
                       </label>
                       <input
@@ -490,17 +493,17 @@ export default function MoviesManagement() {
                         placeholder="U, U/A, A"
                         value={movieForm.certification || ""}
                         onChange={(e) => setMovieForm({ ...movieForm, certification: e.target.value })}
-                        className="mt-1.5 w-full rounded-xl border border-slate-700/80 bg-slate-900/90 px-3 py-2.5 text-xs text-white placeholder-slate-400 outline-none transition focus:border-amber-500"
+                        className="mt-1.5 w-full rounded-xl border border-[#2c2820] bg-[#161410] px-3 py-2.5 text-xs text-[#f4efe8] placeholder-[#7d7871] outline-none transition focus:border-[#c9993a]"
                       />
                     </div>
                   </div>
 
                   {/* Poster Image Uploader */}
-                  <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-3.5">
-                    <label className="block text-xs font-bold uppercase tracking-wider text-amber-400">
+                  <div className="rounded-xl border border-[#222018] bg-[#161410]/70 p-3.5">
+                    <label className="block text-xs font-bold uppercase tracking-wider text-[#e8be6a]">
                       Movie Poster Artwork
                     </label>
-                    <p className="mt-0.5 text-[11px] text-slate-400">
+                    <p className="mt-0.5 text-[11px] text-[#b8b2aa]">
                       Upload an image file from your device or specify an image URL
                     </p>
 
@@ -520,20 +523,20 @@ export default function MoviesManagement() {
                       onDrop={(e) => onDrop(e, "now")}
                       className={`mt-2.5 flex flex-col items-center justify-center rounded-xl border-2 border-dashed p-4 text-center transition ${
                         dragActiveNow
-                          ? "border-amber-400 bg-amber-500/10"
-                          : "border-slate-700/80 bg-slate-900/50 hover:border-amber-500/40 hover:bg-slate-900/80"
+                          ? "border-[#e8be6a] bg-[#c9993a]/10"
+                          : "border-[#2c2820] bg-[#161410] hover:border-[#c9993a]/50 hover:bg-[#161410]/90"
                       }`}
                     >
                       {uploadingTarget === "now" ? (
                         <div className="flex flex-col items-center py-2">
-                          <svg className="h-6 w-6 animate-spin text-amber-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                          <svg className="h-6 w-6 animate-spin text-[#e8be6a]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                             <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
                           </svg>
-                          <span className="mt-2 text-xs font-semibold text-amber-300">Uploading poster image...</span>
+                          <span className="mt-2 text-xs font-semibold text-[#e8be6a]">Uploading poster image...</span>
                         </div>
                       ) : (
                         <>
-                          <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-amber-500/20 bg-amber-500/10 text-amber-400">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#c9993a]/30 bg-[#c9993a]/10 text-[#e8be6a]">
                             <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
                               <polyline points="17 8 12 3 7 8" />
@@ -544,7 +547,7 @@ export default function MoviesManagement() {
                             <button
                               type="button"
                               onClick={() => fileInputNowRef.current?.click()}
-                              className="inline-flex items-center gap-1.5 rounded-lg bg-amber-500/15 border border-amber-500/30 px-3 py-1 text-xs font-bold text-amber-300 transition hover:bg-amber-500/25"
+                              className="inline-flex items-center gap-1.5 rounded-lg bg-[#c9993a]/15 border border-[#c9993a]/30 px-3 py-1 text-xs font-bold text-[#e8be6a] transition hover:bg-[#c9993a]/25"
                             >
                               <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                 <circle cx="12" cy="12" r="10" />
@@ -553,7 +556,7 @@ export default function MoviesManagement() {
                               </svg>
                               <span>Browse File to Upload</span>
                             </button>
-                            <span className="block mt-1 text-[10px] text-slate-400">
+                            <span className="block mt-1 text-[10px] text-[#b8b2aa]">
                               or drag and drop here (JPG, PNG, WebP up to 10MB)
                             </span>
                           </div>
@@ -563,9 +566,9 @@ export default function MoviesManagement() {
 
                     {/* Preview or URL Input */}
                     {movieForm.posterUrl ? (
-                      <div className="mt-3 flex items-center justify-between gap-3 rounded-xl border border-slate-800 bg-slate-900/90 p-2.5">
+                      <div className="mt-3 flex items-center justify-between gap-3 rounded-xl border border-[#222018] bg-[#161410] p-2.5">
                         <div className="flex items-center gap-3 overflow-hidden">
-                          <div className="relative h-14 w-10 shrink-0 overflow-hidden rounded-lg border border-slate-700 bg-black">
+                          <div className="relative h-14 w-10 shrink-0 overflow-hidden rounded-lg border border-[#2c2820] bg-black">
                             <Image
                               src={movieForm.posterUrl}
                               alt="Poster Preview"
@@ -576,8 +579,8 @@ export default function MoviesManagement() {
                             />
                           </div>
                           <div className="min-w-0 flex-1">
-                            <p className="text-xs font-semibold text-white truncate">Current Poster</p>
-                            <p className="text-[10px] text-slate-400 truncate">{movieForm.posterUrl}</p>
+                            <p className="text-xs font-semibold text-[#f4efe8] truncate">Current Poster</p>
+                            <p className="text-[10px] text-[#b8b2aa] truncate">{movieForm.posterUrl}</p>
                           </div>
                         </div>
 
@@ -585,7 +588,7 @@ export default function MoviesManagement() {
                           <button
                             type="button"
                             onClick={() => fileInputNowRef.current?.click()}
-                            className="rounded-lg border border-slate-700 bg-slate-800 px-2 py-1 text-[11px] font-medium text-slate-300 hover:text-white"
+                            className="rounded-lg border border-[#2c2820] bg-[#161410] px-2 py-1 text-[11px] font-medium text-[#b8b2aa] hover:text-[#f4efe8]"
                           >
                             Replace
                           </button>
@@ -604,7 +607,7 @@ export default function MoviesManagement() {
                       </div>
                     ) : (
                       <div className="mt-2.5">
-                        <label className="block text-[11px] font-semibold text-slate-400">
+                        <label className="block text-[11px] font-semibold text-[#b8b2aa]">
                           Or paste external image URL / path:
                         </label>
                         <input
@@ -612,7 +615,7 @@ export default function MoviesManagement() {
                           placeholder="e.g. /hero-cinema.png or https://..."
                           value={movieForm.posterUrl || ""}
                           onChange={(e) => setMovieForm({ ...movieForm, posterUrl: e.target.value })}
-                          className="mt-1 w-full rounded-xl border border-slate-700/80 bg-slate-900/90 px-3 py-2 text-xs text-white placeholder-slate-500 outline-none transition focus:border-amber-500"
+                          className="mt-1 w-full rounded-xl border border-[#2c2820] bg-[#161410] px-3 py-2 text-xs text-[#f4efe8] placeholder-[#7d7871] outline-none transition focus:border-[#c9993a]"
                         />
                       </div>
                     )}
@@ -620,13 +623,13 @@ export default function MoviesManagement() {
 
                   {/* Dimension */}
                   <div>
-                    <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300">
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-[#b8b2aa]">
                       Screen Dimension
                     </label>
                     <select
                       value={movieForm.dimension || "2D"}
                       onChange={(e) => setMovieForm({ ...movieForm, dimension: e.target.value })}
-                      className="mt-1.5 w-full rounded-xl border border-slate-700/80 bg-slate-900/90 px-3 py-2.5 text-xs text-white outline-none transition focus:border-amber-500"
+                      className="mt-1.5 w-full rounded-xl border border-[#2c2820] bg-[#161410] px-3 py-2.5 text-xs text-[#f4efe8] outline-none transition focus:border-[#c9993a]"
                     >
                       <option value="2D">2D</option>
                       <option value="3D">3D</option>
@@ -636,15 +639,15 @@ export default function MoviesManagement() {
                   </div>
 
                   {/* Showtimes Builder */}
-                  <div className="border-t border-slate-800/80 pt-3">
+                  <div className="border-t border-[#222018] pt-3">
                     <div className="mb-2 flex items-center justify-between">
-                      <label className="text-xs font-bold uppercase tracking-wider text-amber-400">
+                      <label className="text-xs font-bold uppercase tracking-wider text-[#e8be6a]">
                         Show Timings ({movieForm.showtimes.length})
                       </label>
                       <button
                         type="button"
                         onClick={addShowtime}
-                        className="inline-flex items-center gap-1 rounded-lg border border-amber-500/40 bg-amber-500/10 px-2.5 py-1 text-[11px] font-bold text-amber-300 hover:bg-amber-500/20"
+                        className="inline-flex items-center gap-1 rounded-lg border border-[#c9993a]/40 bg-[#c9993a]/10 px-2.5 py-1 text-[11px] font-bold text-[#e8be6a] hover:bg-[#c9993a]/20"
                       >
                         <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                           <line x1="12" y1="5" x2="12" y2="19" />
@@ -661,19 +664,19 @@ export default function MoviesManagement() {
                             type="time"
                             value={show.time}
                             onChange={(e) => updateShowtime(idx, "time", e.target.value)}
-                            className="rounded-xl border border-slate-700/80 bg-slate-900/90 px-3 py-2 text-xs text-white outline-none transition focus:border-amber-500"
+                            className="rounded-xl border border-[#2c2820] bg-[#161410] px-3 py-2 text-xs text-[#f4efe8] outline-none transition focus:border-[#c9993a]"
                           />
                           <input
                             type="text"
                             placeholder="Format (e.g. 4K DOLBY ATMOS)"
                             value={show.format}
                             onChange={(e) => updateShowtime(idx, "format", e.target.value)}
-                            className="flex-1 rounded-xl border border-slate-700/80 bg-slate-900/90 px-3 py-2 text-xs text-white placeholder-slate-400 outline-none transition focus:border-amber-500"
+                            className="flex-1 rounded-xl border border-[#2c2820] bg-[#161410] px-3 py-2 text-xs text-[#f4efe8] placeholder-[#7d7871] outline-none transition focus:border-[#c9993a]"
                           />
                           <button
                             type="button"
                             onClick={() => removeShowtime(idx)}
-                            className="flex h-8 w-8 items-center justify-center rounded-xl border border-slate-700 bg-slate-800 text-slate-400 hover:border-rose-500/50 hover:bg-rose-500/20 hover:text-rose-300"
+                            className="flex h-8 w-8 items-center justify-center rounded-xl border border-[#2c2820] bg-[#161410] text-[#b8b2aa] hover:border-rose-500/50 hover:bg-rose-500/20 hover:text-rose-300"
                             aria-label="Remove showtime"
                           >
                             <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -687,15 +690,15 @@ export default function MoviesManagement() {
                   </div>
 
                   {/* Active Toggle */}
-                  <div className="flex items-center gap-3 rounded-xl border border-slate-800 bg-slate-950/50 p-3">
+                  <div className="flex items-center gap-3 rounded-xl border border-[#222018] bg-[#161410]/60 p-3">
                     <input
                       type="checkbox"
                       id="movie-now-showing"
                       checked={movieForm.isNowShowing}
                       onChange={(e) => setMovieForm({ ...movieForm, isNowShowing: e.target.checked })}
-                      className="h-4 w-4 rounded accent-amber-500"
+                      className="h-4 w-4 rounded accent-[#c9993a]"
                     />
-                    <label htmlFor="movie-now-showing" className="cursor-pointer text-xs font-medium text-slate-200">
+                    <label htmlFor="movie-now-showing" className="cursor-pointer text-xs font-medium text-[#f4efe8]">
                       Actively screening on Sri Murugan screens
                     </label>
                   </div>
@@ -705,7 +708,7 @@ export default function MoviesManagement() {
                     <button
                       type="submit"
                       disabled={saving || uploadingTarget !== null}
-                      className="flex-1 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-slate-950 shadow-md shadow-amber-500/20 transition hover:brightness-110 active:scale-[0.98] disabled:opacity-50"
+                      className="flex-1 rounded-xl bg-gradient-to-r from-[#c9993a] via-[#e8be6a] to-[#c9993a] px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-[#080808] shadow-md shadow-[#c9993a]/20 transition hover:brightness-110 active:scale-[0.98] disabled:opacity-50"
                     >
                       {saving ? "Saving..." : editingMovieId ? "Update Movie" : "Publish Movie"}
                     </button>
@@ -713,7 +716,7 @@ export default function MoviesManagement() {
                       <button
                         type="button"
                         onClick={resetMovieForm}
-                        className="rounded-xl border border-slate-700/80 bg-slate-800 px-4 py-2.5 text-xs font-semibold text-slate-300 transition hover:bg-slate-700"
+                        className="rounded-xl border border-[#2c2820] bg-[#161410] px-4 py-2.5 text-xs font-semibold text-[#b8b2aa] transition hover:bg-[#222018] hover:text-[#f4efe8]"
                       >
                         Cancel
                       </button>
@@ -724,8 +727,8 @@ export default function MoviesManagement() {
                 /* Upcoming Form */
                 <form onSubmit={saveUpcoming} className="space-y-4">
                   <div>
-                    <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300">
-                      Movie Title <span className="text-amber-400">*</span>
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-[#b8b2aa]">
+                      Movie Title <span className="text-[#e8be6a]">*</span>
                     </label>
                     <input
                       type="text"
@@ -733,13 +736,13 @@ export default function MoviesManagement() {
                       value={upcomingForm.title}
                       onChange={(e) => setUpcomingForm({ ...upcomingForm, title: e.target.value })}
                       required
-                      className="mt-1.5 w-full rounded-xl border border-slate-700/80 bg-slate-900/90 px-3.5 py-2.5 text-xs text-white placeholder-slate-400 outline-none transition focus:border-amber-500"
+                      className="mt-1.5 w-full rounded-xl border border-[#2c2820] bg-[#161410] px-3.5 py-2.5 text-xs text-[#f4efe8] placeholder-[#7d7871] outline-none transition focus:border-[#c9993a]"
                     />
                   </div>
 
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300">
+                      <label className="block text-xs font-semibold uppercase tracking-wider text-[#b8b2aa]">
                         Language
                       </label>
                       <input
@@ -747,28 +750,28 @@ export default function MoviesManagement() {
                         placeholder="Tamil, Telugu..."
                         value={upcomingForm.language || ""}
                         onChange={(e) => setUpcomingForm({ ...upcomingForm, language: e.target.value })}
-                        className="mt-1.5 w-full rounded-xl border border-slate-700/80 bg-slate-900/90 px-3 py-2.5 text-xs text-white placeholder-slate-400 outline-none transition focus:border-amber-500"
+                        className="mt-1.5 w-full rounded-xl border border-[#2c2820] bg-[#161410] px-3 py-2.5 text-xs text-[#f4efe8] placeholder-[#7d7871] outline-none transition focus:border-[#c9993a]"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300">
+                      <label className="block text-xs font-semibold uppercase tracking-wider text-[#b8b2aa]">
                         Release Date
                       </label>
                       <input
                         type="date"
                         value={upcomingForm.releaseDate || ""}
                         onChange={(e) => setUpcomingForm({ ...upcomingForm, releaseDate: e.target.value })}
-                        className="mt-1.5 w-full rounded-xl border border-slate-700/80 bg-slate-900/90 px-3 py-2.5 text-xs text-white outline-none transition focus:border-amber-500"
+                        className="mt-1.5 w-full rounded-xl border border-[#2c2820] bg-[#161410] px-3 py-2.5 text-xs text-[#f4efe8] outline-none transition focus:border-[#c9993a]"
                       />
                     </div>
                   </div>
 
                   {/* Poster Image Uploader for Upcoming */}
-                  <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-3.5">
-                    <label className="block text-xs font-bold uppercase tracking-wider text-amber-400">
+                  <div className="rounded-xl border border-[#222018] bg-[#161410]/70 p-3.5">
+                    <label className="block text-xs font-bold uppercase tracking-wider text-[#e8be6a]">
                       Upcoming Poster Artwork
                     </label>
-                    <p className="mt-0.5 text-[11px] text-slate-400">
+                    <p className="mt-0.5 text-[11px] text-[#b8b2aa]">
                       Upload a teaser or release poster from your computer
                     </p>
 
@@ -788,20 +791,20 @@ export default function MoviesManagement() {
                       onDrop={(e) => onDrop(e, "upcoming")}
                       className={`mt-2.5 flex flex-col items-center justify-center rounded-xl border-2 border-dashed p-4 text-center transition ${
                         dragActiveUpcoming
-                          ? "border-amber-400 bg-amber-500/10"
-                          : "border-slate-700/80 bg-slate-900/50 hover:border-amber-500/40 hover:bg-slate-900/80"
+                          ? "border-[#e8be6a] bg-[#c9993a]/10"
+                          : "border-[#2c2820] bg-[#161410] hover:border-[#c9993a]/50 hover:bg-[#161410]/90"
                       }`}
                     >
                       {uploadingTarget === "upcoming" ? (
                         <div className="flex flex-col items-center py-2">
-                          <svg className="h-6 w-6 animate-spin text-amber-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                          <svg className="h-6 w-6 animate-spin text-[#e8be6a]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                             <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
                           </svg>
-                          <span className="mt-2 text-xs font-semibold text-amber-300">Uploading teaser poster...</span>
+                          <span className="mt-2 text-xs font-semibold text-[#e8be6a]">Uploading teaser poster...</span>
                         </div>
                       ) : (
                         <>
-                          <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-amber-500/20 bg-amber-500/10 text-amber-400">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#c9993a]/30 bg-[#c9993a]/10 text-[#e8be6a]">
                             <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
                               <polyline points="17 8 12 3 7 8" />
@@ -812,7 +815,7 @@ export default function MoviesManagement() {
                             <button
                               type="button"
                               onClick={() => fileInputUpcomingRef.current?.click()}
-                              className="inline-flex items-center gap-1.5 rounded-lg bg-amber-500/15 border border-amber-500/30 px-3 py-1 text-xs font-bold text-amber-300 transition hover:bg-amber-500/25"
+                              className="inline-flex items-center gap-1.5 rounded-lg bg-[#c9993a]/15 border border-[#c9993a]/30 px-3 py-1 text-xs font-bold text-[#e8be6a] transition hover:bg-[#c9993a]/25"
                             >
                               <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                 <circle cx="12" cy="12" r="10" />
@@ -821,7 +824,7 @@ export default function MoviesManagement() {
                               </svg>
                               <span>Browse File to Upload</span>
                             </button>
-                            <span className="block mt-1 text-[10px] text-slate-400">
+                            <span className="block mt-1 text-[10px] text-[#b8b2aa]">
                               or drag and drop here (JPG, PNG, WebP up to 10MB)
                             </span>
                           </div>
@@ -831,9 +834,9 @@ export default function MoviesManagement() {
 
                     {/* Preview or URL Input */}
                     {upcomingForm.posterUrl ? (
-                      <div className="mt-3 flex items-center justify-between gap-3 rounded-xl border border-slate-800 bg-slate-900/90 p-2.5">
+                      <div className="mt-3 flex items-center justify-between gap-3 rounded-xl border border-[#222018] bg-[#161410] p-2.5">
                         <div className="flex items-center gap-3 overflow-hidden">
-                          <div className="relative h-14 w-10 shrink-0 overflow-hidden rounded-lg border border-slate-700 bg-black">
+                          <div className="relative h-14 w-10 shrink-0 overflow-hidden rounded-lg border border-[#2c2820] bg-black">
                             <Image
                               src={upcomingForm.posterUrl}
                               alt="Poster Preview"
@@ -844,8 +847,8 @@ export default function MoviesManagement() {
                             />
                           </div>
                           <div className="min-w-0 flex-1">
-                            <p className="text-xs font-semibold text-white truncate">Current Poster</p>
-                            <p className="text-[10px] text-slate-400 truncate">{upcomingForm.posterUrl}</p>
+                            <p className="text-xs font-semibold text-[#f4efe8] truncate">Current Poster</p>
+                            <p className="text-[10px] text-[#b8b2aa] truncate">{upcomingForm.posterUrl}</p>
                           </div>
                         </div>
 
@@ -853,7 +856,7 @@ export default function MoviesManagement() {
                           <button
                             type="button"
                             onClick={() => fileInputUpcomingRef.current?.click()}
-                            className="rounded-lg border border-slate-700 bg-slate-800 px-2 py-1 text-[11px] font-medium text-slate-300 hover:text-white"
+                            className="rounded-lg border border-[#2c2820] bg-[#161410] px-2 py-1 text-[11px] font-medium text-[#b8b2aa] hover:text-[#f4efe8]"
                           >
                             Replace
                           </button>
@@ -872,7 +875,7 @@ export default function MoviesManagement() {
                       </div>
                     ) : (
                       <div className="mt-2.5">
-                        <label className="block text-[11px] font-semibold text-slate-400">
+                        <label className="block text-[11px] font-semibold text-[#b8b2aa]">
                           Or paste external image URL / path:
                         </label>
                         <input
@@ -880,7 +883,7 @@ export default function MoviesManagement() {
                           placeholder="e.g. /poster.jpg or https://..."
                           value={upcomingForm.posterUrl || ""}
                           onChange={(e) => setUpcomingForm({ ...upcomingForm, posterUrl: e.target.value })}
-                          className="mt-1 w-full rounded-xl border border-slate-700/80 bg-slate-900/90 px-3 py-2 text-xs text-white placeholder-slate-500 outline-none transition focus:border-amber-500"
+                          className="mt-1 w-full rounded-xl border border-[#2c2820] bg-[#161410] px-3 py-2 text-xs text-[#f4efe8] placeholder-[#7d7871] outline-none transition focus:border-[#c9993a]"
                         />
                       </div>
                     )}
@@ -890,7 +893,7 @@ export default function MoviesManagement() {
                     <button
                       type="submit"
                       disabled={saving || uploadingTarget !== null}
-                      className="flex-1 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-slate-950 shadow-md shadow-amber-500/20 transition hover:brightness-110 active:scale-[0.98] disabled:opacity-50"
+                      className="flex-1 rounded-xl bg-gradient-to-r from-[#c9993a] via-[#e8be6a] to-[#c9993a] px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-[#080808] shadow-md shadow-[#c9993a]/20 transition hover:brightness-110 active:scale-[0.98] disabled:opacity-50"
                     >
                       {saving ? "Saving..." : editingUpcomingId ? "Update Upcoming" : "Add Announcement"}
                     </button>
@@ -898,7 +901,7 @@ export default function MoviesManagement() {
                       <button
                         type="button"
                         onClick={resetUpcomingForm}
-                        className="rounded-xl border border-slate-700/80 bg-slate-800 px-4 py-2.5 text-xs font-semibold text-slate-300 transition hover:bg-slate-700"
+                        className="rounded-xl border border-[#2c2820] bg-[#161410] px-4 py-2.5 text-xs font-semibold text-[#b8b2aa] transition hover:bg-[#222018] hover:text-[#f4efe8]"
                       >
                         Cancel
                       </button>
@@ -911,7 +914,7 @@ export default function MoviesManagement() {
             {/* Movie Listings List */}
             <div>
               <div className="mb-4 flex items-center justify-between">
-                <h2 className="text-base font-bold text-white">
+                <h2 className="text-base font-bold text-[#f4efe8]">
                   {activeTab === "now" ? "Now Showing Titles" : "Upcoming Releases"} (
                   {activeTab === "now" ? movies.length : upcoming.length})
                 </h2>
@@ -919,28 +922,28 @@ export default function MoviesManagement() {
 
               {activeTab === "now" ? (
                 movies.length === 0 ? (
-                  <div className="flex min-h-[300px] flex-col items-center justify-center rounded-2xl border border-dashed border-slate-800 bg-slate-900/20 p-8 text-center">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-800 bg-slate-900 text-amber-400">
+                  <div className="flex min-h-[300px] flex-col items-center justify-center rounded-2xl border border-dashed border-[#222018] bg-[#111010]/40 p-8 text-center">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-[#222018] bg-[#161410] text-[#e8be6a]">
                       <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
                         <rect width="18" height="18" x="3" y="3" rx="2" />
                         <path d="M7 3v18" />
                         <path d="M17 3v18" />
                       </svg>
                     </div>
-                    <h3 className="mt-3 text-sm font-bold text-white">No active screenings listed</h3>
-                    <p className="mt-1 text-xs text-slate-400">Add a movie using the form on the left to show it on the site</p>
+                    <h3 className="mt-3 text-sm font-bold text-[#f4efe8]">No active screenings listed</h3>
+                    <p className="mt-1 text-xs text-[#b8b2aa]">Add a movie using the form on the left to show it on the site</p>
                   </div>
                 ) : (
                   <div className="space-y-3">
                     {movies.map((movie) => (
                       <div
                         key={movie.id}
-                        className="group flex flex-col justify-between rounded-2xl border border-slate-800/80 bg-gradient-to-b from-slate-900/80 to-[#0c101a] p-5 shadow-md transition hover:border-slate-700"
+                        className="group flex flex-col justify-between rounded-2xl border border-[#222018] bg-[#111010] p-5 shadow-md transition hover:border-[#2c2820]"
                       >
                         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                           <div className="flex gap-4">
                             {movie.posterUrl && (
-                              <div className="relative h-20 w-14 shrink-0 overflow-hidden rounded-xl border border-slate-800 bg-slate-950">
+                              <div className="relative h-20 w-14 shrink-0 overflow-hidden rounded-xl border border-[#222018] bg-[#080808]">
                                 <Image
                                   src={movie.posterUrl}
                                   alt={movie.title}
@@ -954,19 +957,19 @@ export default function MoviesManagement() {
 
                             <div>
                               <div className="flex flex-wrap items-center gap-2">
-                                <h3 className="text-base font-bold text-white">{movie.title}</h3>
+                                <h3 className="text-base font-bold text-[#f4efe8]">{movie.title}</h3>
                                 {movie.certification && (
-                                  <span className="rounded-md border border-amber-500/40 bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-bold text-amber-300">
+                                  <span className="rounded-md border border-[#c9993a]/40 bg-[#c9993a]/10 px-1.5 py-0.5 text-[10px] font-bold text-[#e8be6a]">
                                     {movie.certification}
                                   </span>
                                 )}
                                 {movie.dimension && (
-                                  <span className="rounded-md border border-slate-700 bg-slate-800 px-1.5 py-0.5 text-[10px] font-semibold text-slate-300">
+                                  <span className="rounded-md border border-[#2c2820] bg-[#161410] px-1.5 py-0.5 text-[10px] font-semibold text-[#b8b2aa]">
                                     {movie.dimension}
                                   </span>
                                 )}
                               </div>
-                              <p className="mt-1 text-xs font-semibold text-slate-400">
+                              <p className="mt-1 text-xs font-semibold text-[#b8b2aa]">
                                 {movie.language || "Regional"}
                               </p>
 
@@ -975,14 +978,14 @@ export default function MoviesManagement() {
                                 {movie.showtimes?.map((show, idx) => (
                                   <div
                                     key={idx}
-                                    className="inline-flex items-center gap-1.5 rounded-xl border border-amber-500/30 bg-amber-500/10 px-2.5 py-1 text-xs"
+                                    className="inline-flex items-center gap-1.5 rounded-xl border border-[#c9993a]/30 bg-[#c9993a]/10 px-2.5 py-1 text-xs"
                                   >
-                                    <svg className="h-3 w-3 text-amber-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                    <svg className="h-3 w-3 text-[#c9993a]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                       <circle cx="12" cy="12" r="10" />
                                       <polyline points="12 6 12 12 16 14" />
                                     </svg>
-                                    <span className="font-bold text-amber-200">{to12HourFormat(show.time)}</span>
-                                    <span className="text-[10px] text-amber-400/80">• {show.format}</span>
+                                    <span className="font-bold text-[#e8be6a]">{to12HourFormat(show.time)}</span>
+                                    <span className="text-[10px] text-[#e8be6a]/80">• {show.format}</span>
                                   </div>
                                 ))}
                               </div>
@@ -994,7 +997,7 @@ export default function MoviesManagement() {
                             <button
                               type="button"
                               onClick={() => editMovie(movie)}
-                              className="rounded-xl border border-slate-700/80 bg-slate-800/80 px-3.5 py-1.5 text-xs font-semibold text-slate-200 transition hover:border-amber-500/50 hover:bg-slate-700 hover:text-white"
+                              className="rounded-xl border border-[#2c2820] bg-[#161410] px-3.5 py-1.5 text-xs font-semibold text-[#f4efe8] transition hover:border-[#c9993a]/50 hover:bg-[#222018]"
                             >
                               Edit
                             </button>
@@ -1012,8 +1015,8 @@ export default function MoviesManagement() {
                   </div>
                 )
               ) : upcoming.length === 0 ? (
-                <div className="flex min-h-[300px] flex-col items-center justify-center rounded-2xl border border-dashed border-slate-800 bg-slate-900/20 p-8 text-center">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-800 bg-slate-900 text-amber-400">
+                <div className="flex min-h-[300px] flex-col items-center justify-center rounded-2xl border border-dashed border-[#222018] bg-[#111010]/40 p-8 text-center">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-[#222018] bg-[#161410] text-[#e8be6a]">
                     <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
                       <rect width="18" height="18" x="3" y="4" rx="2" />
                       <line x1="16" y1="2" x2="16" y2="6" />
@@ -1021,20 +1024,20 @@ export default function MoviesManagement() {
                       <line x1="3" y1="10" x2="21" y2="10" />
                     </svg>
                   </div>
-                  <h3 className="mt-3 text-sm font-bold text-white">No upcoming movies announced</h3>
-                  <p className="mt-1 text-xs text-slate-400">Add upcoming releases to display in the coming soon section</p>
+                  <h3 className="mt-3 text-sm font-bold text-[#f4efe8]">No upcoming movies announced</h3>
+                  <p className="mt-1 text-xs text-[#b8b2aa]">Add upcoming releases to display in the coming soon section</p>
                 </div>
               ) : (
                 <div className="space-y-3">
                   {upcoming.map((movie) => (
                     <div
                       key={movie.id}
-                      className="group flex flex-col justify-between rounded-2xl border border-slate-800/80 bg-gradient-to-b from-slate-900/80 to-[#0c101a] p-5 shadow-md transition hover:border-slate-700"
+                      className="group flex flex-col justify-between rounded-2xl border border-[#222018] bg-[#111010] p-5 shadow-md transition hover:border-[#2c2820]"
                     >
                       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                         <div className="flex gap-4">
                           {movie.posterUrl && (
-                            <div className="relative h-20 w-14 shrink-0 overflow-hidden rounded-xl border border-slate-800 bg-slate-950">
+                            <div className="relative h-20 w-14 shrink-0 overflow-hidden rounded-xl border border-[#222018] bg-[#080808]">
                               <Image
                                 src={movie.posterUrl}
                                 alt={movie.title}
@@ -1047,8 +1050,8 @@ export default function MoviesManagement() {
                           )}
 
                           <div>
-                            <h3 className="text-base font-bold text-white">{movie.title}</h3>
-                            <p className="mt-1 text-xs font-semibold text-slate-400">
+                            <h3 className="text-base font-bold text-[#f4efe8]">{movie.title}</h3>
+                            <p className="mt-1 text-xs font-semibold text-[#b8b2aa]">
                               {movie.language || "Regional"}
                               {movie.releaseDate && ` • Releasing ${new Date(movie.releaseDate).toLocaleDateString("en-IN", { month: "short", day: "numeric", year: "numeric" })}`}
                             </p>
@@ -1059,7 +1062,7 @@ export default function MoviesManagement() {
                           <button
                             type="button"
                             onClick={() => editUpcoming(movie)}
-                            className="rounded-xl border border-slate-700/80 bg-slate-800/80 px-3.5 py-1.5 text-xs font-semibold text-slate-200 transition hover:border-amber-500/50 hover:bg-slate-700 hover:text-white"
+                            className="rounded-xl border border-[#2c2820] bg-[#161410] px-3.5 py-1.5 text-xs font-semibold text-[#f4efe8] transition hover:border-[#c9993a]/50 hover:bg-[#222018]"
                           >
                             Edit
                           </button>

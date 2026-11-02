@@ -1,7 +1,9 @@
 "use client";
 
-import { FormEvent, useState, useRef, useEffect } from "react";
+import { FormEvent, useState, useRef, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
+import Link from "next/link";
 
 export default function CafeLoginPage() {
   const router = useRouter();
@@ -15,6 +17,42 @@ export default function CafeLoginPage() {
   }, []);
 
   const pin = digits.join("");
+
+  const handleLogin = useCallback(async (pinValue: string) => {
+    if (pinValue.length < 4) {
+      setError("Please enter your 4 to 6-digit staff PIN.");
+      return;
+    }
+
+    setLoading(true);
+    setError("");
+
+    try {
+      const response = await fetch("/api/cafe/auth", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pin: pinValue }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.error || "Invalid PIN. Please check and try again.");
+        setDigits(["", "", "", "", "", ""]);
+        inputRefs.current[0]?.focus();
+        return;
+      }
+
+      router.push("/cafe/pos");
+      router.refresh();
+    } catch {
+      setError("Connection error communicating with terminal. Please retry.");
+      setDigits(["", "", "", "", "", ""]);
+      inputRefs.current[0]?.focus();
+    } finally {
+      setLoading(false);
+    }
+  }, [router]);
 
   const handleDigitChange = (index: number, value: string) => {
     const cleaned = value.replace(/\D/g, "");
@@ -88,44 +126,42 @@ export default function CafeLoginPage() {
     }
   };
 
-  const handleLogin = async (pinValue: string) => {
-    if (pinValue.length < 4) {
-      setError("PIN must be 4–6 digits");
-      return;
-    }
+  // On-screen Numpad interaction for touch registers & POS tablets
+  const handleNumpadPress = (num: string) => {
+    if (loading) return;
+    const firstEmptyIndex = digits.findIndex((d) => d === "");
+    if (firstEmptyIndex !== -1) {
+      const updated = [...digits];
+      updated[firstEmptyIndex] = num;
+      setDigits(updated);
 
-    setLoading(true);
-    setError("");
-
-    try {
-      const response = await fetch("/api/cafe/auth", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ pin: pinValue }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        setError(data.error || "Invalid PIN");
-        setDigits(["", "", "", "", "", ""]);
-        inputRefs.current[0]?.focus();
-        return;
+      if (firstEmptyIndex < 5) {
+        inputRefs.current[firstEmptyIndex + 1]?.focus();
       }
 
-      router.push("/cafe/pos");
-    } catch {
-      setError("Connection error. Please try again.");
-      setDigits(["", "", "", "", "", ""]);
-      inputRefs.current[0]?.focus();
-    } finally {
-      setLoading(false);
+      const fullPin = updated.join("");
+      if (fullPin.length === 6) {
+        void handleLogin(fullPin);
+      }
     }
   };
 
-  const handleSubmit = (e: FormEvent) => {
-    e.preventDefault();
-    void handleLogin(pin);
+  const handleNumpadBackspace = () => {
+    if (loading) return;
+    // find the last filled index
+    let lastFilled = -1;
+    for (let i = digits.length - 1; i >= 0; i--) {
+      if (digits[i] !== "") {
+        lastFilled = i;
+        break;
+      }
+    }
+    if (lastFilled !== -1) {
+      const updated = [...digits];
+      updated[lastFilled] = "";
+      setDigits(updated);
+      inputRefs.current[lastFilled]?.focus();
+    }
   };
 
   const clearPin = () => {
@@ -134,73 +170,208 @@ export default function CafeLoginPage() {
     inputRefs.current[0]?.focus();
   };
 
+  const handleSubmit = (e: FormEvent) => {
+    e.preventDefault();
+    void handleLogin(pin);
+  };
+
   return (
-    <main className="flex min-h-screen items-center justify-center bg-gradient-to-br from-gray-950 via-gray-900 to-black p-4">
-      <div className="w-full max-w-md">
-        <div className="mb-8 text-center">
-          <h1 className="text-4xl font-bold text-amber-400">Sri Murugan Cinema</h1>
-          <p className="mt-2 text-xl text-gray-400">Cafe POS System</p>
+    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#080808] px-4 py-8 text-[#f4efe8]">
+      {/* Ambient Cinema Lighting Backdrops */}
+      <div className="pointer-events-none absolute -top-40 left-1/2 h-[500px] w-[500px] -translate-x-1/2 rounded-full bg-[#c9993a]/10 blur-[150px]" />
+      <div className="pointer-events-none absolute -bottom-40 left-1/2 h-[450px] w-[450px] -translate-x-1/2 rounded-full bg-[#9a7228]/10 blur-[140px]" />
+
+      <div className="relative w-full max-w-md">
+        {/* Cinema Brand Header */}
+        <div className="mb-6 flex flex-col items-center text-center">
+          <Link href="/" className="group flex flex-col items-center transition hover:opacity-90">
+            <div className="relative mb-3 flex h-20 w-20 items-center justify-center rounded-2xl border border-[#c9993a]/30 bg-gradient-to-b from-[#161410] to-[#080808] p-3 shadow-xl shadow-[#c9993a]/10 group-hover:border-[#c9993a]/60">
+              <Image
+                src="/logo.png"
+                alt="Sri Murugan Cinema"
+                width={64}
+                height={64}
+                className="object-contain"
+                priority
+              />
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span className="rounded-full border border-[#c9993a]/40 bg-[#c9993a]/10 px-3 py-0.5 text-[10px] font-bold uppercase tracking-[0.2em] text-[#e8be6a]">
+                Cafe POS Register
+              </span>
+            </div>
+
+            <h1 className="mt-2 text-2xl font-black tracking-tight text-white sm:text-3xl">
+              Sri Murugan Cinema
+            </h1>
+            <p className="mt-1 font-dancing text-lg text-[#c9993a]">
+              Concessions & Counter Login
+            </p>
+          </Link>
         </div>
 
-        <form onSubmit={handleSubmit} className="rounded-2xl border border-gray-800 bg-gray-900/50 p-4 shadow-2xl backdrop-blur sm:p-8">
-          <h2 className="mb-6 text-center text-2xl font-bold text-white">
-            Enter Your PIN
-          </h2>
-
-          {/* PIN Input */}
-          <div className="mb-6 flex justify-center gap-1.5 sm:gap-3">
-            {[0, 1, 2, 3, 4, 5].map((index) => (
-              <input
-                key={index}
-                ref={(el) => { inputRefs.current[index] = el; }}
-                type="text"
-                inputMode="numeric"
-                maxLength={1}
-                value={digits[index]}
-                onChange={(e) => handleDigitChange(index, e.target.value)}
-                onKeyDown={(e) => handleKeyDown(index, e)}
-                onPaste={handlePaste}
-                disabled={loading}
-                className="h-14 min-w-0 flex-1 rounded-lg border-2 border-gray-700 bg-gray-800 text-center text-xl font-bold text-white transition-all focus:border-amber-400 focus:outline-none disabled:opacity-50 sm:h-16 sm:max-w-14 sm:text-2xl"
-              />
-            ))}
-          </div>
-
-          {error && (
-            <div className="mb-4 rounded-lg bg-red-500/10 border border-red-500/30 px-4 py-3 text-center">
-              <p className="text-sm font-semibold text-red-400">{error}</p>
+        {/* PIN Entry Card */}
+        <div className="rounded-3xl border border-[#222018] bg-gradient-to-b from-[#111010]/95 via-[#161410]/95 to-[#080808] p-6 shadow-2xl backdrop-blur-xl sm:p-8">
+          <form onSubmit={handleSubmit}>
+            <div className="mb-5 text-center">
+              <h2 className="text-sm font-bold uppercase tracking-wider text-slate-200">
+                Enter Staff Access PIN
+              </h2>
+              <p className="mt-1 text-xs text-[#b8b2aa]">
+                4 to 6-digit numeric terminal passcode
+              </p>
             </div>
-          )}
 
-          <div className="space-y-3">
+            {/* PIN Inputs (Hidden caret, glowing boxes with dots) */}
+            <div className="mb-5 flex justify-center gap-2 sm:gap-2.5">
+              {[0, 1, 2, 3, 4, 5].map((index) => {
+                const isFilled = digits[index] !== "";
+                return (
+                  <div key={index} className="relative">
+                    <input
+                      ref={(el) => {
+                        inputRefs.current[index] = el;
+                      }}
+                      type="text"
+                      inputMode="numeric"
+                      maxLength={1}
+                      value={digits[index]}
+                      onChange={(e) => handleDigitChange(index, e.target.value)}
+                      onKeyDown={(e) => handleKeyDown(index, e)}
+                      onPaste={handlePaste}
+                      disabled={loading}
+                      aria-label={`PIN digit ${index + 1}`}
+                      className={`h-12 w-11 rounded-xl border-2 text-center font-mono text-xl font-bold transition-all sm:h-14 sm:w-13 sm:text-2xl ${
+                        isFilled
+                          ? "border-[#c9993a] bg-[#c9993a]/15 text-[#e8be6a] shadow-[0_0_12px_rgba(201,153,58,0.25)]"
+                          : "border-[#2c2820] bg-[#111010] text-white focus:border-[#c9993a] focus:bg-[#161410] focus:outline-none"
+                      } disabled:opacity-50`}
+                    />
+                    {isFilled && (
+                      <span className="pointer-events-none absolute left-1/2 top-1/2 h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#e8be6a]" />
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Error Message */}
+            {error && (
+              <div
+                role="alert"
+                className="mb-5 flex items-center gap-2.5 rounded-xl border border-rose-500/40 bg-rose-950/40 p-3 text-xs font-semibold text-rose-200"
+              >
+                <svg className="h-4 w-4 shrink-0 text-rose-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <circle cx="12" cy="12" r="10" />
+                  <line x1="12" y1="8" x2="12" y2="12" />
+                  <line x1="12" y1="16" x2="12.01" y2="16" />
+                </svg>
+                <span>{error}</span>
+              </div>
+            )}
+
+            {/* On-Screen Touch Numpad (Essential for Cinema POS Counters & Tablets) */}
+            <div className="mb-5 grid grid-cols-3 gap-2 sm:gap-2.5">
+              {["1", "2", "3", "4", "5", "6", "7", "8", "9"].map((num) => (
+                <button
+                  key={num}
+                  type="button"
+                  onClick={() => handleNumpadPress(num)}
+                  disabled={loading}
+                  className="flex h-12 items-center justify-center rounded-xl border border-[#2c2820] bg-[#161410]/80 font-mono text-lg font-bold text-white shadow-sm transition hover:border-[#c9993a]/50 hover:bg-[#222018] active:scale-95 disabled:opacity-50 sm:h-14 sm:text-xl"
+                >
+                  {num}
+                </button>
+              ))}
+
+              <button
+                type="button"
+                onClick={clearPin}
+                disabled={loading || pin.length === 0}
+                className="flex h-12 items-center justify-center rounded-xl border border-[#2c2820] bg-[#111010] text-xs font-bold uppercase tracking-wider text-[#b8b2aa] transition hover:border-rose-500/40 hover:bg-rose-950/20 hover:text-rose-300 active:scale-95 disabled:opacity-40 sm:h-14"
+              >
+                Clear
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleNumpadPress("0")}
+                disabled={loading}
+                className="flex h-12 items-center justify-center rounded-xl border border-[#2c2820] bg-[#161410]/80 font-mono text-lg font-bold text-white shadow-sm transition hover:border-[#c9993a]/50 hover:bg-[#222018] active:scale-95 disabled:opacity-50 sm:h-14 sm:text-xl"
+              >
+                0
+              </button>
+
+              <button
+                type="button"
+                onClick={handleNumpadBackspace}
+                disabled={loading || pin.length === 0}
+                className="flex h-12 items-center justify-center rounded-xl border border-[#2c2820] bg-[#111010] text-xs font-bold text-[#b8b2aa] transition hover:border-[#c9993a]/40 hover:text-white active:scale-95 disabled:opacity-40 sm:h-14"
+                aria-label="Backspace"
+              >
+                <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z" />
+                  <line x1="18" y1="9" x2="12" y2="15" />
+                  <line x1="12" y1="9" x2="18" y2="15" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Submit Button */}
             <button
               type="submit"
               disabled={loading || pin.length < 4}
-              className="w-full rounded-lg bg-amber-500 px-6 py-4 text-lg font-bold uppercase text-black transition-all hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#c9993a] via-[#e8be6a] to-[#c9993a] text-xs font-bold uppercase tracking-wider text-[#080808] shadow-lg shadow-[#c9993a]/20 transition hover:brightness-110 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
             >
-              {loading ? "Logging In..." : "Login"}
+              {loading ? (
+                <>
+                  <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                  </svg>
+                  <span>Authenticating Terminal...</span>
+                </>
+              ) : (
+                <>
+                  <span>Sign In to POS Terminal</span>
+                  <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                    <polyline points="12 5 19 12 12 19" />
+                  </svg>
+                </>
+              )}
             </button>
+          </form>
 
-            <button
-              type="button"
-              onClick={clearPin}
-              disabled={loading}
-              className="w-full rounded-lg border-2 border-gray-700 px-6 py-3 text-sm font-bold uppercase text-gray-400 transition-all hover:border-gray-600 hover:text-gray-300 disabled:opacity-50"
+          {/* Quick Footer Links */}
+          <div className="mt-6 flex items-center justify-between border-t border-[#222018] pt-4 text-xs text-[#b8b2aa]">
+            <Link
+              href="/"
+              className="inline-flex items-center gap-1.5 transition hover:text-[#e8be6a]"
             >
-              Clear
-            </button>
-          </div>
+              <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <line x1="19" y1="12" x2="5" y2="12" />
+                <polyline points="12 19 5 12 12 5" />
+              </svg>
+              <span>Cinema Website</span>
+            </Link>
 
-          <div className="mt-6 text-center text-sm text-gray-500">
-            <p>Staff members only</p>
-            <p className="mt-1">PIN is 4-6 digits</p>
+            <Link
+              href="/admin/login"
+              className="font-medium text-slate-300 transition hover:text-[#e8be6a]"
+            >
+              Admin Portal →
+            </Link>
           </div>
-        </form>
+        </div>
 
-        <div className="mt-8 text-center">
-          <a href="/admin/login" className="text-sm text-gray-500 hover:text-gray-400">
-            Admin Login →
-          </a>
+        {/* Security Notice */}
+        <div className="mt-6 flex items-center justify-center gap-2 text-center text-[11px] text-[#b8b2aa]/70">
+          <svg className="h-3.5 w-3.5 text-[#c9993a]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
+            <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+          </svg>
+          <span>Authorized Sri Murugan Staff Only • Terminal Protected</span>
         </div>
       </div>
     </main>

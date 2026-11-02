@@ -18,12 +18,12 @@ type Order = {
 };
 
 const filterTabs: { value: Filter; label: string; dotColor: string }[] = [
-  { value: "active", label: "Active Queue", dotColor: "bg-amber-400" },
-  { value: "pending", label: "New", dotColor: "bg-amber-500" },
+  { value: "active", label: "Active Queue", dotColor: "bg-[#e8be6a]" },
+  { value: "pending", label: "New", dotColor: "bg-[#c9993a]" },
   { value: "preparing", label: "Preparing", dotColor: "bg-sky-400" },
   { value: "completed", label: "Completed", dotColor: "bg-emerald-400" },
   { value: "cancelled", label: "Cancelled", dotColor: "bg-rose-400" },
-  { value: "all", label: "All Orders", dotColor: "bg-slate-400" },
+  { value: "all", label: "All Orders", dotColor: "bg-[#b8b2aa]" },
 ];
 
 function formatOrderTime(isoString: string): string {
@@ -189,33 +189,33 @@ export default function FoodOrdersPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#090c12] text-slate-100">
-      <AdminNav title="Food orders" />
+    <main className="min-h-screen bg-[#080808] text-[#f4efe8]">
+      <AdminNav title="Auditorium Order Queue" />
 
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         {/* Page Top Header */}
         <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">
-                Food & Cafe Orders
+              <h1 className="text-2xl font-black tracking-tight text-white sm:text-3xl">
+                Food &amp; Beverage Delivery
               </h1>
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-xs font-semibold text-amber-300">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-[#c9993a]/40 bg-[#c9993a]/10 px-3 py-1 text-xs font-bold text-[#e8be6a]">
                 <span className="relative flex h-2 w-2">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-400 opacity-75" />
-                  <span className="relative inline-flex h-2 w-2 rounded-full bg-amber-500" />
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#e8be6a] opacity-75" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-[#c9993a]" />
                 </span>
                 {activeCount} Active in Queue
               </span>
             </div>
-            <p className="mt-1.5 text-sm text-slate-400">
-              Only verified, pre-paid online orders appear in this live delivery queue.
+            <p className="mt-0.5 font-dancing text-lg text-[#c9993a]">
+              Direct-to-seat hot food &amp; snack delivery monitoring
             </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
             {updatedAt && (
-              <span className="text-xs font-medium text-slate-400">
+              <span className="text-xs font-medium text-[#b8b2aa]">
                 Updated {updatedAt.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
               </span>
             )}
@@ -227,10 +227,10 @@ export default function FoodOrdersPage() {
                 void loadOrders();
               }}
               disabled={isRefreshing}
-              className="inline-flex items-center gap-2 rounded-xl border border-slate-700/80 bg-slate-900/80 px-3.5 py-2 text-xs font-semibold text-slate-200 shadow-sm transition hover:border-amber-500/50 hover:bg-slate-800 disabled:opacity-50"
+              className="inline-flex items-center gap-2 rounded-xl border border-[#2c2820] bg-[#111010] px-3.5 py-2 text-xs font-semibold text-[#f4efe8] shadow-sm transition hover:border-[#c9993a]/60 hover:bg-[#161410] disabled:opacity-50"
             >
               <svg
-                className={`h-3.5 w-3.5 text-amber-400 ${isRefreshing ? "animate-spin" : ""}`}
+                className={`h-3.5 w-3.5 text-[#e8be6a] ${isRefreshing ? "animate-spin" : ""}`}
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
@@ -250,7 +250,7 @@ export default function FoodOrdersPage() {
 
         {/* Informational banner if browsing older history */}
         {browsingHistory && (
-          <div className="mb-5 flex items-center justify-between rounded-xl border border-sky-500/30 bg-sky-500/10 px-4 py-3 text-xs text-sky-200">
+          <div className="mb-5 flex items-center justify-between rounded-xl border border-sky-500/40 bg-sky-950/30 px-4 py-3 text-xs text-sky-200">
             <div className="flex items-center gap-2">
               <svg className="h-4 w-4 shrink-0 text-sky-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <circle cx="12" cy="12" r="10" />
@@ -275,7 +275,7 @@ export default function FoodOrdersPage() {
 
         {/* Error Alert */}
         {error && (
-          <div role="alert" className="mb-6 flex items-start gap-3 rounded-xl border border-rose-500/40 bg-rose-950/40 p-4 text-sm text-rose-200">
+          <div role="alert" className="mb-6 flex items-start gap-3 rounded-2xl border border-rose-500/40 bg-rose-950/40 p-4 text-sm text-rose-200">
             <svg className="mt-0.5 h-5 w-5 shrink-0 text-rose-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <circle cx="12" cy="12" r="10" />
               <line x1="12" y1="8" x2="12" y2="12" />
@@ -286,7 +286,7 @@ export default function FoodOrdersPage() {
         )}
 
         {/* Filter Tabs & Search Bar */}
-        <div className="mb-6 flex flex-col gap-4 rounded-2xl border border-slate-800/80 bg-slate-900/60 p-3 sm:flex-row sm:items-center sm:justify-between sm:p-4">
+        <div className="mb-6 flex flex-col gap-4 rounded-3xl border border-[#222018] bg-[#111010]/80 p-3 sm:flex-row sm:items-center sm:justify-between sm:p-4">
           {/* Scrollable Filters */}
           <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0" aria-label="Order status filter">
             {filterTabs.map((item) => {
@@ -300,17 +300,17 @@ export default function FoodOrdersPage() {
                   aria-pressed={isSelected}
                   className={`group relative flex shrink-0 items-center gap-2 rounded-xl px-3.5 py-2 text-xs font-semibold transition ${
                     isSelected
-                      ? "bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 shadow-md shadow-amber-500/20"
-                      : "text-slate-300 hover:bg-slate-800 hover:text-white"
+                      ? "bg-gradient-to-r from-[#c9993a] via-[#e8be6a] to-[#c9993a] text-[#080808] font-bold shadow-md shadow-[#c9993a]/20"
+                      : "border border-[#2c2820] bg-[#161410] text-[#b8b2aa] hover:border-[#c9993a]/40 hover:text-white"
                   }`}
                 >
-                  <span className={`h-1.5 w-1.5 rounded-full ${isSelected ? "bg-slate-950" : item.dotColor}`} />
+                  <span className={`h-1.5 w-1.5 rounded-full ${isSelected ? "bg-[#080808]" : item.dotColor}`} />
                   <span>{item.label}</span>
                   <span
                     className={`rounded-full px-2 py-0.5 text-[11px] font-bold tabular-nums ${
                       isSelected
-                        ? "bg-slate-950/20 text-slate-950"
-                        : "bg-slate-800 text-slate-400 group-hover:text-slate-200"
+                        ? "bg-[#080808]/20 text-[#080808]"
+                        : "bg-[#111010] text-[#b8b2aa] group-hover:text-white"
                     }`}
                   >
                     {count}
@@ -323,7 +323,7 @@ export default function FoodOrdersPage() {
           {/* Search Box */}
           <div className="relative shrink-0 sm:w-72">
             <svg
-              className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
+              className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#c9993a]"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
@@ -339,13 +339,13 @@ export default function FoodOrdersPage() {
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               placeholder="Search seat, #id, or guest..."
-              className="h-10 w-full rounded-xl border border-slate-700/80 bg-slate-900/90 pl-10 pr-9 text-xs text-white placeholder-slate-400 outline-none transition focus:border-amber-500 focus:ring-1 focus:ring-amber-500/40"
+              className="h-10 w-full rounded-xl border border-[#2c2820] bg-[#161410] pl-10 pr-9 text-xs text-[#f4efe8] placeholder-[#b8b2aa]/60 outline-none transition focus:border-[#c9993a] focus:ring-1 focus:ring-[#c9993a]/40"
             />
             {search && (
               <button
                 type="button"
                 onClick={() => setSearch("")}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#b8b2aa] hover:text-white"
                 aria-label="Clear search"
               >
                 <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -359,14 +359,14 @@ export default function FoodOrdersPage() {
 
         {/* Content Section */}
         {loading && orders.length === 0 ? (
-          <div className="flex min-h-[360px] flex-col items-center justify-center rounded-2xl border border-slate-800 bg-slate-900/30 p-8 text-center">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-amber-500/30 bg-amber-500/10 text-amber-400">
+          <div className="flex min-h-[360px] flex-col items-center justify-center rounded-3xl border border-[#222018] bg-[#111010]/50 p-8 text-center">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-[#c9993a]/30 bg-[#c9993a]/10 text-[#e8be6a]">
               <svg className="h-6 w-6 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                 <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
               </svg>
             </div>
             <p className="mt-4 text-sm font-semibold text-white">Loading orders queue...</p>
-            <p className="mt-1 text-xs text-slate-400">Connecting to Sri Murugan Cinema order stream</p>
+            <p className="mt-1 text-xs text-[#b8b2aa]">Connecting to Sri Murugan Cinema order stream</p>
           </div>
         ) : visibleOrders.length ? (
           <div className="grid gap-4">
@@ -374,19 +374,18 @@ export default function FoodOrdersPage() {
               const isPending = order.status === "pending";
               const isPreparing = order.status === "preparing";
               const isCompleted = order.status === "completed";
-              const isCancelled = order.status === "cancelled";
 
               return (
                 <article
                   key={order.id}
-                  className={`group relative overflow-hidden rounded-2xl border bg-gradient-to-b from-slate-900/90 to-[#0c101a] p-5 shadow-lg transition duration-200 hover:border-slate-700/80 ${
+                  className={`group relative overflow-hidden rounded-2xl border bg-gradient-to-b from-[#111010] to-[#0c0a08] p-5 shadow-xl transition duration-200 hover:border-[#c9993a]/50 ${
                     isPending
-                      ? "border-amber-500/40 ring-1 ring-amber-500/20"
+                      ? "border-[#c9993a]/60 ring-1 ring-[#c9993a]/30"
                       : isPreparing
-                      ? "border-sky-500/40"
+                      ? "border-sky-500/50"
                       : isCompleted
-                      ? "border-emerald-500/20"
-                      : "border-slate-800/80 opacity-75"
+                      ? "border-emerald-500/30"
+                      : "border-[#222018] opacity-75"
                   }`}
                 >
                   <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
@@ -394,7 +393,7 @@ export default function FoodOrdersPage() {
                     <div className="space-y-2">
                       <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                         {/* Order ID */}
-                        <span className="font-mono text-sm font-bold text-amber-400">
+                        <span className="font-mono text-sm font-bold text-[#e8be6a]">
                           #{order.id}
                         </span>
 
@@ -402,18 +401,18 @@ export default function FoodOrdersPage() {
                         <span
                           className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-bold uppercase tracking-wider ${
                             isPending
-                              ? "bg-amber-500/15 text-amber-300 border border-amber-500/30"
+                              ? "bg-[#c9993a]/15 text-[#e8be6a] border border-[#c9993a]/40"
                               : isPreparing
-                              ? "bg-sky-500/15 text-sky-300 border border-sky-500/30"
+                              ? "bg-sky-500/15 text-sky-300 border border-sky-500/40"
                               : isCompleted
-                              ? "bg-emerald-500/15 text-emerald-300 border border-emerald-500/30"
-                              : "bg-rose-500/15 text-rose-300 border border-rose-500/30"
+                              ? "bg-emerald-500/15 text-emerald-300 border border-emerald-500/40"
+                              : "bg-rose-500/15 text-rose-300 border border-rose-500/40"
                           }`}
                         >
                           <span
                             className={`h-1.5 w-1.5 rounded-full ${
                               isPending
-                                ? "bg-amber-400 animate-pulse"
+                                ? "bg-[#e8be6a] animate-pulse"
                                 : isPreparing
                                 ? "bg-sky-400 animate-pulse"
                                 : isCompleted
@@ -425,16 +424,16 @@ export default function FoodOrdersPage() {
                         </span>
 
                         {/* Relative Elapsed Timer */}
-                        <span className="text-xs text-slate-400 font-medium">
+                        <span className="text-xs text-[#b8b2aa] font-medium">
                           • {formatElapsed(order.createdAt)} ({formatOrderTime(order.createdAt)})
                         </span>
                       </div>
 
                       {/* Primary Destination: Seat Highlight */}
                       <div className="flex items-center gap-2">
-                        <div className="flex items-center gap-2 rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 shadow-sm">
+                        <div className="flex items-center gap-2 rounded-xl border border-[#c9993a]/40 bg-[#c9993a]/15 px-3 py-1.5 shadow-sm">
                           <svg
-                            className="h-4 w-4 shrink-0 text-amber-400"
+                            className="h-4 w-4 shrink-0 text-[#e8be6a]"
                             viewBox="0 0 24 24"
                             fill="none"
                             stroke="currentColor"
@@ -447,15 +446,15 @@ export default function FoodOrdersPage() {
                             <path d="M5 18v2" />
                             <path d="M19 18v2" />
                           </svg>
-                          <span className="text-sm font-bold text-amber-200">
+                          <span className="text-sm font-bold text-[#e8be6a]">
                             {order.seat}
                           </span>
                         </div>
 
-                        <span className="text-xs text-slate-400">
-                          Recipient:{" "}
-                          <strong className="text-slate-200">
-                            {order.customerName?.trim() || "Guest"}
+                        <span className="text-xs text-[#b8b2aa]">
+                          Guest:{" "}
+                          <strong className="text-white">
+                            {order.customerName?.trim() || "Guest Customer"}
                           </strong>
                         </span>
                       </div>
@@ -464,9 +463,9 @@ export default function FoodOrdersPage() {
                     {/* Right: Payment & Action Buttons */}
                     <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center lg:items-end">
                       {/* Price Pill */}
-                      <div className="rounded-xl border border-slate-800 bg-slate-900/80 px-3.5 py-1.5 text-right">
-                        <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Total Paid</p>
-                        <p className="text-base font-extrabold text-amber-400">
+                      <div className="rounded-xl border border-[#2c2820] bg-[#161410] px-3.5 py-1.5 text-right">
+                        <p className="text-[10px] font-semibold uppercase tracking-wider text-[#b8b2aa]">Total Paid</p>
+                        <p className="text-base font-extrabold text-[#e8be6a]">
                           {formatPrice(order.amountPaise)}
                         </p>
                       </div>
@@ -478,7 +477,7 @@ export default function FoodOrdersPage() {
                             type="button"
                             disabled={savingId === order.id}
                             onClick={() => void updateStatus(order, "preparing")}
-                            className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 px-4 py-2.5 text-xs font-bold text-slate-950 shadow-md shadow-amber-500/20 transition hover:brightness-110 active:scale-[0.98] disabled:opacity-50"
+                            className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#c9993a] via-[#e8be6a] to-[#c9993a] px-4 py-2.5 text-xs font-bold text-[#080808] shadow-md shadow-[#c9993a]/20 transition hover:brightness-110 active:scale-95 disabled:opacity-50"
                           >
                             <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                               <circle cx="12" cy="12" r="10" />
@@ -493,7 +492,7 @@ export default function FoodOrdersPage() {
                             type="button"
                             disabled={savingId === order.id}
                             onClick={() => void updateStatus(order, "completed")}
-                            className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 px-4 py-2.5 text-xs font-bold text-white shadow-md shadow-emerald-500/20 transition hover:brightness-110 active:scale-[0.98] disabled:opacity-50"
+                            className="inline-flex items-center gap-2 rounded-xl bg-emerald-500 px-4 py-2.5 text-xs font-bold text-black shadow-md shadow-emerald-500/20 transition hover:bg-emerald-400 active:scale-95 disabled:opacity-50"
                           >
                             <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                               <polyline points="20 6 9 17 4 12" />
@@ -521,25 +520,25 @@ export default function FoodOrdersPage() {
                   </div>
 
                   {/* Items Ordered List */}
-                  <div className="mt-4 border-t border-slate-800/80 pt-3">
-                    <p className="mb-2 text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                      Food & Beverage Items ({order.items?.reduce((s, i) => s + i.quantity, 0) || 0})
+                  <div className="mt-4 border-t border-[#222018] pt-3">
+                    <p className="mb-2 text-[11px] font-bold uppercase tracking-wider text-[#b8b2aa]">
+                      Food &amp; Beverage Items ({order.items?.reduce((s, i) => s + i.quantity, 0) || 0})
                     </p>
                     <div className="flex flex-wrap gap-2">
                       {Array.isArray(order.items) &&
                         order.items.map((item, index) => (
                           <div
                             key={`${item.name}-${index}`}
-                            className="inline-flex items-center gap-2 rounded-xl border border-slate-800 bg-slate-900/90 px-3 py-1.5 text-xs"
+                            className="inline-flex items-center gap-2 rounded-xl border border-[#2c2820] bg-[#161410] px-3 py-1.5 text-xs"
                           >
-                            <span className="flex h-5 w-5 items-center justify-center rounded-lg bg-amber-500/20 font-bold text-amber-300">
+                            <span className="flex h-5 w-5 items-center justify-center rounded-lg bg-[#c9993a]/20 font-bold text-[#e8be6a]">
                               {item.quantity}×
                             </span>
-                            <span className="font-semibold text-slate-200">
+                            <span className="font-semibold text-white">
                               {item.name}
                             </span>
                             {item.variantName && (
-                              <span className="rounded-md border border-slate-700/80 bg-slate-800/60 px-1.5 py-0.5 text-[10px] text-slate-300">
+                              <span className="rounded-md border border-[#2c2820] bg-[#111010] px-1.5 py-0.5 text-[10px] text-[#b8b2aa]">
                                 {item.variantName}
                               </span>
                             )}
@@ -550,13 +549,13 @@ export default function FoodOrdersPage() {
 
                   {/* Footer metadata: Payment ID */}
                   {order.razorpayPaymentId && (
-                    <div className="mt-3 flex items-center gap-2 text-[11px] text-slate-400">
-                      <svg className="h-3.5 w-3.5 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <div className="mt-3 flex items-center gap-2 text-[11px] text-[#b8b2aa]">
+                      <svg className="h-3.5 w-3.5 text-[#c9993a]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
                         <line x1="1" y1="10" x2="23" y2="10" />
                       </svg>
                       <span>Razorpay ID:</span>
-                      <code className="rounded bg-slate-950 px-1.5 py-0.5 font-mono text-[10px] text-slate-300">
+                      <code className="rounded bg-[#080808] px-1.5 py-0.5 font-mono text-[10px] text-[#e8be6a]">
                         {order.razorpayPaymentId}
                       </code>
                     </div>
@@ -566,9 +565,9 @@ export default function FoodOrdersPage() {
             })}
           </div>
         ) : (
-          <div className="flex min-h-[360px] flex-col items-center justify-center rounded-2xl border border-dashed border-slate-800 bg-slate-900/20 p-8 text-center">
-            <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-slate-800 bg-slate-900 text-slate-400">
-              <svg className="h-8 w-8 text-amber-400/80" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+          <div className="flex min-h-[360px] flex-col items-center justify-center rounded-3xl border border-dashed border-[#222018] bg-[#111010]/30 p-8 text-center">
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-[#2c2820] bg-[#161410] text-[#c9993a]">
+              <svg className="h-8 w-8 text-[#c9993a]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                 <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
                 <path d="M3 6h18" />
                 <path d="M16 10a4 4 0 0 1-8 0" />
@@ -577,7 +576,7 @@ export default function FoodOrdersPage() {
             <h3 className="mt-4 text-base font-bold text-white">
               {search ? "No matching orders found" : "No orders in this view"}
             </h3>
-            <p className="mt-1 max-w-sm text-xs text-slate-400">
+            <p className="mt-1 max-w-sm text-xs text-[#b8b2aa]">
               {search
                 ? `No orders matched "${search}". Try searching by order number, guest name, or screen.`
                 : "When customers order from their seats via the QR menu, confirmed orders will display here automatically."}
@@ -586,7 +585,7 @@ export default function FoodOrdersPage() {
               <button
                 type="button"
                 onClick={() => setSearch("")}
-                className="mt-4 inline-flex items-center gap-1.5 rounded-xl border border-slate-700 bg-slate-800 px-3 py-1.5 text-xs font-semibold text-slate-200 hover:bg-slate-700"
+                className="mt-4 inline-flex items-center gap-1.5 rounded-xl border border-[#2c2820] bg-[#161410] px-3 py-1.5 text-xs font-semibold text-[#f4efe8] hover:border-[#c9993a]/50"
               >
                 Clear Search
               </button>
@@ -601,18 +600,18 @@ export default function FoodOrdersPage() {
               type="button"
               disabled={loadingMore}
               onClick={() => void loadOrders(nextCursor)}
-              className="inline-flex items-center gap-2 rounded-xl border border-slate-700/80 bg-slate-900/80 px-6 py-2.5 text-xs font-semibold text-slate-200 shadow-sm transition hover:border-amber-500/50 hover:bg-slate-800 disabled:opacity-50"
+              className="inline-flex items-center gap-2 rounded-xl border border-[#2c2820] bg-[#111010] px-6 py-2.5 text-xs font-semibold text-[#f4efe8] shadow-sm transition hover:border-[#c9993a]/50 hover:bg-[#161410] disabled:opacity-50"
             >
               {loadingMore ? (
                 <>
-                  <svg className="h-3.5 w-3.5 animate-spin text-amber-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <svg className="h-3.5 w-3.5 animate-spin text-[#e8be6a]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                     <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
                   </svg>
                   <span>Loading older orders...</span>
                 </>
               ) : (
                 <>
-                  <svg className="h-3.5 w-3.5 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <svg className="h-3.5 w-3.5 text-[#c9993a]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <polyline points="6 9 12 15 18 9" />
                   </svg>
                   <span>Load More Orders</span>

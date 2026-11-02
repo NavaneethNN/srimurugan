@@ -239,30 +239,30 @@ export default function CafeMenuPage() {
   });
 
   return (
-    <main className="min-h-screen bg-[#090c12] text-slate-100">
+    <main className="min-h-screen bg-[#080808] text-[#f4efe8]">
       <AdminNav title="Menu & Catalog" />
 
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         {/* Top Header */}
         <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">
+            <h1 className="text-2xl font-black tracking-tight text-white sm:text-3xl">
               Cafe Menu Catalog
             </h1>
-            <p className="mt-1 text-sm text-slate-400">
-              Manage cinema concession products, multi-size pricing tiers, tags, and category taxonomies.
+            <p className="mt-0.5 font-dancing text-lg text-[#c9993a]">
+              Concessions catalog, multi-tier pricing, and category hierarchies
             </p>
           </div>
 
           {/* Action Tabs */}
-          <div className="flex items-center gap-2 rounded-xl border border-slate-800 bg-slate-900/80 p-1">
+          <div className="flex items-center gap-2 rounded-2xl border border-[#222018] bg-[#111010] p-1.5 shadow-xl">
             <button
               type="button"
               onClick={() => setActiveTab("products")}
-              className={`flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-bold transition ${
+              className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition ${
                 activeTab === "products"
-                  ? "bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 shadow-md shadow-amber-500/20"
-                  : "text-slate-400 hover:text-white"
+                  ? "bg-gradient-to-r from-[#c9993a] via-[#e8be6a] to-[#c9993a] text-[#080808] shadow-md shadow-[#c9993a]/20"
+                  : "text-[#b8b2aa] hover:text-white"
               }`}
             >
               <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -276,10 +276,10 @@ export default function CafeMenuPage() {
             <button
               type="button"
               onClick={() => setActiveTab("categories")}
-              className={`flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-bold transition ${
+              className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition ${
                 activeTab === "categories"
-                  ? "bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 shadow-md shadow-amber-500/20"
-                  : "text-slate-400 hover:text-white"
+                  ? "bg-gradient-to-r from-[#c9993a] via-[#e8be6a] to-[#c9993a] text-[#080808] shadow-md shadow-[#c9993a]/20"
+                  : "text-[#b8b2aa] hover:text-white"
               }`}
             >
               <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -333,8 +333,8 @@ export default function CafeMenuPage() {
         )}
 
         {loading ? (
-          <div className="flex min-h-[400px] flex-col items-center justify-center rounded-2xl border border-slate-800 bg-slate-900/30 text-center">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-amber-500/30 bg-amber-500/10 text-amber-400">
+          <div className="flex min-h-[400px] flex-col items-center justify-center rounded-3xl border border-[#222018] bg-[#111010]/50 text-center">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-[#c9993a]/30 bg-[#c9993a]/10 text-[#e8be6a]">
               <svg className="h-6 w-6 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                 <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
               </svg>
@@ -345,16 +345,16 @@ export default function CafeMenuPage() {
           /* Products Workspace */
           <div className="grid gap-8 lg:grid-cols-[420px_1fr]">
             {/* Left: Product Form */}
-            <div className="h-fit rounded-2xl border border-slate-800/80 bg-gradient-to-b from-slate-900/90 to-[#0c101a] p-6 shadow-xl">
+            <div className="h-fit rounded-3xl border border-[#222018] bg-gradient-to-b from-[#111010] to-[#0c0a08] p-6 shadow-2xl">
               <div className="mb-5 flex items-center justify-between">
                 <div>
                   <h2 className="text-lg font-bold text-white">
                     {editingProductId ? "Edit Concession Item" : "Add Concession Item"}
                   </h2>
-                  <p className="text-xs text-slate-400">Configure item details and variant pricing</p>
+                  <p className="text-xs text-[#b8b2aa]">Configure item details and variant pricing</p>
                 </div>
                 {editingProductId && (
-                  <span className="rounded-full border border-amber-500/40 bg-amber-500/10 px-2.5 py-0.5 text-[10px] font-bold text-amber-300">
+                  <span className="rounded-full border border-[#c9993a]/40 bg-[#c9993a]/15 px-2.5 py-0.5 text-[10px] font-bold text-[#e8be6a]">
                     Editing #{editingProductId}
                   </span>
                 )}
@@ -363,8 +363,8 @@ export default function CafeMenuPage() {
               <form onSubmit={saveProduct} className="space-y-4">
                 {/* Product Name */}
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300">
-                    Item Name <span className="text-amber-400">*</span>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-[#b8b2aa]">
+                    Item Name <span className="text-[#e8be6a]">*</span>
                   </label>
                   <input
                     type="text"
@@ -372,7 +372,7 @@ export default function CafeMenuPage() {
                     maxLength={120}
                     value={product.name}
                     onChange={(e) => setProduct({ ...product, name: e.target.value })}
-                    className="mt-1.5 w-full rounded-xl border border-slate-700/80 bg-slate-900/90 px-3.5 py-2.5 text-xs text-white placeholder-slate-400 outline-none transition focus:border-amber-500 focus:ring-1 focus:ring-amber-500/40"
+                    className="mt-1.5 w-full rounded-xl border border-[#2c2820] bg-[#161410] px-3.5 py-2.5 text-xs text-[#f4efe8] placeholder-[#b8b2aa]/50 outline-none transition focus:border-[#c9993a] focus:ring-1 focus:ring-[#c9993a]/40"
                     placeholder="e.g. Cheese Popcorn Tub"
                   />
                 </div>
@@ -380,14 +380,14 @@ export default function CafeMenuPage() {
                 {/* Category & Order */}
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300">
-                      Category <span className="text-amber-400">*</span>
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-[#b8b2aa]">
+                      Category <span className="text-[#e8be6a]">*</span>
                     </label>
                     <select
                       required
                       value={product.categoryId || ""}
                       onChange={(e) => setProduct({ ...product, categoryId: Number(e.target.value) })}
-                      className="mt-1.5 w-full rounded-xl border border-slate-700/80 bg-slate-900/90 px-3 py-2.5 text-xs text-white outline-none transition focus:border-amber-500 focus:ring-1 focus:ring-amber-500/40"
+                      className="mt-1.5 w-full rounded-xl border border-[#2c2820] bg-[#161410] px-3 py-2.5 text-xs text-[#f4efe8] outline-none transition focus:border-[#c9993a] focus:ring-1 focus:ring-[#c9993a]/40"
                     >
                       <option value="">Select Category</option>
                       {categories.map((cat) => (
@@ -399,7 +399,7 @@ export default function CafeMenuPage() {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300">
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-[#b8b2aa]">
                       Sort Order
                     </label>
                     <input
@@ -408,14 +408,14 @@ export default function CafeMenuPage() {
                       max="10000"
                       value={product.sortOrder}
                       onChange={(e) => setProduct({ ...product, sortOrder: Number(e.target.value) })}
-                      className="mt-1.5 w-full rounded-xl border border-slate-700/80 bg-slate-900/90 px-3 py-2.5 text-xs text-white outline-none transition focus:border-amber-500 focus:ring-1 focus:ring-amber-500/40"
+                      className="mt-1.5 w-full rounded-xl border border-[#2c2820] bg-[#161410] px-3 py-2.5 text-xs text-[#f4efe8] outline-none transition focus:border-[#c9993a]"
                     />
                   </div>
                 </div>
 
                 {/* Description */}
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300">
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-[#b8b2aa]">
                     Description
                   </label>
                   <textarea
@@ -423,7 +423,7 @@ export default function CafeMenuPage() {
                     rows={2}
                     value={product.description}
                     onChange={(e) => setProduct({ ...product, description: e.target.value })}
-                    className="mt-1.5 w-full rounded-xl border border-slate-700/80 bg-slate-900/90 px-3.5 py-2.5 text-xs text-white placeholder-slate-400 outline-none transition focus:border-amber-500 focus:ring-1 focus:ring-amber-500/40"
+                    className="mt-1.5 w-full rounded-xl border border-[#2c2820] bg-[#161410] px-3.5 py-2.5 text-xs text-[#f4efe8] placeholder-[#b8b2aa]/50 outline-none transition focus:border-[#c9993a] focus:ring-1 focus:ring-[#c9993a]/40"
                     placeholder="Crispy gourmet popcorn seasoned with cheddar cheese..."
                   />
                 </div>
@@ -431,19 +431,19 @@ export default function CafeMenuPage() {
                 {/* Image URL & Tag */}
                 <div className="space-y-3">
                   <div>
-                    <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300">
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-[#b8b2aa]">
                       Image URL / Path
                     </label>
                     <input
                       type="text"
                       value={product.imageUrl}
                       onChange={(e) => setProduct({ ...product, imageUrl: e.target.value })}
-                      className="mt-1.5 w-full rounded-xl border border-slate-700/80 bg-slate-900/90 px-3.5 py-2.5 text-xs text-white placeholder-slate-400 outline-none transition focus:border-amber-500 focus:ring-1 focus:ring-amber-500/40"
+                      className="mt-1.5 w-full rounded-xl border border-[#2c2820] bg-[#161410] px-3.5 py-2.5 text-xs text-[#f4efe8] placeholder-[#b8b2aa]/50 outline-none transition focus:border-[#c9993a]"
                       placeholder="e.g. /food/popcorn.jpg or https://..."
                     />
                     {product.imageUrl && (
-                      <div className="mt-2 flex items-center gap-3 rounded-xl border border-slate-800 bg-slate-950/60 p-2">
-                        <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-lg bg-slate-900">
+                      <div className="mt-2 flex items-center gap-3 rounded-xl border border-[#222018] bg-[#080808] p-2">
+                        <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-lg bg-[#111010]">
                           <Image
                             src={product.imageUrl}
                             alt="Preview"
@@ -453,13 +453,13 @@ export default function CafeMenuPage() {
                             unoptimized
                           />
                         </div>
-                        <span className="truncate text-[11px] text-slate-400">Preview: {product.imageUrl}</span>
+                        <span className="truncate text-[11px] text-[#b8b2aa]">Preview: {product.imageUrl}</span>
                       </div>
                     )}
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300">
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-[#b8b2aa]">
                       Highlight Tag (Optional)
                     </label>
                     <input
@@ -467,34 +467,34 @@ export default function CafeMenuPage() {
                       maxLength={80}
                       value={product.tag}
                       onChange={(e) => setProduct({ ...product, tag: e.target.value })}
-                      className="mt-1.5 w-full rounded-xl border border-slate-700/80 bg-slate-900/90 px-3.5 py-2.5 text-xs text-white placeholder-slate-400 outline-none transition focus:border-amber-500 focus:ring-1 focus:ring-amber-500/40"
+                      className="mt-1.5 w-full rounded-xl border border-[#2c2820] bg-[#161410] px-3.5 py-2.5 text-xs text-[#f4efe8] placeholder-[#b8b2aa]/50 outline-none transition focus:border-[#c9993a]"
                       placeholder="e.g. Best Seller, Veg, Must Try"
                     />
                   </div>
                 </div>
 
                 {/* Available toggle */}
-                <div className="flex items-center gap-3 rounded-xl border border-slate-800 bg-slate-950/50 p-3">
+                <div className="flex items-center gap-3 rounded-xl border border-[#222018] bg-[#161410]/70 p-3">
                   <input
                     type="checkbox"
                     id="product-available"
                     checked={product.isAvailable}
                     onChange={(e) => setProduct({ ...product, isAvailable: e.target.checked })}
-                    className="h-4 w-4 rounded accent-amber-500"
+                    className="h-4 w-4 rounded accent-[#c9993a]"
                   />
-                  <label htmlFor="product-available" className="cursor-pointer text-xs font-medium text-slate-200">
+                  <label htmlFor="product-available" className="cursor-pointer text-xs font-medium text-[#f4efe8]">
                     Available for customers to order in cinema
                   </label>
                 </div>
 
                 {/* Variants & Pricing */}
-                <div className="border-t border-slate-800/80 pt-4">
+                <div className="border-t border-[#222018] pt-4">
                   <div className="mb-3 flex items-center justify-between">
                     <div>
-                      <p className="text-xs font-bold uppercase tracking-wider text-amber-400">
+                      <p className="text-xs font-bold uppercase tracking-wider text-[#e8be6a]">
                         Size & Pricing Variants
                       </p>
-                      <p className="text-[11px] text-slate-400">Each item needs at least 1 price option</p>
+                      <p className="text-[11px] text-[#b8b2aa]">Each item needs at least 1 price option</p>
                     </div>
                     <button
                       type="button"
@@ -504,7 +504,7 @@ export default function CafeMenuPage() {
                           variants: [...product.variants, { name: "", price: "" }],
                         })
                       }
-                      className="inline-flex items-center gap-1 rounded-lg border border-amber-500/40 bg-amber-500/10 px-2.5 py-1 text-[11px] font-bold text-amber-300 transition hover:bg-amber-500/20"
+                      className="inline-flex items-center gap-1 rounded-lg border border-[#c9993a]/40 bg-[#c9993a]/15 px-2.5 py-1 text-[11px] font-bold text-[#e8be6a] transition hover:bg-[#c9993a]/25"
                     >
                       <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                         <line x1="12" y1="5" x2="12" y2="19" />
@@ -524,10 +524,10 @@ export default function CafeMenuPage() {
                           value={variant.name}
                           onChange={(e) => updateVariant(index, "name", e.target.value)}
                           placeholder="e.g. Regular, Large"
-                          className="flex-1 rounded-xl border border-slate-700/80 bg-slate-900/90 px-3 py-2 text-xs text-white placeholder-slate-400 outline-none transition focus:border-amber-500"
+                          className="flex-1 rounded-xl border border-[#2c2820] bg-[#161410] px-3 py-2 text-xs text-[#f4efe8] placeholder-[#b8b2aa]/50 outline-none transition focus:border-[#c9993a]"
                         />
                         <div className="relative w-28 shrink-0">
-                          <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">
+                          <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-[#b8b2aa]">
                             ₹
                           </span>
                           <input
@@ -537,7 +537,7 @@ export default function CafeMenuPage() {
                             value={variant.price}
                             onChange={(e) => updateVariant(index, "price", e.target.value)}
                             placeholder="120"
-                            className="w-full rounded-xl border border-slate-700/80 bg-slate-900/90 pl-7 pr-3 py-2 text-xs font-semibold text-white placeholder-slate-400 outline-none transition focus:border-amber-500"
+                            className="w-full rounded-xl border border-[#2c2820] bg-[#161410] pl-7 pr-3 py-2 text-xs font-semibold text-[#f4efe8] placeholder-[#b8b2aa]/50 outline-none transition focus:border-[#c9993a]"
                           />
                         </div>
                         <button
@@ -549,7 +549,7 @@ export default function CafeMenuPage() {
                               variants: product.variants.filter((_, i) => i !== index),
                             })
                           }
-                          className="flex h-8 w-8 items-center justify-center rounded-xl border border-slate-700 bg-slate-800 text-slate-400 transition hover:border-rose-500/50 hover:bg-rose-500/20 hover:text-rose-300 disabled:opacity-30"
+                          className="flex h-8 w-8 items-center justify-center rounded-xl border border-[#2c2820] bg-[#111010] text-[#b8b2aa] transition hover:border-rose-500/50 hover:bg-rose-500/20 hover:text-rose-300 disabled:opacity-30"
                           aria-label="Remove variant"
                         >
                           <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -567,7 +567,7 @@ export default function CafeMenuPage() {
                   <button
                     type="submit"
                     disabled={saving || !categories.length}
-                    className="flex-1 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-slate-950 shadow-md shadow-amber-500/20 transition hover:brightness-110 active:scale-[0.98] disabled:opacity-50"
+                    className="flex-1 rounded-xl bg-gradient-to-r from-[#c9993a] via-[#e8be6a] to-[#c9993a] px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-[#080808] shadow-md shadow-[#c9993a]/20 transition hover:brightness-110 active:scale-95 disabled:opacity-50"
                   >
                     {saving ? "Saving..." : editingProductId ? "Update Product" : "Save Product"}
                   </button>
@@ -575,7 +575,7 @@ export default function CafeMenuPage() {
                     <button
                       type="button"
                       onClick={resetProduct}
-                      className="rounded-xl border border-slate-700/80 bg-slate-800 px-4 py-2.5 text-xs font-semibold text-slate-300 transition hover:bg-slate-700"
+                      className="rounded-xl border border-[#2c2820] bg-[#161410] px-4 py-2.5 text-xs font-semibold text-[#b8b2aa] transition hover:bg-[#222018] hover:text-white"
                     >
                       Cancel
                     </button>
@@ -587,7 +587,7 @@ export default function CafeMenuPage() {
             {/* Right: Products Grid */}
             <div className="space-y-4">
               {/* Product Filters Toolbar */}
-              <div className="flex flex-col gap-3 rounded-2xl border border-slate-800/80 bg-slate-900/60 p-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex flex-col gap-3 rounded-2xl border border-[#222018] bg-[#111010]/80 p-3 sm:flex-row sm:items-center sm:justify-between">
                 {/* Category Pills */}
                 <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
                   <button
@@ -595,8 +595,8 @@ export default function CafeMenuPage() {
                     onClick={() => setSelectedCategoryFilter("all")}
                     className={`rounded-xl px-3 py-1.5 text-xs font-bold transition ${
                       selectedCategoryFilter === "all"
-                        ? "bg-amber-500 text-slate-950"
-                        : "border border-slate-800 bg-slate-900/90 text-slate-400 hover:text-white"
+                        ? "bg-gradient-to-r from-[#c9993a] via-[#e8be6a] to-[#c9993a] text-[#080808]"
+                        : "border border-[#2c2820] bg-[#161410] text-[#b8b2aa] hover:text-white"
                     }`}
                   >
                     All ({products.length})
@@ -610,8 +610,8 @@ export default function CafeMenuPage() {
                         onClick={() => setSelectedCategoryFilter(cat.id)}
                         className={`shrink-0 rounded-xl px-3 py-1.5 text-xs font-semibold transition ${
                           selectedCategoryFilter === cat.id
-                            ? "bg-amber-500 text-slate-950"
-                            : "border border-slate-800 bg-slate-900/90 text-slate-400 hover:text-white"
+                            ? "bg-gradient-to-r from-[#c9993a] via-[#e8be6a] to-[#c9993a] text-[#080808] font-bold"
+                            : "border border-[#2c2820] bg-[#161410] text-[#b8b2aa] hover:text-white"
                         }`}
                       >
                         {cat.name} ({count})
@@ -623,7 +623,7 @@ export default function CafeMenuPage() {
                 {/* Product Search */}
                 <div className="relative shrink-0 sm:w-60">
                   <svg
-                    className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400"
+                    className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#c9993a]"
                     viewBox="0 0 24 24"
                     fill="none"
                     stroke="currentColor"
@@ -637,15 +637,15 @@ export default function CafeMenuPage() {
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Search menu..."
-                    className="h-9 w-full rounded-xl border border-slate-700/80 bg-slate-900/90 pl-9 pr-3 text-xs text-white placeholder-slate-400 outline-none transition focus:border-amber-500"
+                    className="h-9 w-full rounded-xl border border-[#2c2820] bg-[#161410] pl-9 pr-3 text-xs text-[#f4efe8] placeholder-[#b8b2aa]/50 outline-none transition focus:border-[#c9993a]"
                   />
                 </div>
               </div>
 
               {/* Items Card List */}
               {filteredProducts.length === 0 ? (
-                <div className="flex min-h-[300px] flex-col items-center justify-center rounded-2xl border border-dashed border-slate-800 bg-slate-900/20 p-8 text-center">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-800 bg-slate-900 text-amber-400">
+                <div className="flex min-h-[300px] flex-col items-center justify-center rounded-3xl border border-dashed border-[#222018] bg-[#111010]/30 p-8 text-center">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-[#2c2820] bg-[#161410] text-[#c9993a]">
                     <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
                       <path d="M18 2v6a3 3 0 0 1-3 3 3 3 0 0 1-3-3V2" />
                       <path d="M15 2v19" />
@@ -654,7 +654,7 @@ export default function CafeMenuPage() {
                     </svg>
                   </div>
                   <h3 className="mt-3 text-sm font-bold text-white">No products found</h3>
-                  <p className="mt-1 text-xs text-slate-400">
+                  <p className="mt-1 text-xs text-[#b8b2aa]">
                     {searchQuery ? `No menu items match "${searchQuery}"` : "Add your first menu item using the form on the left"}
                   </p>
                 </div>
@@ -665,7 +665,7 @@ export default function CafeMenuPage() {
                     return (
                       <div
                         key={item.id}
-                        className="group flex flex-col justify-between rounded-2xl border border-slate-800/80 bg-gradient-to-b from-slate-900/80 to-[#0c101a] p-4 shadow-md transition hover:border-slate-700"
+                        className="group flex flex-col justify-between rounded-2xl border border-[#222018] bg-gradient-to-b from-[#111010] to-[#0c0a08] p-4 shadow-md transition hover:border-[#c9993a]/50"
                       >
                         <div>
                           <div className="flex items-start justify-between gap-3">
@@ -673,22 +673,22 @@ export default function CafeMenuPage() {
                               <div className="flex flex-wrap items-center gap-1.5">
                                 <h3 className="text-sm font-bold text-white">{item.name}</h3>
                                 {item.tag && (
-                                  <span className="rounded-md border border-amber-500/40 bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-bold text-amber-300">
+                                  <span className="rounded-md border border-[#c9993a]/40 bg-[#c9993a]/15 px-1.5 py-0.5 text-[10px] font-bold text-[#e8be6a]">
                                     {item.tag}
                                   </span>
                                 )}
                               </div>
-                              <p className="mt-0.5 text-[11px] font-semibold text-slate-400">{catName}</p>
+                              <p className="mt-0.5 text-[11px] font-semibold text-[#b8b2aa]">{catName}</p>
                               {item.description && (
-                                <p className="mt-1.5 line-clamp-2 text-xs text-slate-300">{item.description}</p>
+                                <p className="mt-1.5 line-clamp-2 text-xs text-[#b8b2aa]">{item.description}</p>
                               )}
                             </div>
 
                             <span
                               className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
                                 item.isAvailable
-                                  ? "bg-emerald-500/15 text-emerald-300 border border-emerald-500/30"
-                                  : "bg-rose-500/15 text-rose-300 border border-rose-500/30"
+                                  ? "bg-emerald-500/15 text-emerald-300 border border-emerald-500/40"
+                                  : "bg-rose-500/15 text-rose-300 border border-rose-500/40"
                               }`}
                             >
                               {item.isAvailable ? "Available" : "Hidden"}
@@ -696,22 +696,22 @@ export default function CafeMenuPage() {
                           </div>
 
                           {/* Variants pricing breakdown */}
-                          <div className="mt-3 space-y-1 rounded-xl border border-slate-800/60 bg-slate-950/40 p-2.5">
+                          <div className="mt-3 space-y-1 rounded-xl border border-[#222018] bg-[#161410] p-2.5">
                             {item.variants.map((v) => (
                               <div key={v.id} className="flex items-center justify-between text-xs">
-                                <span className="text-slate-300">{v.name}</span>
-                                <span className="font-bold text-amber-400">{formatPrice(v.pricePaise)}</span>
+                                <span className="text-[#b8b2aa]">{v.name}</span>
+                                <span className="font-bold text-[#e8be6a]">{formatPrice(v.pricePaise)}</span>
                               </div>
                             ))}
                           </div>
                         </div>
 
                         {/* Action buttons */}
-                        <div className="mt-3 flex items-center gap-2 border-t border-slate-800/60 pt-3">
+                        <div className="mt-3 flex items-center gap-2 border-t border-[#222018] pt-3">
                           <button
                             type="button"
                             onClick={() => editProduct(item)}
-                            className="flex-1 rounded-xl border border-slate-700/80 bg-slate-800/80 px-3 py-1.5 text-xs font-semibold text-slate-200 transition hover:border-amber-500/50 hover:bg-slate-700 hover:text-white"
+                            className="flex-1 rounded-xl border border-[#2c2820] bg-[#161410] px-3 py-1.5 text-xs font-semibold text-[#f4efe8] transition hover:border-[#c9993a]/50 hover:text-white"
                           >
                             Edit
                           </button>
@@ -734,18 +734,18 @@ export default function CafeMenuPage() {
           /* Categories Workspace */
           <div className="grid gap-8 lg:grid-cols-[400px_1fr]">
             {/* Category Form */}
-            <div className="h-fit rounded-2xl border border-slate-800/80 bg-gradient-to-b from-slate-900/90 to-[#0c101a] p-6 shadow-xl">
+            <div className="h-fit rounded-3xl border border-[#222018] bg-gradient-to-b from-[#111010] to-[#0c0a08] p-6 shadow-2xl">
               <div className="mb-5">
                 <h2 className="text-lg font-bold text-white">
                   {editingCategoryId ? "Edit Menu Category" : "Add Menu Category"}
                 </h2>
-                <p className="text-xs text-slate-400">Organize food and drink offerings into sections</p>
+                <p className="text-xs text-[#b8b2aa]">Organize food and drink offerings into sections</p>
               </div>
 
               <form onSubmit={saveCategory} className="space-y-4">
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300">
-                    Category Name <span className="text-amber-400">*</span>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-[#b8b2aa]">
+                    Category Name <span className="text-[#e8be6a]">*</span>
                   </label>
                   <input
                     type="text"
@@ -753,13 +753,13 @@ export default function CafeMenuPage() {
                     maxLength={80}
                     value={categoryName}
                     onChange={(e) => setCategoryName(e.target.value)}
-                    className="mt-1.5 w-full rounded-xl border border-slate-700/80 bg-slate-900/90 px-3.5 py-2.5 text-xs text-white placeholder-slate-400 outline-none transition focus:border-amber-500"
+                    className="mt-1.5 w-full rounded-xl border border-[#2c2820] bg-[#161410] px-3.5 py-2.5 text-xs text-[#f4efe8] placeholder-[#b8b2aa]/50 outline-none transition focus:border-[#c9993a]"
                     placeholder="e.g. Popcorn, Cold Beverages, Combos"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300">
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-[#b8b2aa]">
                     Display Order
                   </label>
                   <input
@@ -768,7 +768,7 @@ export default function CafeMenuPage() {
                     max="10000"
                     value={categoryOrder}
                     onChange={(e) => setCategoryOrder(Number(e.target.value))}
-                    className="mt-1.5 w-full rounded-xl border border-slate-700/80 bg-slate-900/90 px-3.5 py-2.5 text-xs text-white outline-none transition focus:border-amber-500"
+                    className="mt-1.5 w-full rounded-xl border border-[#2c2820] bg-[#161410] px-3.5 py-2.5 text-xs text-[#f4efe8] outline-none transition focus:border-[#c9993a]"
                   />
                 </div>
 
@@ -776,7 +776,7 @@ export default function CafeMenuPage() {
                   <button
                     type="submit"
                     disabled={saving}
-                    className="flex-1 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-slate-950 shadow-md shadow-amber-500/20 transition hover:brightness-110 active:scale-[0.98] disabled:opacity-50"
+                    className="flex-1 rounded-xl bg-gradient-to-r from-[#c9993a] via-[#e8be6a] to-[#c9993a] px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-[#080808] shadow-md shadow-[#c9993a]/20 transition hover:brightness-110 active:scale-95 disabled:opacity-50"
                   >
                     {saving ? "Saving..." : editingCategoryId ? "Update Category" : "Create Category"}
                   </button>
@@ -784,7 +784,7 @@ export default function CafeMenuPage() {
                     <button
                       type="button"
                       onClick={resetCategory}
-                      className="rounded-xl border border-slate-700/80 bg-slate-800 px-4 py-2.5 text-xs font-semibold text-slate-300 transition hover:bg-slate-700"
+                      className="rounded-xl border border-[#2c2820] bg-[#161410] px-4 py-2.5 text-xs font-semibold text-[#b8b2aa] transition hover:bg-[#222018] hover:text-white"
                     >
                       Cancel
                     </button>
@@ -800,8 +800,8 @@ export default function CafeMenuPage() {
               </div>
 
               {categories.length === 0 ? (
-                <div className="flex min-h-[250px] flex-col items-center justify-center rounded-2xl border border-dashed border-slate-800 bg-slate-900/20 p-8 text-center">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-800 bg-slate-900 text-amber-400">
+                <div className="flex min-h-[250px] flex-col items-center justify-center rounded-3xl border border-dashed border-[#222018] bg-[#111010]/30 p-8 text-center">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-[#2c2820] bg-[#161410] text-[#c9993a]">
                     <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
                       <rect width="8" height="4" x="8" y="2" rx="1" ry="1" />
                       <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
@@ -810,7 +810,7 @@ export default function CafeMenuPage() {
                     </svg>
                   </div>
                   <h3 className="mt-3 text-sm font-bold text-white">No categories configured</h3>
-                  <p className="mt-1 text-xs text-slate-400">Add categories to group your cinema food menu</p>
+                  <p className="mt-1 text-xs text-[#b8b2aa]">Add categories to group your cinema food menu</p>
                 </div>
               ) : (
                 <div className="grid gap-3 sm:grid-cols-2">
@@ -819,21 +819,21 @@ export default function CafeMenuPage() {
                     return (
                       <div
                         key={category.id}
-                        className="flex flex-col justify-between rounded-2xl border border-slate-800/80 bg-gradient-to-b from-slate-900/80 to-[#0c101a] p-4 shadow-md transition hover:border-slate-700"
+                        className="flex flex-col justify-between rounded-2xl border border-[#222018] bg-gradient-to-b from-[#111010] to-[#0c0a08] p-4 shadow-md transition hover:border-[#c9993a]/50"
                       >
                         <div className="flex items-start justify-between">
                           <div>
                             <h3 className="text-sm font-bold text-white">{category.name}</h3>
-                            <p className="mt-1 text-xs text-slate-400">
-                              Sort index: {category.sortOrder} • <span className="font-semibold text-amber-400">{productCount} items</span>
+                            <p className="mt-1 text-xs text-[#b8b2aa]">
+                              Sort index: {category.sortOrder} • <span className="font-semibold text-[#e8be6a]">{productCount} items</span>
                             </p>
                           </div>
-                          <span className="rounded-md border border-slate-800 bg-slate-950 px-2 py-0.5 font-mono text-[10px] text-slate-400">
+                          <span className="rounded-md border border-[#2c2820] bg-[#161410] px-2 py-0.5 font-mono text-[10px] text-[#e8be6a]">
                             #{category.id}
                           </span>
                         </div>
 
-                        <div className="mt-4 flex gap-2 border-t border-slate-800/60 pt-3">
+                        <div className="mt-4 flex gap-2 border-t border-[#222018] pt-3">
                           <button
                             type="button"
                             onClick={() => {
@@ -841,7 +841,7 @@ export default function CafeMenuPage() {
                               setCategoryName(category.name);
                               setCategoryOrder(category.sortOrder);
                             }}
-                            className="flex-1 rounded-xl border border-slate-700/80 bg-slate-800/80 px-3 py-1.5 text-xs font-semibold text-slate-200 transition hover:border-amber-500/50 hover:bg-slate-700 hover:text-white"
+                            className="flex-1 rounded-xl border border-[#2c2820] bg-[#161410] px-3 py-1.5 text-xs font-semibold text-[#f4efe8] transition hover:border-[#c9993a]/50 hover:text-white"
                           >
                             Edit
                           </button>

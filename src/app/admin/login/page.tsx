@@ -38,41 +38,44 @@ export default function AdminLogin() {
   }
 
   return (
-    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#090c12] px-4 text-slate-100">
+    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#080808] px-4 py-8 text-[#f4efe8]">
       {/* Ambient Cinema Lighting Backdrops */}
-      <div className="pointer-events-none absolute -top-40 left-1/2 h-[500px] w-[500px] -translate-x-1/2 rounded-full bg-amber-500/10 blur-[140px]" />
-      <div className="pointer-events-none absolute -bottom-40 left-1/2 h-[400px] w-[400px] -translate-x-1/2 rounded-full bg-amber-600/5 blur-[120px]" />
+      <div className="pointer-events-none absolute -top-40 left-1/2 h-[500px] w-[500px] -translate-x-1/2 rounded-full bg-[#c9993a]/10 blur-[150px]" />
+      <div className="pointer-events-none absolute -bottom-40 left-1/2 h-[450px] w-[450px] -translate-x-1/2 rounded-full bg-[#9a7228]/10 blur-[140px]" />
 
       <div className="relative w-full max-w-md">
         {/* Cinema Brand Header */}
-        <div className="mb-8 flex flex-col items-center text-center">
-          <div className="relative mb-3 flex h-20 w-20 items-center justify-center rounded-2xl border border-amber-500/30 bg-gradient-to-b from-slate-900 to-black p-3 shadow-xl shadow-amber-500/10">
-            <Image
-              src="/logo.png"
-              alt="Sri Murugan Cinema"
-              width={64}
-              height={64}
-              className="object-contain"
-              priority
-            />
-          </div>
+        <div className="mb-6 flex flex-col items-center text-center">
+          <Link href="/" className="group flex flex-col items-center transition hover:opacity-90">
+            <div className="relative mb-3 flex h-20 w-20 items-center justify-center rounded-2xl border border-[#c9993a]/30 bg-gradient-to-b from-[#161410] to-[#080808] p-3 shadow-xl shadow-[#c9993a]/10 group-hover:border-[#c9993a]/60">
+              <Image
+                src="/logo.png"
+                alt="Sri Murugan Cinema"
+                width={64}
+                height={64}
+                className="object-contain"
+                priority
+              />
+            </div>
 
-          <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-amber-400">
-            Operations & Portal
-          </span>
-          <h1 className="mt-2 text-2xl font-black tracking-tight text-white sm:text-3xl">
-            Sri Murugan Cinema
-          </h1>
-          <p className="mt-1 text-xs text-slate-400">
-            Sign in to manage live seat orders, tickets, and theatrical schedules
-          </p>
+            <span className="rounded-full border border-[#c9993a]/40 bg-[#c9993a]/10 px-3 py-0.5 text-[10px] font-bold uppercase tracking-[0.2em] text-[#e8be6a]">
+              Operations & Management
+            </span>
+
+            <h1 className="mt-2 text-2xl font-black tracking-tight text-white sm:text-3xl">
+              Sri Murugan Cinema
+            </h1>
+            <p className="mt-1 font-dancing text-lg text-[#c9993a]">
+              Executive Command Center
+            </p>
+          </Link>
         </div>
 
         {/* Login Box */}
-        <div className="rounded-3xl border border-slate-800/90 bg-gradient-to-b from-slate-900/90 via-[#0d121c]/90 to-[#090c12] p-7 shadow-2xl backdrop-blur-xl">
+        <div className="rounded-3xl border border-[#222018] bg-gradient-to-b from-[#111010]/95 via-[#161410]/95 to-[#080808] p-6 shadow-2xl backdrop-blur-xl sm:p-8">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-[#b8b2aa]">
                 Master Password
               </label>
               <div className="relative mt-2">
@@ -80,7 +83,7 @@ export default function AdminLogin() {
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="h-11 w-full rounded-xl border border-slate-700/80 bg-slate-950/80 pl-4 pr-11 text-sm text-white placeholder-slate-500 outline-none transition focus:border-amber-500 focus:ring-1 focus:ring-amber-500/40"
+                  className="h-11 w-full rounded-xl border border-[#2c2820] bg-[#111010] pl-4 pr-11 text-sm text-[#f4efe8] placeholder-[#b8b2aa]/50 outline-none transition focus:border-[#c9993a] focus:ring-1 focus:ring-[#c9993a]/40"
                   placeholder="Enter administrator password"
                   required
                   autoFocus
@@ -88,7 +91,7 @@ export default function AdminLogin() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#b8b2aa] hover:text-[#f4efe8]"
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? (
@@ -123,7 +126,7 @@ export default function AdminLogin() {
             <button
               type="submit"
               disabled={loading}
-              className="mt-2 flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 text-xs font-bold uppercase tracking-wider text-slate-950 shadow-lg shadow-amber-500/20 transition hover:brightness-110 active:scale-[0.98] disabled:opacity-60"
+              className="mt-2 flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#c9993a] via-[#e8be6a] to-[#c9993a] text-xs font-bold uppercase tracking-wider text-[#080808] shadow-lg shadow-[#c9993a]/20 transition hover:brightness-110 active:scale-[0.98] disabled:opacity-60"
             >
               {loading ? (
                 <>
@@ -145,10 +148,10 @@ export default function AdminLogin() {
           </form>
 
           {/* Quick link back */}
-          <div className="mt-6 flex items-center justify-between border-t border-slate-800/80 pt-4 text-xs text-slate-400">
+          <div className="mt-6 flex items-center justify-between border-t border-[#222018] pt-4 text-xs text-[#b8b2aa]">
             <Link
               href="/"
-              className="inline-flex items-center gap-1.5 transition hover:text-amber-400"
+              className="inline-flex items-center gap-1.5 transition hover:text-[#e8be6a]"
             >
               <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <line x1="19" y1="12" x2="5" y2="12" />
@@ -159,16 +162,16 @@ export default function AdminLogin() {
 
             <Link
               href="/cafe/login"
-              className="font-medium text-slate-300 underline transition hover:text-amber-300"
+              className="font-medium text-[#e8be6a] transition hover:underline"
             >
-              Cafe Staff POS
+              Staff POS Login →
             </Link>
           </div>
         </div>
 
         {/* Footer Security Badge */}
-        <div className="mt-6 flex items-center justify-center gap-2 text-center text-[11px] text-slate-500">
-          <svg className="h-3.5 w-3.5 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <div className="mt-6 flex items-center justify-center gap-2 text-center text-[11px] text-[#b8b2aa]/70">
+          <svg className="h-3.5 w-3.5 text-[#c9993a]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
             <path d="M7 11V7a5 5 0 0 1 10 0v4" />
           </svg>
