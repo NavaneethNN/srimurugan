@@ -183,6 +183,7 @@ async function runVerification() {
   });
 
   assert.ok(!completeResult.error, `Completion failed: ${completeResult.error}`);
+  assert.ok(completeResult.order, "Must return completed order");
   assert.equal(completeResult.order.status, "completed");
   assert.equal(completeResult.order.completedBy, testStaff.name);
   assert.ok(completeResult.order.completedAt, "completedAt must be timestamped");

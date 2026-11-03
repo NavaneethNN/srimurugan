@@ -22,16 +22,16 @@ export default function PolicyPage({
           <Link href="/order-food" className="text-sm font-semibold text-gold hover:text-gold">
             ← Back to food orders
           </Link>
-          <p className="mt-10 text-xs font-bold uppercase tracking-[0.2em] text-gold">Sri Murugan Cinema · Customer policies</p>
-          <h1 className="mt-3 font-[family-name:var(--font-cormorant)] text-5xl font-semibold text-foreground sm:text-6xl">
+          <p className="mt-8 text-xs font-bold uppercase tracking-[0.2em] text-gold">Sri Murugan Cinema · Customer policies</p>
+          <h1 className="mt-3 font-[family-name:var(--font-cormorant)] text-3xl xs:text-4xl sm:text-5xl lg:text-6xl font-semibold text-foreground break-words">
             {title}
           </h1>
-          <p className="mt-5 text-base leading-7 text-muted">{introduction}</p>
-          <div className="mt-10 space-y-5">
+          <p className="mt-4 text-sm sm:text-base leading-relaxed sm:leading-7 text-muted">{introduction}</p>
+          <div className="mt-8 sm:mt-10 space-y-4 sm:space-y-5">
             {sections.map((section) => (
-              <section key={section.title} className="rounded-2xl border border-gold/20 bg-card p-6 shadow-[0_14px_35px_rgba(60,39,21,.05)] sm:p-8">
-                <h2 className="text-lg font-semibold text-gold">{section.title}</h2>
-                <div className="mt-3 text-sm leading-7 text-muted sm:text-base">{section.content}</div>
+              <section key={section.title} className="rounded-2xl border border-gold/20 bg-card p-5 shadow-[0_14px_35px_rgba(60,39,21,.05)] sm:p-8">
+                <h2 className="text-base sm:text-lg font-semibold text-gold">{section.title}</h2>
+                <div className="mt-2.5 sm:mt-3 text-sm leading-relaxed sm:leading-7 text-muted sm:text-base">{section.content}</div>
               </section>
             ))}
           </div>

@@ -212,7 +212,7 @@ export default function CafeLoginPage() {
         </div>
 
         {/* PIN Entry Card */}
-        <div className="rounded-3xl border border-[#222018] bg-gradient-to-b from-[#111010]/95 via-[#161410]/95 to-[#080808] p-6 shadow-2xl backdrop-blur-xl sm:p-8">
+        <div className="rounded-3xl border border-[#222018] bg-gradient-to-b from-[#111010]/95 via-[#161410]/95 to-[#080808] p-4 xs:p-6 sm:p-8 shadow-2xl backdrop-blur-xl">
           <form onSubmit={handleSubmit}>
             <div className="mb-5 text-center">
               <h2 className="text-sm font-bold uppercase tracking-wider text-slate-200">
@@ -224,7 +224,7 @@ export default function CafeLoginPage() {
             </div>
 
             {/* PIN Inputs (Hidden caret, glowing boxes with dots) */}
-            <div className="mb-5 flex justify-center gap-2 sm:gap-2.5">
+            <div className="mb-5 flex justify-center gap-1.5 xs:gap-2 sm:gap-2.5">
               {[0, 1, 2, 3, 4, 5].map((index) => {
                 const isFilled = digits[index] !== "";
                 return (
@@ -242,7 +242,7 @@ export default function CafeLoginPage() {
                       onPaste={handlePaste}
                       disabled={loading}
                       aria-label={`PIN digit ${index + 1}`}
-                      className={`h-12 w-11 rounded-xl border-2 text-center font-mono text-xl font-bold transition-all sm:h-14 sm:w-13 sm:text-2xl ${
+                      className={`h-11 w-9 xs:w-10 sm:h-14 sm:w-13 rounded-xl border-2 text-center font-mono text-lg font-bold transition-all sm:text-2xl ${
                         isFilled
                           ? "border-[#c9993a] bg-[#c9993a]/15 text-[#e8be6a] shadow-[0_0_12px_rgba(201,153,58,0.25)]"
                           : "border-[#2c2820] bg-[#111010] text-white focus:border-[#c9993a] focus:bg-[#161410] focus:outline-none"

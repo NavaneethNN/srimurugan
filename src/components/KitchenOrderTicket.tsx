@@ -232,12 +232,12 @@ export default function KitchenOrderTicketModal({
 
       {/* Modal Backdrop (screen view) */}
       <div
-        className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-3 backdrop-blur-sm overflow-y-auto"
+        className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-3 sm:p-4 backdrop-blur-sm overflow-y-auto"
         role="dialog"
         aria-modal="true"
         aria-labelledby="kot-modal-title"
       >
-        <div className="relative my-6 w-full max-w-lg rounded-2xl border border-[#2c2820] bg-[#111010] p-5 shadow-2xl text-[#f4efe8]">
+        <div className="relative my-4 w-full max-w-lg rounded-2xl border border-[#2c2820] bg-[#111010] p-4 sm:p-5 shadow-2xl text-[#f4efe8]">
           {/* Header */}
           <div className="flex items-start justify-between border-b border-[#222018] pb-4">
             <div>
@@ -343,10 +343,10 @@ export default function KitchenOrderTicketModal({
           </div>
 
           {/* Realistic Thermal Receipt Preview Container */}
-          <div className="mt-4 flex justify-center bg-[#080808] p-4 rounded-xl border border-[#222018]">
+          <div className="mt-4 flex justify-center bg-[#080808] p-3 sm:p-4 rounded-xl border border-[#222018] overflow-hidden">
             <div
               id="kot-print-area"
-              className={`rounded border border-neutral-300 bg-[#fffdf7] p-4 text-black shadow-lg font-mono text-[12px] leading-tight select-text ${
+              className={`rounded border border-neutral-300 bg-[#fffdf7] p-3 sm:p-4 text-black shadow-lg font-mono text-[11px] sm:text-[12px] leading-tight select-text overflow-x-auto max-w-full ${
                 paperWidth === "58mm" ? "w-[240px]" : "w-[300px]"
               }`}
               style={{
@@ -359,12 +359,12 @@ export default function KitchenOrderTicketModal({
           </div>
 
           {/* Action Buttons */}
-          <div className="mt-5 flex flex-wrap items-center justify-between gap-2.5 pt-3 border-t border-[#222018]">
-            <div className="flex gap-2">
+          <div className="mt-5 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pt-3 border-t border-[#222018]">
+            <div className="flex flex-wrap gap-2 w-full sm:w-auto">
               <button
                 type="button"
                 onClick={handleCopyText}
-                className="inline-flex min-h-10 items-center gap-1.5 rounded-xl border border-[#2c2820] bg-[#161410] px-3.5 text-xs font-semibold text-[#f4efe8] hover:border-[#c9993a] transition"
+                className="inline-flex min-h-10 flex-1 sm:flex-none items-center justify-center gap-1.5 rounded-xl border border-[#2c2820] bg-[#161410] px-3.5 text-xs font-semibold text-[#f4efe8] hover:border-[#c9993a] transition"
               >
                 <svg className="h-3.5 w-3.5 text-[#e8be6a]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
@@ -376,7 +376,7 @@ export default function KitchenOrderTicketModal({
               <button
                 type="button"
                 onClick={toggleMarkPrinted}
-                className={`inline-flex min-h-10 items-center gap-1.5 rounded-xl border px-3 text-xs font-semibold transition ${
+                className={`inline-flex min-h-10 flex-1 sm:flex-none items-center justify-center gap-1.5 rounded-xl border px-3 text-xs font-semibold transition ${
                   printed
                     ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20"
                     : "border-[#2c2820] bg-[#161410] text-[#b8b2aa] hover:text-white"
@@ -385,16 +385,16 @@ export default function KitchenOrderTicketModal({
                 <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                   <polyline points="20 6 9 17 4 12" />
                 </svg>
-                <span>{printed ? "Printed ✓" : "Mark Printed"}</span>
+                <span>{printed ? "Printed" : "Mark Printed"}</span>
               </button>
             </div>
 
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2 w-full sm:w-auto">
               {onClose && (
                 <button
                   type="button"
                   onClick={onClose}
-                  className="min-h-10 rounded-xl border border-[#2c2820] bg-[#161410] px-4 text-xs font-semibold text-[#b8b2aa] hover:text-white transition"
+                  className="min-h-10 flex-1 sm:flex-none rounded-xl border border-[#2c2820] bg-[#161410] px-4 text-xs font-semibold text-[#b8b2aa] hover:text-white transition"
                 >
                   Done / Close
                 </button>
@@ -403,7 +403,7 @@ export default function KitchenOrderTicketModal({
               <button
                 type="button"
                 onClick={handlePrint}
-                className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-gradient-to-r from-[#c9993a] via-[#e8be6a] to-[#c9993a] px-5 text-xs font-black uppercase tracking-wider text-[#080808] shadow-md shadow-[#c9993a]/20 transition hover:brightness-110 active:scale-95"
+                className="inline-flex min-h-10 flex-1 sm:flex-none items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#c9993a] via-[#e8be6a] to-[#c9993a] px-5 text-xs font-black uppercase tracking-wider text-[#080808] shadow-md shadow-[#c9993a]/20 transition hover:brightness-110 active:scale-95"
               >
                 <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                   <polyline points="6 9 6 2 18 2 18 9" />

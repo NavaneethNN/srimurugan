@@ -345,7 +345,7 @@ export default function CafeMenuPage() {
           /* Products Workspace */
           <div className="grid gap-8 lg:grid-cols-[420px_1fr]">
             {/* Left: Product Form */}
-            <div className="h-fit rounded-3xl border border-[#222018] bg-gradient-to-b from-[#111010] to-[#0c0a08] p-6 shadow-2xl">
+            <div className="h-fit rounded-3xl border border-[#222018] bg-gradient-to-b from-[#111010] to-[#0c0a08] p-4 sm:p-6 shadow-2xl">
               <div className="mb-5 flex items-center justify-between">
                 <div>
                   <h2 className="text-lg font-bold text-white">
@@ -589,7 +589,7 @@ export default function CafeMenuPage() {
               {/* Product Filters Toolbar */}
               <div className="flex flex-col gap-3 rounded-2xl border border-[#222018] bg-[#111010]/80 p-3 sm:flex-row sm:items-center sm:justify-between">
                 {/* Category Pills */}
-                <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
+                <div className="no-scrollbar touch-scroll-x flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
                   <button
                     type="button"
                     onClick={() => setSelectedCategoryFilter("all")}
@@ -734,7 +734,7 @@ export default function CafeMenuPage() {
           /* Categories Workspace */
           <div className="grid gap-8 lg:grid-cols-[400px_1fr]">
             {/* Category Form */}
-            <div className="h-fit rounded-3xl border border-[#222018] bg-gradient-to-b from-[#111010] to-[#0c0a08] p-6 shadow-2xl">
+            <div className="h-fit rounded-3xl border border-[#222018] bg-gradient-to-b from-[#111010] to-[#0c0a08] p-4 sm:p-6 shadow-2xl">
               <div className="mb-5">
                 <h2 className="text-lg font-bold text-white">
                   {editingCategoryId ? "Edit Menu Category" : "Add Menu Category"}

@@ -433,7 +433,7 @@ export default function MoviesManagement() {
         ) : (
           <div className="grid gap-8 lg:grid-cols-[440px_1fr]">
             {/* Form Editor Card */}
-            <div className="h-fit rounded-2xl border border-[#222018] bg-[#111010] p-6 shadow-xl">
+            <div className="h-fit rounded-2xl border border-[#222018] bg-[#111010] p-4 sm:p-6 shadow-xl">
               <div className="mb-5 flex items-center justify-between">
                 <div>
                   <h2 className="text-lg font-bold text-[#f4efe8]">

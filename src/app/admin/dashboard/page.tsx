@@ -315,14 +315,14 @@ export default function AdminDashboard() {
                 </div>
 
                 {/* Queue Filter Bar */}
-                <div className="flex gap-2 border-b border-[#222018] bg-[#0a0806] px-5 py-3" aria-label="Dashboard order filter">
+                <div className="no-scrollbar touch-scroll-x flex gap-2 overflow-x-auto border-b border-[#222018] bg-[#0a0806] px-4 py-3 sm:px-5" aria-label="Dashboard order filter">
                   {(["active", "pending", "preparing"] as QueueView[]).map((view) => (
                     <button
                       key={view}
                       type="button"
                       onClick={() => setQueueView(view)}
                       aria-pressed={queueView === view}
-                      className={`min-h-8 rounded-xl px-3.5 text-xs font-bold transition-all ${
+                      className={`min-h-8 shrink-0 rounded-xl px-3.5 text-xs font-bold transition-all ${
                         queueView === view
                           ? "bg-gradient-to-r from-[#c9993a] via-[#e8be6a] to-[#c9993a] text-[#080808] shadow-md shadow-[#c9993a]/20"
                           : "border border-[#2c2820] bg-[#111010] text-[#b8b2aa] hover:border-[#c9993a]/40 hover:text-white"
@@ -554,17 +554,17 @@ export default function AdminDashboard() {
                 {/* Theater Info Card */}
                 <div className="rounded-3xl border border-[#222018] bg-[#111010]/60 p-5">
                   <h4 className="text-xs font-bold uppercase tracking-wider text-[#b8b2aa]">Auditorium Infrastructure</h4>
-                  <ul className="mt-3 space-y-2 text-xs text-[#b8b2aa]">
-                    <li className="flex items-center justify-between border-b border-[#222018] pb-2">
-                      <span className="text-[#b8b2aa]">Screen 1</span>
+                  <ul className="mt-3 space-y-2.5 text-xs text-[#b8b2aa]">
+                    <li className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 border-b border-[#222018] pb-2">
+                      <span className="text-[#b8b2aa] font-medium">Screen 1</span>
                       <span className="font-semibold text-white">4K Barco Laser · Dolby Atmos (64 Ch)</span>
                     </li>
-                    <li className="flex items-center justify-between border-b border-[#222018] pb-2">
-                      <span className="text-[#b8b2aa]">Screen 2</span>
+                    <li className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 border-b border-[#222018] pb-2">
+                      <span className="text-[#b8b2aa] font-medium">Screen 2</span>
                       <span className="font-semibold text-white">2K Christie · 7.1 Surround Sound</span>
                     </li>
-                    <li className="flex items-center justify-between pt-1">
-                      <span className="text-[#b8b2aa]">Payments</span>
+                    <li className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 pt-0.5">
+                      <span className="text-[#b8b2aa] font-medium">Payments</span>
                       <span className="font-semibold text-emerald-400">Razorpay Direct Active</span>
                     </li>
                   </ul>

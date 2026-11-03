@@ -363,7 +363,7 @@ export default function FoodOrdersPage() {
         {/* Filter Tabs & Search Bar */}
         <div className="mb-6 flex flex-col gap-4 rounded-3xl border border-[#222018] bg-[#111010]/80 p-3 sm:flex-row sm:items-center sm:justify-between sm:p-4">
           {/* Scrollable Filters */}
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0" aria-label="Order status filter">
+          <div className="no-scrollbar touch-scroll-x flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0" aria-label="Order status filter">
             {filterTabs.map((item) => {
               const count = getCountForFilter(item.value);
               const isSelected = filter === item.value;
@@ -594,9 +594,9 @@ export default function FoodOrdersPage() {
                     </div>
 
                     {/* Right: Payment & Action Buttons */}
-                    <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center lg:items-end">
+                    <div className="flex flex-col sm:flex-row sm:items-center lg:items-end justify-between sm:justify-start gap-3 w-full lg:w-auto">
                       {/* Price Pill */}
-                      <div className="rounded-xl border border-[#2c2820] bg-[#161410] px-3.5 py-1.5 text-right">
+                      <div className="flex sm:block items-center justify-between w-full sm:w-auto rounded-xl border border-[#2c2820] bg-[#161410] px-3.5 py-1.5 sm:text-right">
                         <p className="text-[10px] font-semibold uppercase tracking-wider text-[#b8b2aa]">Total Paid</p>
                         <p className="text-base font-extrabold text-[#e8be6a]">
                           {formatPrice(order.amountPaise)}

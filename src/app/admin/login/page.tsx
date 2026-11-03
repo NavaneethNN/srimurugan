@@ -72,7 +72,7 @@ export default function AdminLogin() {
         </div>
 
         {/* Login Box */}
-        <div className="rounded-3xl border border-[#222018] bg-gradient-to-b from-[#111010]/95 via-[#161410]/95 to-[#080808] p-6 shadow-2xl backdrop-blur-xl sm:p-8">
+        <div className="rounded-3xl border border-[#222018] bg-gradient-to-b from-[#111010]/95 via-[#161410]/95 to-[#080808] p-5 xs:p-6 sm:p-8 shadow-2xl backdrop-blur-xl">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-xs font-semibold uppercase tracking-wider text-[#b8b2aa]">

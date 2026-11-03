@@ -230,7 +230,7 @@ export default function CafeUsersPage() {
         ) : (
           <div className="grid gap-8 lg:grid-cols-[400px_1fr]">
             {/* Form Box */}
-            <div className="h-fit rounded-3xl border border-[#222018] bg-gradient-to-b from-[#111010] to-[#0c0a08] p-6 shadow-2xl">
+            <div className="h-fit rounded-3xl border border-[#222018] bg-gradient-to-b from-[#111010] to-[#0c0a08] p-4 sm:p-6 shadow-2xl">
               <div className="mb-5">
                 <h2 className="text-lg font-bold text-white">
                   {editingId ? "Edit Staff Account" : "Add New Staff Member"}
