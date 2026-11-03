@@ -199,6 +199,7 @@ test("foodOrderConfirmation allows seat editing only when order status is pendin
   // Pending status within window: can edit seat
   const pendingConfirmation = foodOrderConfirmation({ ...baseOrder, status: "pending" });
   assert.equal(pendingConfirmation.canEditSeat, true);
+  assert.equal(pendingConfirmation.order.amountPaise, 15000);
   assert.ok(pendingConfirmation.editRemainingMs > 0);
 
   // Preparing status (staff accepted and KOT printed): seat editing is locked

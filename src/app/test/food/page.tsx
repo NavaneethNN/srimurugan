@@ -232,7 +232,7 @@ const TEST_CASES: TestCase[] = [
     title: "Order confirmation is shown after payment",
     description: "User sees their order summary with ID and items after successful payment.",
     steps: ["Complete a test payment.", "Wait for the confirmation screen."],
-    expected: "Confirmation modal shows order ID, customer name, seat, and item list.",
+    expected: "Confirmation modal shows order ID, customer name, seat, item list, and total amount paid.",
   },
   {
     id: "PAY-05",

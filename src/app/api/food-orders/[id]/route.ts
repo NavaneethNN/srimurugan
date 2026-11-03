@@ -88,7 +88,7 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
           gt(foodOrders.paidAt, new Date(Date.now() - SEAT_EDIT_WINDOW_MS))
         )
       )
-      .returning({ id: foodOrders.id, seat: foodOrders.seat, status: foodOrders.status });
+      .returning({ id: foodOrders.id, seat: foodOrders.seat, status: foodOrders.status, amountPaise: foodOrders.amountPaise });
 
     if (!order) {
       const [latest] = await db

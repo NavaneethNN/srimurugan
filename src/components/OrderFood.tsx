@@ -15,13 +15,21 @@ type Confirmation = {
   customerName: string;
   seat: string;
   items: FoodOrderItem[];
+  amountPaise?: number | null;
   editToken: string;
   editDeadline: number;
   editWindowMs: number;
   canEditSeat?: boolean;
 };
 type ConfirmationPayload = {
-  order: { id: number; status: string; customerName: string; seat: string; items: FoodOrderItem[] };
+  order: {
+    id: number;
+    status: string;
+    customerName: string;
+    seat: string;
+    items: FoodOrderItem[];
+    amountPaise?: number | null;
+  };
   editToken: string;
   editRemainingMs: number;
   editWindowMs: number;
@@ -48,6 +56,7 @@ function confirmationFrom(result: ConfirmationPayload, receivedAt: number): Conf
     customerName: result.order.customerName,
     seat: result.order.seat,
     items: result.order.items,
+    amountPaise: result.order.amountPaise,
     editToken: result.editToken,
     editDeadline: canEditSeat ? receivedAt + result.editRemainingMs : receivedAt,
     editWindowMs: result.editWindowMs,
@@ -283,6 +292,7 @@ export default function OrderFood() {
             status: result.order.status,
             seat: result.order.seat,
             items: result.order.items,
+            amountPaise: result.order.amountPaise ?? current.amountPaise,
             canEditSeat,
           };
         });
@@ -465,6 +475,10 @@ export default function OrderFood() {
     knownTotalPaise
   );
   const secondsLeft = confirmation ? Math.max(0, Math.ceil((confirmation.editDeadline - now) / 1000)) : 0;
+  const confirmationTotalPaise =
+    confirmation?.amountPaise ??
+    confirmation?.items?.reduce((sum, item) => sum + (item.unitPricePaise || 0) * item.quantity, 0) ??
+    0;
 
   function changeQuantity(productId: number, variantId: string, change: number) {
     const key = lineKey(productId, variantId);
@@ -1124,7 +1138,7 @@ export default function OrderFood() {
                   </div>
                   <h2 className="mt-1 text-xl font-bold sm:text-2xl">{orderStatusText[confirmation.status] || "Order received"}</h2>
                   <p className="mt-1 text-xs text-foreground/80 sm:text-sm">
-                    {confirmation.customerName} · Delivering to: <strong className="text-gold">{confirmation.seat}</strong>
+                    {confirmation.customerName} · Delivering to: <strong className="text-gold">{confirmation.seat}</strong> · Total: <strong className="text-gold">{formatPrice(confirmationTotalPaise)}</strong>
                     {confirmation.status === "pending" && secondsLeft > 0 ? (
                       <span className="ml-2 inline-flex items-center rounded-full border border-gold/40 bg-gold/15 px-2 py-0.5 text-[0.68rem] font-bold text-gold">
                         Seat editable: {secondsLeft}s
@@ -1684,7 +1698,12 @@ export default function OrderFood() {
 
             {/* Items summary */}
             <div className="mt-5">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-muted">Your Items</h3>
+              <div className="flex items-center justify-between">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-muted">Your Items</h3>
+                <span className="text-xs text-muted">
+                  {confirmation.items.reduce((s, i) => s + i.quantity, 0)} {confirmation.items.reduce((s, i) => s + i.quantity, 0) === 1 ? "item" : "items"}
+                </span>
+              </div>
               <ul className="mt-2.5 space-y-2">
                 {confirmation.items.map((item) => (
                   <li
@@ -1701,6 +1720,21 @@ export default function OrderFood() {
                   </li>
                 ))}
               </ul>
+            </div>
+
+            {/* Order Total / Payment Summary Card */}
+            <div className="mt-4 rounded-2xl border border-gold/30 bg-[#f9edda]/80 p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <span className="block text-xs font-bold uppercase tracking-wider text-muted">Total Paid</span>
+                  <span className="text-[11px] text-muted">Paid Online via Razorpay</span>
+                </div>
+                <div className="text-right">
+                  <span className="block text-xl font-black text-gold sm:text-2xl">
+                    {formatPrice(confirmationTotalPaise)}
+                  </span>
+                </div>
+              </div>
             </div>
 
             <button
