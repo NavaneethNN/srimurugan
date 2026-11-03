@@ -698,3 +698,15 @@ test("PRINTER_PRESETS includes Canon G2010 desktop A4 printer and thermal models
   assert.ok(PRINTER_PRESETS.includes("POS Thermal 80mm (ESC/POS)"));
   assert.ok(PRINTER_PRESETS.includes("Browser Print / Save as PDF"));
 });
+
+test("ORDER_TRANSITIONS strictly forbids cancelling completed (delivered) orders", async () => {
+  const { ORDER_TRANSITIONS } = await import("../src/lib/orderStatusUpdate");
+  // Only pending orders can be cancelled
+  assert.deepEqual(ORDER_TRANSITIONS.cancelled, ["pending"]);
+  // Completed orders can never be cancelled
+  assert.equal(ORDER_TRANSITIONS.cancelled.includes("completed"), false);
+  // Completed status only accepts transition from preparing
+  assert.deepEqual(ORDER_TRANSITIONS.completed, ["preparing"]);
+  // Preparing status only accepts transition from pending
+  assert.deepEqual(ORDER_TRANSITIONS.preparing, ["pending"]);
+});

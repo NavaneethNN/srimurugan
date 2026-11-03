@@ -72,6 +72,10 @@ export default function AdminDashboard() {
   }, [refresh]);
 
   async function updateStatus(order: QueueOrder, next: "preparing" | "completed" | "cancelled") {
+    if (next === "cancelled" && order.status === "completed") {
+      setError(`Order #${order.id} has already been delivered and cannot be cancelled.`);
+      return;
+    }
     if (next === "cancelled" && !window.confirm(`Cancel order #${order.id}? The customer will see this status.`)) return;
     requestId.current += 1;
     savingRef.current = true;
@@ -360,10 +364,12 @@ export default function AdminDashboard() {
                                   className={`rounded-full px-2.5 py-0.5 text-[0.65rem] font-bold uppercase tracking-wider ${
                                     isPending
                                       ? "border border-[#c9993a]/40 bg-[#c9993a]/10 text-[#e8be6a]"
+                                      : order.status === "completed"
+                                      ? "border border-emerald-500/40 bg-emerald-500/10 text-emerald-300"
                                       : "border border-sky-500/40 bg-sky-500/10 text-sky-300"
                                   }`}
                                 >
-                                  {isPending ? "New" : "Preparing"}
+                                  {isPending ? "New" : order.status === "completed" ? "Delivered" : "Preparing"}
                                 </span>
                               </div>
 
@@ -407,19 +413,30 @@ export default function AdminDashboard() {
                             {/* Action Buttons */}
                             <div className="flex w-full sm:w-auto flex-wrap shrink-0 items-center gap-2 self-stretch sm:self-center">
                               {isPending ? (
-                                <button
-                                  type="button"
-                                  disabled={savingId !== null}
-                                  onClick={() => void updateStatus(order, "preparing")}
-                                  className="inline-flex min-h-10 flex-1 sm:flex-none justify-center items-center gap-1.5 rounded-xl bg-gradient-to-r from-[#c9993a] via-[#e8be6a] to-[#c9993a] px-4 text-xs font-black uppercase tracking-wider text-[#080808] shadow-md shadow-[#c9993a]/20 transition hover:brightness-110 active:scale-95 disabled:opacity-50"
-                                >
-                                  <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                                    <circle cx="12" cy="12" r="10" />
-                                    <polyline points="12 6 12 12 16 14" />
-                                  </svg>
-                                  <span>{savingId === order.id ? "Saving…" : "Start Prep"}</span>
-                                </button>
-                              ) : (
+                                <>
+                                  <button
+                                    type="button"
+                                    disabled={savingId !== null}
+                                    onClick={() => void updateStatus(order, "preparing")}
+                                    className="inline-flex min-h-10 flex-1 sm:flex-none justify-center items-center gap-1.5 rounded-xl bg-gradient-to-r from-[#c9993a] via-[#e8be6a] to-[#c9993a] px-4 text-xs font-black uppercase tracking-wider text-[#080808] shadow-md shadow-[#c9993a]/20 transition hover:brightness-110 active:scale-95 disabled:opacity-50"
+                                  >
+                                    <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                                      <circle cx="12" cy="12" r="10" />
+                                      <polyline points="12 6 12 12 16 14" />
+                                    </svg>
+                                    <span>{savingId === order.id ? "Saving…" : "Start Prep"}</span>
+                                  </button>
+
+                                  <button
+                                    type="button"
+                                    disabled={savingId !== null}
+                                    onClick={() => void updateStatus(order, "cancelled")}
+                                    className="inline-flex min-h-10 px-3.5 text-xs font-medium text-[#b8b2aa] items-center justify-center rounded-xl border border-[#2c2820] bg-[#161410] transition hover:border-rose-900/50 hover:bg-rose-950/30 hover:text-rose-300 disabled:opacity-50"
+                                  >
+                                    Cancel
+                                  </button>
+                                </>
+                              ) : order.status === "preparing" ? (
                                 <button
                                   type="button"
                                   disabled={savingId !== null}
@@ -431,16 +448,14 @@ export default function AdminDashboard() {
                                   </svg>
                                   <span>{savingId === order.id ? "Saving…" : "Delivered"}</span>
                                 </button>
-                              )}
-
-                              <button
-                                type="button"
-                                disabled={savingId !== null}
-                                onClick={() => void updateStatus(order, "cancelled")}
-                                className="inline-flex min-h-10 px-3.5 text-xs font-medium text-[#b8b2aa] items-center justify-center rounded-xl border border-[#2c2820] bg-[#161410] transition hover:border-rose-900/50 hover:bg-rose-950/30 hover:text-rose-300 disabled:opacity-50"
-                              >
-                                Cancel
-                              </button>
+                              ) : order.status === "completed" ? (
+                                <span className="inline-flex min-h-10 items-center gap-1.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3.5 text-xs font-bold text-emerald-300">
+                                  <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                                    <polyline points="20 6 9 17 4 12" />
+                                  </svg>
+                                  Delivered
+                                </span>
+                              ) : null}
                             </div>
                           </div>
                         </article>

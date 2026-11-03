@@ -269,6 +269,10 @@ export default function CafePOSPage() {
   }
 
   async function updateStatus(order: Order, next: "preparing" | "completed" | "cancelled") {
+    if (next === "cancelled" && order.status === "completed") {
+      setError(`Order #${order.id} has already been delivered and cannot be cancelled.`);
+      return;
+    }
     if (
       next === "cancelled" &&
       !window.confirm(`Cancel order #${order.id}? The customer will see this status.`)
@@ -859,14 +863,16 @@ export default function CafePOSPage() {
                     )}
                   </button>
 
-                  <button
-                    type="button"
-                    disabled={savingId === selectedOrder.id}
-                    onClick={() => void updateStatus(selectedOrder, "cancelled")}
-                    className="min-h-11 rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 text-xs font-semibold text-rose-300 hover:bg-rose-500/20 disabled:opacity-50"
-                  >
-                    Cancel Order
-                  </button>
+                  {selectedOrder.status === "pending" && (
+                    <button
+                      type="button"
+                      disabled={savingId === selectedOrder.id}
+                      onClick={() => void updateStatus(selectedOrder, "cancelled")}
+                      className="min-h-11 rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 text-xs font-semibold text-rose-300 hover:bg-rose-500/20 disabled:opacity-50"
+                    >
+                      Cancel Order
+                    </button>
+                  )}
                 </div>
               </div>
             ) : (

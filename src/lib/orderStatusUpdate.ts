@@ -7,7 +7,7 @@ import { verifyAdminSession } from "@/lib/adminSession";
 export const ORDER_TRANSITIONS: Record<string, string[]> = {
   preparing: ["pending"],
   completed: ["preparing"],
-  cancelled: ["pending", "preparing"],
+  cancelled: ["pending"],
 };
 
 export type OrderActor = {
@@ -120,6 +120,12 @@ export async function updateOrderStatus({
 
   const allowedPriorStatuses = ORDER_TRANSITIONS[nextStatus];
   if (!allowedPriorStatuses.includes(currentOrder.status)) {
+    if (nextStatus === "cancelled" && currentOrder.status === "completed") {
+      return {
+        error: `Order #${orderId} has already been delivered and cannot be cancelled.`,
+        status: 409,
+      };
+    }
     return {
       error: `Order #${orderId} is currently "${currentOrder.status}" and cannot transition to "${nextStatus}".`,
       status: 409,

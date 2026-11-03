@@ -218,6 +218,10 @@ export default function FoodOrdersPage() {
   }, [orders, search]);
 
   async function updateStatus(order: Order, status: "preparing" | "completed" | "cancelled") {
+    if (status === "cancelled" && order.status === "completed") {
+      setError(`Order #${order.id} has already been delivered and cannot be cancelled.`);
+      return;
+    }
     if (status === "cancelled" && !window.confirm(`Cancel order #${order.id}? The customer will see this status.`)) {
       return;
     }
@@ -647,7 +651,7 @@ export default function FoodOrdersPage() {
                           <span>Print KOT</span>
                         </button>
 
-                        {(isPending || isPreparing) && (
+                        {isPending && (
                           <button
                             type="button"
                             disabled={savingId === order.id}
