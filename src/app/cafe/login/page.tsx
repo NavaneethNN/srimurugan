@@ -197,6 +197,7 @@ export default function CafeLoginPage() {
                       }}
                       type="text"
                       inputMode="numeric"
+                      pattern="[0-9]*"
                       maxLength={1}
                       value={digits[index]}
                       onChange={(e) => handleDigitChange(index, e.target.value)}
@@ -204,14 +205,22 @@ export default function CafeLoginPage() {
                       onPaste={handlePaste}
                       disabled={loading}
                       aria-label={`PIN digit ${index + 1}`}
-                      className={`h-11 w-9 xs:w-10 sm:h-14 sm:w-13 rounded-xl border-2 text-center font-mono text-lg font-bold transition-all sm:text-2xl ${
+                      className={`h-11 w-9 xs:w-10 sm:h-14 sm:w-13 rounded-xl border-2 text-center font-mono text-lg font-bold transition-all sm:text-2xl text-transparent caret-transparent select-none ${
                         isFilled
-                          ? "border-[#c9993a] bg-[#c9993a]/15 text-[#e8be6a] shadow-[0_0_12px_rgba(201,153,58,0.25)]"
-                          : "border-[#2c2820] bg-[#111010] text-white focus:border-[#c9993a] focus:bg-[#161410] focus:outline-none"
+                          ? "border-[#c9993a] bg-[#c9993a]/15 shadow-[0_0_12px_rgba(201,153,58,0.25)]"
+                          : "border-[#2c2820] bg-[#111010] focus:border-[#c9993a] focus:bg-[#161410] focus:outline-none focus:ring-1 focus:ring-[#c9993a]/50"
                       } disabled:opacity-50`}
+                      style={{
+                        color: "transparent",
+                        WebkitTextFillColor: "transparent",
+                        caretColor: "transparent",
+                      }}
                     />
                     {isFilled && (
-                      <span className="pointer-events-none absolute left-1/2 top-1/2 h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#e8be6a]" />
+                      <span
+                        aria-hidden="true"
+                        className="pointer-events-none absolute left-1/2 top-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-to-br from-[#f4efe8] via-[#e8be6a] to-[#c9993a] shadow-[0_0_8px_rgba(232,190,106,0.8)]"
+                      />
                     )}
                   </div>
                 );
