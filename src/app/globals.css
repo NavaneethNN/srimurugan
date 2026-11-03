@@ -113,6 +113,24 @@ body {
   scrollbar-width: none;
 }
 
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(201, 153, 58, 0.4) transparent;
+}
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(201, 153, 58, 0.35);
+  border-radius: 9999px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(201, 153, 58, 0.65);
+}
+
 /* ── Keyframes ─────────────────────────────────────────────────────── */
 @keyframes text-reveal {
   0%   { opacity: 0; transform: translateY(20px); filter: blur(6px); }

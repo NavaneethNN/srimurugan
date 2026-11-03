@@ -1447,25 +1447,32 @@ export default function OrderFood() {
 
             {/* Desktop Sticky Cart Sidebar */}
             <aside
-              className="hidden rounded-3xl border border-gold/30 bg-card p-5 shadow-xl lg:sticky lg:top-24 lg:block"
+              className="hidden rounded-3xl border border-gold/30 bg-card shadow-xl lg:sticky lg:top-24 lg:flex lg:max-h-[calc(100dvh-7.5rem)] lg:flex-col lg:overflow-hidden"
               aria-label="Your cart and checkout"
             >
-              <div className="mb-4 flex items-center justify-between border-b border-surface-border pb-3.5">
-                <div>
-                  <p className="text-[0.65rem] font-bold uppercase tracking-[0.2em] text-gold">Seat Delivery</p>
-                  <h2 className="mt-0.5 text-xl font-bold text-foreground">Your Order</h2>
+              <div className="shrink-0 border-b border-surface-border px-5 py-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-[0.65rem] font-bold uppercase tracking-[0.2em] text-gold">Seat Delivery</p>
+                    <h2 className="mt-0.5 text-xl font-bold text-foreground">Your Order</h2>
+                  </div>
+                  {itemCount > 0 && (
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-extrabold text-gold">{formatPrice(knownTotalPaise)}</span>
+                      <span className="flex h-6 min-w-6 items-center justify-center rounded-full bg-gold px-2 text-xs font-black text-white">
+                        {itemCount}
+                      </span>
+                    </div>
+                  )}
                 </div>
-                {itemCount > 0 && (
-                  <span className="flex h-6 min-w-6 items-center justify-center rounded-full bg-gold px-2 text-xs font-black text-white">
-                    {itemCount}
-                  </span>
-                )}
               </div>
 
-              {cartContents()}
+              <div className="touch-scroll-y custom-scrollbar flex-1 overflow-y-auto px-5 py-4 overscroll-contain">
+                {cartContents()}
 
-              {/* Order Form (Customer + Seat + Pay) */}
-              <div className="mt-5 border-t border-surface-border pt-4">{orderForm(false)}</div>
+                {/* Order Form (Customer + Seat + Pay) */}
+                <div className="mt-5 border-t border-surface-border pt-4">{orderForm(false)}</div>
+              </div>
             </aside>
           </div>
         </div>
