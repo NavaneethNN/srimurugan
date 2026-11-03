@@ -34,6 +34,7 @@ export default function NowShowing() {
   const [loading, setLoading] = useState(true);
   const [current, setCurrent] = useState(0);
   const [selectedTimes, setSelectedTimes] = useState<Record<number, string | null>>({});
+  const [touchStartX, setTouchStartX] = useState<number | null>(null);
 
   useEffect(() => {
     fetch("/api/movies")
@@ -47,6 +48,26 @@ export default function NowShowing() {
     const timer = setInterval(() => setCurrent((index) => (index + 1) % movies.length), 7000);
     return () => clearInterval(timer);
   }, [movies.length]);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStartX(e.touches[0].clientX);
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX === null || movies.length <= 1) return;
+    const touchEndX = e.changedTouches[0].clientX;
+    const diff = touchStartX - touchEndX;
+    if (Math.abs(diff) > 45) {
+      if (diff > 0) {
+        // swipe left -> next movie
+        setCurrent((index) => (index + 1) % movies.length);
+      } else {
+        // swipe right -> previous movie
+        setCurrent((index) => (index - 1 + movies.length) % movies.length);
+      }
+    }
+    setTouchStartX(null);
+  };
 
   const movie = movies[current];
   // Use separate images for desktop and mobile
@@ -245,8 +266,12 @@ export default function NowShowing() {
               </div>
             </div>
 
-            {/* Mobile: Full-Screen Background */}
-            <div className="md:hidden">
+            {/* Mobile: Full-Screen Background with Touch Swipe */}
+            <div
+              className="md:hidden touch-pan-y"
+              onTouchStart={handleTouchStart}
+              onTouchEnd={handleTouchEnd}
+            >
               <div className="space-y-6">
                 {/* 4K Dolby Badge */}
                 <div className="flex items-center gap-2 rounded-xl border border-white/20 bg-black/70 px-3 py-2 backdrop-blur-md w-fit">
@@ -265,8 +290,8 @@ export default function NowShowing() {
                   </span>
                 </div>
 
-                {/* Movie Title - Single Line with Truncate */}
-                <h3 className="truncate font-[family-name:var(--font-cormorant)] text-4xl font-bold text-white sm:text-5xl">
+                {/* Movie Title - Natural Multi-Line Wrapping */}
+                <h3 className="break-words font-[family-name:var(--font-cormorant)] text-3xl font-bold leading-tight text-white xs:text-4xl sm:text-5xl">
                   {movie.title}
                 </h3>
 

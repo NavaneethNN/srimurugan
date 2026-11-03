@@ -334,11 +334,11 @@ export default function CafeMenuPage() {
           </div>
 
           {/* Action Tabs */}
-          <div className="flex items-center gap-2 rounded-2xl border border-[#222018] bg-[#111010] p-1.5 shadow-xl">
+          <div className="flex w-full sm:w-auto items-center gap-2 rounded-2xl border border-[#222018] bg-[#111010] p-1.5 shadow-xl">
             <button
               type="button"
               onClick={() => setActiveTab("products")}
-              className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition ${
+              className={`flex flex-1 sm:flex-none items-center justify-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition ${
                 activeTab === "products"
                   ? "bg-gradient-to-r from-[#c9993a] via-[#e8be6a] to-[#c9993a] text-[#080808] shadow-md shadow-[#c9993a]/20"
                   : "text-[#b8b2aa] hover:text-white"
@@ -355,7 +355,7 @@ export default function CafeMenuPage() {
             <button
               type="button"
               onClick={() => setActiveTab("categories")}
-              className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition ${
+              className={`flex flex-1 sm:flex-none items-center justify-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition ${
                 activeTab === "categories"
                   ? "bg-gradient-to-r from-[#c9993a] via-[#e8be6a] to-[#c9993a] text-[#080808] shadow-md shadow-[#c9993a]/20"
                   : "text-[#b8b2aa] hover:text-white"

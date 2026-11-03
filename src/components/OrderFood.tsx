@@ -938,7 +938,7 @@ export default function OrderFood() {
                     type="button"
                     onClick={() => changeQuantity(product.id, variant.id, -1)}
                     aria-label={`Remove one ${product.name} ${variant.name}`}
-                    className="flex h-8 w-7 items-center justify-center text-base font-bold text-gold transition hover:bg-gold/10"
+                    className="flex min-h-9 min-w-8 items-center justify-center text-base font-bold text-gold transition hover:bg-gold/10 active:scale-95"
                   >
                     −
                   </button>
@@ -947,7 +947,7 @@ export default function OrderFood() {
                     type="button"
                     onClick={() => changeQuantity(product.id, variant.id, 1)}
                     aria-label={`Add one ${product.name} ${variant.name}`}
-                    className="flex h-8 w-7 items-center justify-center text-base font-bold text-gold transition hover:bg-gold/10"
+                    className="flex min-h-9 min-w-8 items-center justify-center text-base font-bold text-gold transition hover:bg-gold/10 active:scale-95"
                   >
                     +
                   </button>
@@ -1366,16 +1366,16 @@ export default function OrderFood() {
                                       type="button"
                                       onClick={() => changeQuantity(product.id, variant.id, -1)}
                                       aria-label={`Remove one ${product.name} ${variant.name}`}
-                                      className="flex h-8 w-8 items-center justify-center text-base font-bold text-gold transition hover:bg-gold hover:text-white"
+                                      className="flex min-h-[38px] min-w-[38px] items-center justify-center text-base font-bold text-gold transition hover:bg-gold hover:text-white active:scale-95"
                                     >
                                       −
                                     </button>
-                                    <span className="w-6 text-center text-xs font-black text-foreground">{quantity}</span>
+                                    <span className="w-7 text-center text-xs font-black text-foreground">{quantity}</span>
                                     <button
                                       type="button"
                                       onClick={() => changeQuantity(product.id, variant.id, 1)}
                                       aria-label={`Add one ${product.name} ${variant.name}`}
-                                      className="flex h-8 w-8 items-center justify-center text-base font-bold text-gold transition hover:bg-gold hover:text-white"
+                                      className="flex min-h-[38px] min-w-[38px] items-center justify-center text-base font-bold text-gold transition hover:bg-gold hover:text-white active:scale-95"
                                     >
                                       +
                                     </button>
@@ -1385,10 +1385,10 @@ export default function OrderFood() {
                                     type="button"
                                     onClick={() => changeQuantity(product.id, variant.id, 1)}
                                     aria-label={`Add ${product.name} ${variant.name}`}
-                                    className="flex min-h-8 items-center gap-1 rounded-lg border border-gold/60 bg-card px-3 text-xs font-bold text-gold shadow-sm transition-all hover:bg-gold hover:text-white"
+                                    className="flex min-h-[38px] items-center gap-1.5 rounded-lg border border-gold/60 bg-card px-3.5 text-xs font-bold text-gold shadow-sm transition-all hover:bg-gold hover:text-white active:scale-95"
                                   >
                                     <span>Add</span>
-                                    <span>+</span>
+                                    <span aria-hidden="true">+</span>
                                   </button>
                                 )}
                               </div>

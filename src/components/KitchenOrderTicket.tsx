@@ -237,7 +237,7 @@ export default function KitchenOrderTicketModal({
         aria-modal="true"
         aria-labelledby="kot-modal-title"
       >
-        <div className="relative my-4 w-full max-w-lg rounded-2xl border border-[#2c2820] bg-[#111010] p-4 sm:p-5 shadow-2xl text-[#f4efe8]">
+        <div className="relative my-auto w-full max-w-lg max-h-[92dvh] overflow-y-auto rounded-2xl border border-[#2c2820] bg-[#111010] p-4 sm:p-5 shadow-2xl text-[#f4efe8]">
           {/* Header */}
           <div className="flex items-start justify-between border-b border-[#222018] pb-4">
             <div>

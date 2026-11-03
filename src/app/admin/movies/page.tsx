@@ -341,11 +341,11 @@ export default function MoviesManagement() {
           </div>
 
           {/* Tab Switcher */}
-          <div className="flex items-center gap-2 rounded-xl border border-[#222018] bg-[#111010] p-1">
+          <div className="flex w-full sm:w-auto items-center gap-2 rounded-xl border border-[#222018] bg-[#111010] p-1">
             <button
               type="button"
               onClick={() => setActiveTab("now")}
-              className={`flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-bold transition ${
+              className={`flex flex-1 sm:flex-none items-center justify-center gap-2 rounded-lg px-4 py-2 text-xs font-bold transition ${
                 activeTab === "now"
                   ? "bg-gradient-to-r from-[#c9993a] via-[#e8be6a] to-[#c9993a] text-[#080808] shadow-md shadow-[#c9993a]/20"
                   : "text-[#b8b2aa] hover:text-[#f4efe8]"
@@ -366,7 +366,7 @@ export default function MoviesManagement() {
             <button
               type="button"
               onClick={() => setActiveTab("upcoming")}
-              className={`flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-bold transition ${
+              className={`flex flex-1 sm:flex-none items-center justify-center gap-2 rounded-lg px-4 py-2 text-xs font-bold transition ${
                 activeTab === "upcoming"
                   ? "bg-gradient-to-r from-[#c9993a] via-[#e8be6a] to-[#c9993a] text-[#080808] shadow-md shadow-[#c9993a]/20"
                   : "text-[#b8b2aa] hover:text-[#f4efe8]"

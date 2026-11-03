@@ -105,3 +105,4 @@ export async function uploadImage({
     storage: "local",
   };
 }
+

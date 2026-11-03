@@ -7,10 +7,10 @@ export default function Hero() {
       <div className="mx-auto grid min-h-[calc(100svh-68px)] max-w-7xl items-center gap-10 px-5 py-10 sm:px-6 sm:py-16 lg:grid-cols-[.9fr_1.1fr] lg:gap-16 lg:px-8 lg:py-20">
         <div className="max-w-2xl">
           <p className="whitespace-nowrap text-[0.62rem] font-bold uppercase tracking-[0.13em] text-gold sm:text-xs sm:tracking-[0.2em]">Sri Murugan Cinema · Since 1971</p>
-          <h1 className="mt-5 font-[family-name:var(--font-cormorant)] text-[clamp(2.45rem,10vw,3.75rem)] font-semibold leading-[.98] tracking-tight text-foreground lg:text-[clamp(4.25rem,6.2vw,7rem)]">
-            <span className="block whitespace-nowrap">Every film</span>
-            <span className="block whitespace-nowrap"><span className="italic text-gold">deserves</span> a</span>
-            <span className="block whitespace-nowrap">grand screen.</span>
+          <h1 className="mt-5 font-[family-name:var(--font-cormorant)] text-[clamp(2.1rem,9vw,3.75rem)] font-semibold leading-[.98] tracking-tight text-foreground lg:text-[clamp(4.25rem,6.2vw,7rem)]">
+            <span className="block">Every film</span>
+            <span className="block"><span className="italic text-gold">deserves</span> a</span>
+            <span className="block">grand screen.</span>
           </h1>
           <p className="mt-5 max-w-lg text-[0.95rem] leading-7 text-muted sm:mt-6 sm:text-lg sm:leading-8">
             Feel the story come alive with stunning 4K projection, Dolby Atmos sound, and a cinema experience made for Coimbatore.
@@ -48,7 +48,7 @@ export default function Hero() {
         </div>
 
         <div className="relative mx-auto w-full max-w-[680px] lg:max-w-none">
-          <div className="absolute -bottom-5 -right-4 h-full w-full rounded-[2rem] border border-gold/25 bg-[#e9d7b9] sm:-bottom-7 sm:-right-7" />
+          <div className="absolute -bottom-3 -right-2 h-full w-full rounded-[2rem] border border-gold/25 bg-[#e9d7b9] sm:-bottom-7 sm:-right-7" />
           <div className="relative aspect-[5/4] overflow-hidden rounded-[2rem] bg-[#21170e] shadow-[0_30px_70px_rgba(56,35,14,.2)] lg:aspect-[4/5]">
             <Image src="/hero-cinema.png" alt="Auditorium at Sri Murugan Cinema" fill priority className="object-cover" sizes="(max-width: 1024px) 100vw, 50vw" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/45 to-transparent" />

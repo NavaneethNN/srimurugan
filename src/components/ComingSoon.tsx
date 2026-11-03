@@ -88,6 +88,7 @@ export default function ComingSoon() {
   const [loading,  setLoading]  = useState(true);
   const [current,  setCurrent]  = useState(0);
   const [visible,  setVisible]  = useState(4);
+  const [touchStartX, setTouchStartX] = useState<number | null>(null);
 
   useEffect(() => {
     fetch("/api/upcoming")
@@ -114,6 +115,26 @@ export default function ComingSoon() {
     const id = setInterval(() => setCurrent((i) => (i >= maxIndex ? 0 : i + 1)), 3000);
     return () => clearInterval(id);
   }, [maxIndex]);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStartX(e.touches[0].clientX);
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX === null || maxIndex <= 0) return;
+    const touchEndX = e.changedTouches[0].clientX;
+    const diff = touchStartX - touchEndX;
+    if (Math.abs(diff) > 40) {
+      if (diff > 0) {
+        // swipe left -> next slide
+        setCurrent((i) => Math.min(i + 1, maxIndex));
+      } else {
+        // swipe right -> previous slide
+        setCurrent((i) => Math.max(i - 1, 0));
+      }
+    }
+    setTouchStartX(null);
+  };
 
   return (
     <section id="coming-soon" className="bg-surface py-16 sm:py-20 lg:py-24">
@@ -147,8 +168,12 @@ export default function ComingSoon() {
 
         {!loading && upcoming.length > visible && (
           <div className="relative">
-            {/* Track */}
-            <div className="overflow-hidden">
+            {/* Track with touch swipe */}
+            <div
+              className="overflow-hidden touch-pan-y"
+              onTouchStart={handleTouchStart}
+              onTouchEnd={handleTouchEnd}
+            >
               <div
                 className="flex transition-transform duration-500 ease-out"
                 style={{

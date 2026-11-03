@@ -99,3 +99,4 @@ test("uploadImage sanitizes folder name to prevent path traversal", async () => 
     process.env = originalEnv;
   }
 });
+
