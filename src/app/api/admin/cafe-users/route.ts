@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
 import { cafeUsers } from "@/lib/schema";
+import { eq } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { verifyAdminSession } from "@/lib/adminSession";
-import { hashPin } from "@/lib/cafeAuth";
+import { hashPin, verifyPin } from "@/lib/cafeAuth";
 
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 const SESSION_SECRET = process.env.SESSION_SECRET;
@@ -23,6 +24,7 @@ export async function GET() {
       isActive: cafeUsers.isActive,
       lastLoginAt: cafeUsers.lastLoginAt,
       createdAt: cafeUsers.createdAt,
+      updatedAt: cafeUsers.updatedAt,
     })
     .from(cafeUsers)
     .orderBy(cafeUsers.name);
@@ -53,12 +55,36 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "PIN must be 4-6 digits" }, { status: 400 });
     }
 
-    const hashedPin = hashPin(pin);
-    const [user] = await getDb().insert(cafeUsers)
-      .values({ name: name.trim(), pin: hashedPin })
-      .returning();
+    const db = getDb();
+    const activeUsers = await db.select({
+      id: cafeUsers.id,
+      name: cafeUsers.name,
+      pin: cafeUsers.pin,
+    })
+    .from(cafeUsers)
+    .where(eq(cafeUsers.isActive, true));
 
-    return NextResponse.json({ user: { id: user.id, name: user.name, isActive: user.isActive } });
+    const duplicate = activeUsers.find((u) => verifyPin(pin, u.pin));
+    if (duplicate) {
+      return NextResponse.json(
+        { error: `This PIN is already assigned to "${duplicate.name}". Each staff member must have a unique PIN.` },
+        { status: 409 }
+      );
+    }
+
+    const hashedPin = hashPin(pin);
+    const [user] = await db.insert(cafeUsers)
+      .values({ name: name.trim(), pin: hashedPin })
+      .returning({
+        id: cafeUsers.id,
+        name: cafeUsers.name,
+        isActive: cafeUsers.isActive,
+        lastLoginAt: cafeUsers.lastLoginAt,
+        createdAt: cafeUsers.createdAt,
+        updatedAt: cafeUsers.updatedAt,
+      });
+
+    return NextResponse.json({ user });
   } catch (error: unknown) {
     console.error("Error creating cafe user:", error);
     if (error && typeof error === "object" && "code" in error && error.code === "23505") {

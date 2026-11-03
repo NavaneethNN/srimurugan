@@ -101,6 +101,55 @@ export default function CafePOSPage() {
   const [printOrder, setPrintOrder] = useState<KotOrder | null>(null);
   const [printedOrderIds, setPrintedOrderIds] = useState<Set<number>>(new Set());
   const [mobileTab, setMobileTab] = useState<"queue" | "details">("queue");
+  const [showChangePinModal, setShowChangePinModal] = useState(false);
+  const [pinForm, setPinForm] = useState({ currentPin: "", newPin: "", confirmPin: "" });
+  const [showCurrentPin, setShowCurrentPin] = useState(false);
+  const [showNewPin, setShowNewPin] = useState(false);
+  const [savingPin, setSavingPin] = useState(false);
+  const [pinModalError, setPinModalError] = useState("");
+  const [pinModalSuccess, setPinModalSuccess] = useState("");
+
+  const handleChangePinSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPinModalError("");
+    setPinModalSuccess("");
+
+    if (!/^\d{4,6}$/.test(pinForm.currentPin)) {
+      setPinModalError("Current PIN must be 4 to 6 numeric digits.");
+      return;
+    }
+    if (!/^\d{4,6}$/.test(pinForm.newPin)) {
+      setPinModalError("New PIN must be 4 to 6 numeric digits.");
+      return;
+    }
+    if (pinForm.newPin === pinForm.currentPin) {
+      setPinModalError("New PIN must be different from current PIN.");
+      return;
+    }
+    if (pinForm.newPin !== pinForm.confirmPin) {
+      setPinModalError("Confirmation PIN does not match new PIN.");
+      return;
+    }
+
+    setSavingPin(true);
+    try {
+      const response = await fetch("/api/cafe/change-pin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ currentPin: pinForm.currentPin, newPin: pinForm.newPin }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to change PIN");
+      }
+      setPinModalSuccess("PIN updated successfully! Use your new PIN for future sign-ins.");
+      setPinForm({ currentPin: "", newPin: "", confirmPin: "" });
+    } catch (err) {
+      setPinModalError(err instanceof Error ? err.message : "Failed to change PIN");
+    } finally {
+      setSavingPin(false);
+    }
+  };
 
   useEffect(() => {
     try {
@@ -318,11 +367,30 @@ export default function CafePOSPage() {
             </div>
             <h1 className="text-lg font-bold text-[#f4efe8]">Cafe Terminal</h1>
           </div>
-          <div className="flex items-center gap-3 text-sm">
+          <div className="flex items-center gap-2 sm:gap-3 text-sm">
             <div className="flex items-center gap-2 rounded-xl border border-[#2c2820] bg-[#161410] px-3 py-1.5">
               <span className="h-2 w-2 rounded-full bg-emerald-400" />
               <span className="text-xs font-semibold text-[#f4efe8]">{user?.name || "Staff"}</span>
             </div>
+            <button
+              type="button"
+              onClick={() => {
+                setShowChangePinModal(true);
+                setPinForm({ currentPin: "", newPin: "", confirmPin: "" });
+                setShowCurrentPin(false);
+                setShowNewPin(false);
+                setPinModalError("");
+                setPinModalSuccess("");
+              }}
+              title="Change your staff POS login PIN"
+              className="min-h-9 flex items-center gap-1.5 rounded-xl border border-[#2c2820] bg-[#161410] px-3 text-xs font-semibold text-[#b8b2aa] hover:border-[#c9993a]/50 hover:text-[#e8be6a] transition"
+            >
+              <svg className="h-3.5 w-3.5 text-[#c9993a]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
+                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+              </svg>
+              <span className="hidden sm:inline">Change PIN</span>
+            </button>
             <button
               type="button"
               onClick={() => void logout()}
@@ -935,6 +1003,199 @@ export default function CafePOSPage() {
           onTogglePrinted={handleTogglePrinted}
           onClose={() => setPrintOrder(null)}
         />
+      )}
+
+      {/* Self-Service Change PIN Modal */}
+      {showChangePinModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm"
+          role="dialog"
+          aria-modal="true"
+        >
+          <div className="w-full max-w-md rounded-3xl border border-[#2c2820] bg-gradient-to-b from-[#141210] to-[#0a0908] p-6 shadow-2xl">
+            <div className="flex items-start justify-between gap-3 border-b border-[#222018] pb-4">
+              <div>
+                <div className="flex items-center gap-2">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-xl border border-[#c9993a]/40 bg-[#c9993a]/15 text-[#e8be6a]">
+                    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
+                      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                    </svg>
+                  </div>
+                  <h3 className="text-base font-bold text-white">Change Your POS PIN</h3>
+                </div>
+                <p className="mt-1 text-xs text-[#b8b2aa]">
+                  Logged in as <strong className="text-white">{user?.name || "Staff"}</strong>
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setShowChangePinModal(false)}
+                disabled={savingPin}
+                className="rounded-lg p-1.5 text-[#b8b2aa] hover:bg-[#222018] hover:text-white transition disabled:opacity-50"
+                aria-label="Close dialog"
+              >
+                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              </button>
+            </div>
+
+            {pinModalError && (
+              <div
+                role="alert"
+                className="mt-4 flex items-start gap-2.5 rounded-xl border border-rose-500/40 bg-rose-950/40 p-3 text-xs font-semibold text-rose-200"
+              >
+                <svg className="mt-0.5 h-4 w-4 shrink-0 text-rose-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <circle cx="12" cy="12" r="10" />
+                  <line x1="12" y1="8" x2="12" y2="12" />
+                  <line x1="12" y1="16" x2="12.01" y2="16" />
+                </svg>
+                <span>{pinModalError}</span>
+              </div>
+            )}
+
+            {pinModalSuccess && (
+              <div
+                role="status"
+                className="mt-4 flex items-start gap-2.5 rounded-xl border border-emerald-500/40 bg-emerald-950/40 p-3 text-xs font-semibold text-emerald-200"
+              >
+                <svg className="mt-0.5 h-4 w-4 shrink-0 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                  <polyline points="22 4 12 14.01 9 11.01" />
+                </svg>
+                <span>{pinModalSuccess}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleChangePinSubmit} className="mt-5 space-y-4">
+              <div>
+                <div className="flex items-center justify-between">
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-[#b8b2aa]">
+                    Current PIN <span className="text-[#e8be6a]">*</span>
+                  </label>
+                </div>
+                <div className="relative mt-1.5">
+                  <input
+                    type={showCurrentPin ? "text" : "password"}
+                    inputMode="numeric"
+                    value={pinForm.currentPin}
+                    onChange={(e) => setPinForm((prev) => ({ ...prev, currentPin: e.target.value.replace(/\D/g, "").slice(0, 6) }))}
+                    placeholder="Enter existing PIN"
+                    required
+                    className="w-full rounded-xl border border-[#2c2820] bg-[#161410] pl-3.5 pr-10 py-2.5 font-mono text-sm text-[#f4efe8] placeholder-[#b8b2aa]/40 outline-none transition focus:border-[#c9993a]"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowCurrentPin((prev) => !prev)}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-[#b8b2aa] hover:text-[#f4efe8] transition"
+                    aria-label={showCurrentPin ? "Hide current PIN" : "Show current PIN"}
+                  >
+                    {showCurrentPin ? (
+                      <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                        <line x1="1" y1="1" x2="23" y2="23" />
+                      </svg>
+                    ) : (
+                      <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                        <circle cx="12" cy="12" r="3" />
+                      </svg>
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between">
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-[#b8b2aa]">
+                    New PIN (4-6 digits) <span className="text-[#e8be6a]">*</span>
+                  </label>
+                  {pinForm.newPin.length > 0 && (
+                    <span className={`text-[10px] font-mono ${pinForm.newPin.length >= 4 ? "text-emerald-400" : "text-amber-400"}`}>
+                      {pinForm.newPin.length}/6 digits
+                    </span>
+                  )}
+                </div>
+                <div className="relative mt-1.5">
+                  <input
+                    type={showNewPin ? "text" : "password"}
+                    inputMode="numeric"
+                    value={pinForm.newPin}
+                    onChange={(e) => setPinForm((prev) => ({ ...prev, newPin: e.target.value.replace(/\D/g, "").slice(0, 6) }))}
+                    placeholder="Enter new 4 to 6-digit PIN"
+                    required
+                    className="w-full rounded-xl border border-[#2c2820] bg-[#161410] pl-3.5 pr-10 py-2.5 font-mono text-sm text-[#f4efe8] placeholder-[#b8b2aa]/40 outline-none transition focus:border-[#c9993a]"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowNewPin((prev) => !prev)}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-[#b8b2aa] hover:text-[#f4efe8] transition"
+                    aria-label={showNewPin ? "Hide new PIN" : "Show new PIN"}
+                  >
+                    {showNewPin ? (
+                      <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                        <line x1="1" y1="1" x2="23" y2="23" />
+                      </svg>
+                    ) : (
+                      <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                        <circle cx="12" cy="12" r="3" />
+                      </svg>
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between">
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-[#b8b2aa]">
+                    Confirm New PIN <span className="text-[#e8be6a]">*</span>
+                  </label>
+                  {pinForm.confirmPin.length > 0 && (
+                    <span
+                      className={`text-[10px] font-semibold ${
+                        pinForm.newPin === pinForm.confirmPin ? "text-emerald-400" : "text-rose-400"
+                      }`}
+                    >
+                      {pinForm.newPin === pinForm.confirmPin ? "PINs match" : "Does not match"}
+                    </span>
+                  )}
+                </div>
+                <input
+                  type={showNewPin ? "text" : "password"}
+                  inputMode="numeric"
+                  value={pinForm.confirmPin}
+                  onChange={(e) => setPinForm((prev) => ({ ...prev, confirmPin: e.target.value.replace(/\D/g, "").slice(0, 6) }))}
+                  placeholder="Re-enter new PIN"
+                  required
+                  className="mt-1.5 w-full rounded-xl border border-[#2c2820] bg-[#161410] px-3.5 py-2.5 font-mono text-sm text-[#f4efe8] placeholder-[#b8b2aa]/40 outline-none transition focus:border-[#c9993a]"
+                />
+              </div>
+
+              <div className="flex gap-2.5 pt-3">
+                <button
+                  type="submit"
+                  disabled={savingPin || pinForm.newPin.length < 4 || pinForm.newPin !== pinForm.confirmPin}
+                  className="flex-1 rounded-xl bg-gradient-to-r from-[#c9993a] via-[#e8be6a] to-[#c9993a] px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-[#080808] shadow-md shadow-[#c9993a]/20 transition hover:brightness-110 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  {savingPin ? "Updating..." : "Update PIN"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowChangePinModal(false)}
+                  disabled={savingPin}
+                  className="rounded-xl border border-[#2c2820] bg-[#161410] px-4 py-2.5 text-xs font-semibold text-[#b8b2aa] transition hover:bg-[#222018] hover:text-white disabled:opacity-50"
+                >
+                  Close
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       )}
     </main>
   );

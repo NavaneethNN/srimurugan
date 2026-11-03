@@ -4,7 +4,7 @@ import { cafeUsers } from "@/lib/schema";
 import { eq } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { verifyAdminSession } from "@/lib/adminSession";
-import { hashPin } from "@/lib/cafeAuth";
+import { hashPin, verifyPin } from "@/lib/cafeAuth";
 
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 const SESSION_SECRET = process.env.SESSION_SECRET;
@@ -41,6 +41,25 @@ export async function PATCH(
       if (typeof body.pin !== "string" || !/^\d{4,6}$/.test(body.pin)) {
         return NextResponse.json({ error: "PIN must be 4-6 digits" }, { status: 400 });
       }
+
+      // Check if another active staff member already has this raw PIN
+      const db = getDb();
+      const activeUsers = await db.select({
+        id: cafeUsers.id,
+        name: cafeUsers.name,
+        pin: cafeUsers.pin,
+      })
+      .from(cafeUsers)
+      .where(eq(cafeUsers.isActive, true));
+
+      const duplicate = activeUsers.find((u) => u.id !== userId && verifyPin(body.pin, u.pin));
+      if (duplicate) {
+        return NextResponse.json(
+          { error: `This PIN is already assigned to "${duplicate.name}". Each staff member must have a unique PIN.` },
+          { status: 409 }
+        );
+      }
+
       updates.pin = hashPin(body.pin);
     }
     if (body.isActive !== undefined) updates.isActive = Boolean(body.isActive);
@@ -49,13 +68,23 @@ export async function PATCH(
     const [user] = await getDb().update(cafeUsers)
       .set(updates)
       .where(eq(cafeUsers.id, userId))
-      .returning();
+      .returning({
+        id: cafeUsers.id,
+        name: cafeUsers.name,
+        isActive: cafeUsers.isActive,
+        lastLoginAt: cafeUsers.lastLoginAt,
+        createdAt: cafeUsers.createdAt,
+        updatedAt: cafeUsers.updatedAt,
+      });
 
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    return NextResponse.json({ user: { id: user.id, name: user.name, isActive: user.isActive } });
+    return NextResponse.json({
+      user,
+      pinUpdated: Boolean(body.pin !== undefined && body.pin !== ""),
+    });
   } catch (error: unknown) {
     console.error("Error updating cafe user:", error);
     if (error && typeof error === "object" && "code" in error && error.code === "23505") {
