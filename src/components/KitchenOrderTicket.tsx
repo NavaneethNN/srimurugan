@@ -106,6 +106,7 @@ export default function KitchenOrderTicketModal({
 }: Props) {
   const [device, setDevice] = useState<string>("Canon G2010 series");
   const [isCustomDevice, setIsCustomDevice] = useState(false);
+  const [pageSize, setPageSize] = useState<"a4" | "roll">("a4");
   const [paperWidth, setPaperWidth] = useState<"80mm" | "58mm">("80mm");
   const [copied, setCopied] = useState(false);
   const [printed, setPrinted] = useState(isPrinted);
@@ -118,6 +119,10 @@ export default function KitchenOrderTicketModal({
         if (!PRINTER_PRESETS.includes(savedDevice as (typeof PRINTER_PRESETS)[number])) {
           setIsCustomDevice(true);
         }
+      }
+      const savedPageSize = localStorage.getItem("cafe_kot_page_size");
+      if (savedPageSize === "a4" || savedPageSize === "roll") {
+        setPageSize(savedPageSize);
       }
       const savedWidth = localStorage.getItem("cafe_kot_paper_width");
       if (savedWidth === "58mm" || savedWidth === "80mm") {
@@ -166,6 +171,15 @@ export default function KitchenOrderTicketModal({
     }
   }
 
+  function handlePageSizeChange(size: "a4" | "roll") {
+    setPageSize(size);
+    try {
+      localStorage.setItem("cafe_kot_page_size", size);
+    } catch {
+      /* optional */
+    }
+  }
+
   function handlePaperWidthChange(width: "80mm" | "58mm") {
     setPaperWidth(width);
     try {
@@ -202,30 +216,87 @@ export default function KitchenOrderTicketModal({
 
   return (
     <>
-      {/* Global CSS for Print Media to print ONLY the ticket */}
+      {/* Global CSS for Print Media to print on A4 page, centered in middle, starting from top only */}
       <style jsx global>{`
         @media print {
-          /* Hide all page content during print */
+          @page {
+            size: ${pageSize === "roll" ? (paperWidth === "58mm" ? "58mm auto" : "80mm auto") : "A4 portrait"};
+            margin: 0;
+          }
+
+          /* Reset all screen-only filters, transforms and modal backdrops */
+          *, *::before, *::after {
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+            filter: none !important;
+            transform: none !important;
+          }
+
+          /* Ensure clean page canvas */
+          html, body {
+            margin: 0 !important;
+            padding: 0 !important;
+            width: ${pageSize === "roll" ? (paperWidth === "58mm" ? "58mm" : "80mm") : "210mm"} !important;
+            background: #ffffff !important;
+            color: #000000 !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
+
+          /* Hide all screen interface elements */
           body * {
             visibility: hidden !important;
           }
-          /* Make only the KOT ticket and its children visible */
+
+          /* Make only the KOT ticket and its preformatted text visible */
           #kot-print-area,
           #kot-print-area * {
             visibility: visible !important;
           }
+
+          /* Position ticket on A4 page: centered in middle, starting from top only */
           #kot-print-area {
             position: fixed !important;
-            left: 0 !important;
             top: 0 !important;
+            bottom: auto !important;
+            ${pageSize === "roll"
+              ? `
+              left: 0 !important;
+              right: auto !important;
+              margin: 0 !important;
+              margin-top: 2mm !important;
+            `
+              : `
+              left: 0 !important;
+              right: 0 !important;
+              margin-left: auto !important;
+              margin-right: auto !important;
+              margin-top: 4mm !important;
+              margin-bottom: 0 !important;
+            `}
             width: ${paperWidth === "58mm" ? "58mm" : "80mm"} !important;
-            margin: 0 !important;
-            padding: 2mm 3mm !important;
+            max-width: ${paperWidth === "58mm" ? "58mm" : "80mm"} !important;
+            box-sizing: border-box !important;
+            padding: 4mm 5mm !important;
             background: #ffffff !important;
             color: #000000 !important;
             box-shadow: none !important;
-            border: none !important;
+            border: 1px dashed #444444 !important;
+            border-radius: 0 !important;
             font-family: 'Courier New', Courier, monospace !important;
+            overflow: visible !important;
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+          }
+
+          #kot-print-area pre {
+            color: #000000 !important;
+            font-size: ${paperWidth === "58mm" ? "9.5pt" : "10.5pt"} !important;
+            line-height: 1.35 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            white-space: pre-wrap !important;
+            word-break: break-word !important;
           }
         }
       `}</style>
@@ -255,7 +326,7 @@ export default function KitchenOrderTicketModal({
               <button
                 type="button"
                 onClick={onClose}
-                className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#2c2820] bg-[#161410] text-[#b8b2aa] hover:border-[#c9993a] hover:text-white"
+                className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#2c2820] bg-[#161410] text-[#b8b2aa] hover:border-[#c9993a] hover:text-white transition"
                 aria-label="Close KOT preview"
               >
                 <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
@@ -299,17 +370,43 @@ export default function KitchenOrderTicketModal({
               </div>
             </div>
 
-            {/* Paper Size & Printed Checkbox */}
-            <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[#222018] pt-2.5">
+            {/* Paper Format & Size Options */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-t border-[#222018] pt-2.5">
               <div className="flex items-center gap-2">
-                <span className="text-[#b8b2aa]">Ticket Width:</span>
+                <span className="text-[#b8b2aa]">Page Size:</span>
+                <button
+                  type="button"
+                  onClick={() => handlePageSizeChange("a4")}
+                  className={`rounded px-2.5 py-1 text-[11px] font-bold transition ${
+                    pageSize === "a4"
+                      ? "bg-[#c9993a] text-black shadow"
+                      : "border border-[#2c2820] bg-[#0c0a08] text-[#b8b2aa] hover:text-white"
+                  }`}
+                >
+                  A4 Page (Top Center)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handlePageSizeChange("roll")}
+                  className={`rounded px-2.5 py-1 text-[11px] font-bold transition ${
+                    pageSize === "roll"
+                      ? "bg-[#c9993a] text-black shadow"
+                      : "border border-[#2c2820] bg-[#0c0a08] text-[#b8b2aa] hover:text-white"
+                  }`}
+                >
+                  Thermal Roll
+                </button>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <span className="text-[#b8b2aa]">Width:</span>
                 <button
                   type="button"
                   onClick={() => handlePaperWidthChange("80mm")}
-                  className={`rounded px-2 py-0.5 text-[11px] font-bold ${
+                  className={`rounded px-2 py-0.5 text-[11px] font-bold transition ${
                     paperWidth === "80mm"
                       ? "bg-[#c9993a] text-black"
-                      : "border border-[#2c2820] bg-[#0c0a08] text-[#b8b2aa]"
+                      : "border border-[#2c2820] bg-[#0c0a08] text-[#b8b2aa] hover:text-white"
                   }`}
                 >
                   80mm (Standard)
@@ -317,17 +414,25 @@ export default function KitchenOrderTicketModal({
                 <button
                   type="button"
                   onClick={() => handlePaperWidthChange("58mm")}
-                  className={`rounded px-2 py-0.5 text-[11px] font-bold ${
+                  className={`rounded px-2 py-0.5 text-[11px] font-bold transition ${
                     paperWidth === "58mm"
                       ? "bg-[#c9993a] text-black"
-                      : "border border-[#2c2820] bg-[#0c0a08] text-[#b8b2aa]"
+                      : "border border-[#2c2820] bg-[#0c0a08] text-[#b8b2aa] hover:text-white"
                   }`}
                 >
                   58mm (Mini)
                 </button>
               </div>
+            </div>
 
-              {/* Mark as Printed Toggle Option */}
+            {/* Mark as Printed Toggle Option */}
+            <div className="flex items-center justify-between border-t border-[#222018] pt-2">
+              <span className="text-[11px] text-[#b8b2aa]">
+                {pageSize === "a4"
+                  ? "Calibrated for A4 paper: centered horizontally, starting from top"
+                  : "Calibrated for continuous thermal roll paper"}
+              </span>
+
               <label className="flex items-center gap-2 cursor-pointer select-none">
                 <input
                   type="checkbox"
@@ -342,19 +447,41 @@ export default function KitchenOrderTicketModal({
             </div>
           </div>
 
-          {/* Realistic Thermal Receipt Preview Container */}
-          <div className="mt-4 flex justify-center bg-[#080808] p-3 sm:p-4 rounded-xl border border-[#222018] overflow-hidden">
-            <div
-              id="kot-print-area"
-              className={`rounded border border-neutral-300 bg-[#fffdf7] p-3 sm:p-4 text-black shadow-lg font-mono text-[11px] sm:text-[12px] leading-tight select-text overflow-x-auto max-w-full ${
-                paperWidth === "58mm" ? "w-[240px]" : "w-[300px]"
-              }`}
-              style={{
-                fontFamily: "'Courier New', Courier, 'Lucida Console', monospace",
-                lineHeight: "1.35",
-              }}
-            >
-              <pre className="whitespace-pre font-mono m-0 p-0 text-black leading-snug">{rawText}</pre>
+          {/* A4 Sheet Simulation Preview Container */}
+          <div className="mt-4 flex flex-col items-center justify-center rounded-xl border border-[#222018] bg-[#080808] p-3 sm:p-5 overflow-hidden">
+            <div className="mb-2.5 flex items-center justify-between w-full max-w-[340px] px-1 text-[11px] text-[#b8b2aa]">
+              <span className="flex items-center gap-1.5 font-semibold text-[#f4efe8]">
+                <svg className="h-3.5 w-3.5 text-[#e8be6a]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                  <polyline points="14 2 14 8 20 8" />
+                  <line x1="16" y1="13" x2="8" y2="13" />
+                  <line x1="16" y1="17" x2="8" y2="17" />
+                  <polyline points="10 9 9 9 8 9" />
+                </svg>
+                <span>{pageSize === "a4" ? "A4 Page Layout" : "Thermal Roll Layout"}</span>
+              </span>
+              <span className="rounded bg-[#c9993a]/15 border border-[#c9993a]/30 px-2 py-0.5 text-[10px] font-bold text-[#e8be6a]">
+                {pageSize === "a4" ? "Top Center Aligned" : "Left Aligned"}
+              </span>
+            </div>
+
+            {/* A4 sheet miniature frame */}
+            <div className="relative flex flex-col items-center w-full max-w-[340px] pt-2 pb-4 px-3 rounded-lg border border-dashed border-[#333025] bg-[#111010]/80">
+              <span className="text-[10px] text-[#b8b2aa]/70 uppercase tracking-widest mb-2 font-mono">
+                ↑ Top of {pageSize === "a4" ? "A4 Sheet" : "Roll"} ↑
+              </span>
+              <div
+                id="kot-print-area"
+                className={`rounded border border-neutral-300 bg-[#fffdf7] p-3 sm:p-4 text-black shadow-lg font-mono text-[11px] sm:text-[12px] leading-tight select-text overflow-x-auto max-w-full ${
+                  paperWidth === "58mm" ? "w-[240px]" : "w-[300px]"
+                }`}
+                style={{
+                  fontFamily: "'Courier New', Courier, 'Lucida Console', monospace",
+                  lineHeight: "1.35",
+                }}
+              >
+                <pre className="whitespace-pre font-mono m-0 p-0 text-black leading-snug">{rawText}</pre>
+              </div>
             </div>
           </div>
 
@@ -419,4 +546,3 @@ export default function KitchenOrderTicketModal({
     </>
   );
 }
-

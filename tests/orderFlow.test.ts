@@ -649,3 +649,10 @@ test("generateKotRawText matches required thermal KOT structure", async () => {
   assert.ok(raw.includes("KITCHEN ORDER TICKET"));
   assert.ok(raw.includes("NOT A TAX INVOICE"));
 });
+
+test("PRINTER_PRESETS includes Canon G2010 desktop A4 printer and thermal models", async () => {
+  const { PRINTER_PRESETS } = await import("../src/components/KitchenOrderTicket");
+  assert.equal(PRINTER_PRESETS[0], "Canon G2010 series");
+  assert.ok(PRINTER_PRESETS.includes("POS Thermal 80mm (ESC/POS)"));
+  assert.ok(PRINTER_PRESETS.includes("Browser Print / Save as PDF"));
+});
