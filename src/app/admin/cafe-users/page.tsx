@@ -445,7 +445,11 @@ export default function CafeUsersPage() {
                   </li>
                   <li className="flex items-start gap-1.5">
                     <span className="text-[#e8be6a]">•</span>
-                    <span>Use &ldquo;Change PIN&rdquo; on any staff card for quick password resets</span>
+                    <span>Use &ldquo;Change PIN&rdquo; on any staff card to set or reset credentials</span>
+                  </li>
+                  <li className="flex items-start gap-1.5">
+                    <span className="text-[#e8be6a]">•</span>
+                    <span>Staff members cannot change their own PIN — only administrators can manage credentials</span>
                   </li>
                 </ul>
               </div>

@@ -306,7 +306,7 @@ export default function CafeLoginPage() {
           </div>
         </div>
 
-        {/* Security Notice & PIN Help */}
+        {/* Security Notice & PIN Information */}
         <div className="mt-6 space-y-1.5 text-center text-[11px] text-[#b8b2aa]/70">
           <div className="flex items-center justify-center gap-2">
             <svg className="h-3.5 w-3.5 text-[#c9993a]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -316,9 +316,9 @@ export default function CafeLoginPage() {
             <span>Authorized Sri Murugan Staff Only • Terminal Protected</span>
           </div>
           <p>
-            Need to change or reset your PIN? Visit the{" "}
-            <Link href="/admin/cafe-users" className="text-[#e8be6a] hover:underline">
-              Admin Staff Portal
+            Staff PINs can only be set or updated by cinema management in the{" "}
+            <Link href="/admin/cafe-users" className="text-[#e8be6a] hover:underline font-semibold">
+              Admin Portal
             </Link>
           </p>
         </div>

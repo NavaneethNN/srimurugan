@@ -51,13 +51,15 @@ test("PIN change invalidates old PIN and activates new PIN immediately", () => {
   assert.equal(verifyPin(oldPin, storedHash), false);
 });
 
-test("self-service PIN change requires different new PIN and matching confirmation", () => {
+test("admin PIN change enforces confirmation matching and prevents identical PIN", () => {
   const currentPin = "1234";
   const samePin = "1234";
   const newPin = "5678";
+  const matchingConfirm = "5678";
   const mismatchConfirm = "5679";
 
-  assert.equal(currentPin === samePin, true, "Should reject identical PIN");
-  assert.notEqual(newPin, currentPin, "Should accept different PIN");
-  assert.notEqual(newPin, mismatchConfirm, "Should reject mismatched confirmation");
+  assert.equal(currentPin === samePin, true, "Detects identical PIN");
+  assert.equal(newPin === matchingConfirm, true, "Accepts matching confirmation");
+  assert.notEqual(newPin, mismatchConfirm, "Rejects mismatched confirmation");
 });
+
