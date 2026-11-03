@@ -126,44 +126,6 @@ export default function CafeLoginPage() {
     }
   };
 
-  // On-screen Numpad interaction for touch registers & POS tablets
-  const handleNumpadPress = (num: string) => {
-    if (loading) return;
-    const firstEmptyIndex = digits.findIndex((d) => d === "");
-    if (firstEmptyIndex !== -1) {
-      const updated = [...digits];
-      updated[firstEmptyIndex] = num;
-      setDigits(updated);
-
-      if (firstEmptyIndex < 5) {
-        inputRefs.current[firstEmptyIndex + 1]?.focus();
-      }
-
-      const fullPin = updated.join("");
-      if (fullPin.length === 6) {
-        void handleLogin(fullPin);
-      }
-    }
-  };
-
-  const handleNumpadBackspace = () => {
-    if (loading) return;
-    // find the last filled index
-    let lastFilled = -1;
-    for (let i = digits.length - 1; i >= 0; i--) {
-      if (digits[i] !== "") {
-        lastFilled = i;
-        break;
-      }
-    }
-    if (lastFilled !== -1) {
-      const updated = [...digits];
-      updated[lastFilled] = "";
-      setDigits(updated);
-      inputRefs.current[lastFilled]?.focus();
-    }
-  };
-
   const clearPin = () => {
     setDigits(["", "", "", "", "", ""]);
     setError("");
@@ -256,6 +218,23 @@ export default function CafeLoginPage() {
               })}
             </div>
 
+            {/* Clear PIN Action if user started typing */}
+            {pin.length > 0 && !loading && (
+              <div className="mb-4 flex justify-center">
+                <button
+                  type="button"
+                  onClick={clearPin}
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-[#2c2820] bg-[#161410] px-3 py-1 text-[11px] font-semibold text-[#b8b2aa] hover:border-rose-500/40 hover:bg-rose-950/20 hover:text-rose-300 transition"
+                >
+                  <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                  </svg>
+                  <span>Clear digits</span>
+                </button>
+              </div>
+            )}
+
             {/* Error Message */}
             {error && (
               <div
@@ -271,58 +250,11 @@ export default function CafeLoginPage() {
               </div>
             )}
 
-            {/* On-Screen Touch Numpad (Essential for Cinema POS Counters & Tablets) */}
-            <div className="mb-5 grid grid-cols-3 gap-2 sm:gap-2.5">
-              {["1", "2", "3", "4", "5", "6", "7", "8", "9"].map((num) => (
-                <button
-                  key={num}
-                  type="button"
-                  onClick={() => handleNumpadPress(num)}
-                  disabled={loading}
-                  className="flex h-12 items-center justify-center rounded-xl border border-[#2c2820] bg-[#161410]/80 font-mono text-lg font-bold text-white shadow-sm transition hover:border-[#c9993a]/50 hover:bg-[#222018] active:scale-95 disabled:opacity-50 sm:h-14 sm:text-xl"
-                >
-                  {num}
-                </button>
-              ))}
-
-              <button
-                type="button"
-                onClick={clearPin}
-                disabled={loading || pin.length === 0}
-                className="flex h-12 items-center justify-center rounded-xl border border-[#2c2820] bg-[#111010] text-xs font-bold uppercase tracking-wider text-[#b8b2aa] transition hover:border-rose-500/40 hover:bg-rose-950/20 hover:text-rose-300 active:scale-95 disabled:opacity-40 sm:h-14"
-              >
-                Clear
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleNumpadPress("0")}
-                disabled={loading}
-                className="flex h-12 items-center justify-center rounded-xl border border-[#2c2820] bg-[#161410]/80 font-mono text-lg font-bold text-white shadow-sm transition hover:border-[#c9993a]/50 hover:bg-[#222018] active:scale-95 disabled:opacity-50 sm:h-14 sm:text-xl"
-              >
-                0
-              </button>
-
-              <button
-                type="button"
-                onClick={handleNumpadBackspace}
-                disabled={loading || pin.length === 0}
-                className="flex h-12 items-center justify-center rounded-xl border border-[#2c2820] bg-[#111010] text-xs font-bold text-[#b8b2aa] transition hover:border-[#c9993a]/40 hover:text-white active:scale-95 disabled:opacity-40 sm:h-14"
-                aria-label="Backspace"
-              >
-                <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z" />
-                  <line x1="18" y1="9" x2="12" y2="15" />
-                  <line x1="12" y1="9" x2="18" y2="15" />
-                </svg>
-              </button>
-            </div>
-
             {/* Submit Button */}
             <button
               type="submit"
               disabled={loading || pin.length < 4}
-              className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#c9993a] via-[#e8be6a] to-[#c9993a] text-xs font-bold uppercase tracking-wider text-[#080808] shadow-lg shadow-[#c9993a]/20 transition hover:brightness-110 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
+              className="mt-2 flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#c9993a] via-[#e8be6a] to-[#c9993a] text-xs font-bold uppercase tracking-wider text-[#080808] shadow-lg shadow-[#c9993a]/20 transition hover:brightness-110 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
             >
               {loading ? (
                 <>
