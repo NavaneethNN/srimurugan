@@ -18,12 +18,14 @@ type Confirmation = {
   editToken: string;
   editDeadline: number;
   editWindowMs: number;
+  canEditSeat?: boolean;
 };
 type ConfirmationPayload = {
   order: { id: number; status: string; customerName: string; seat: string; items: FoodOrderItem[] };
   editToken: string;
   editRemainingMs: number;
   editWindowMs: number;
+  canEditSeat?: boolean;
 };
 
 const orderStatusText: Record<string, string> = {
@@ -36,6 +38,10 @@ const orderStatusText: Record<string, string> = {
 const orderStatusSteps = ["pending", "preparing", "completed"];
 
 function confirmationFrom(result: ConfirmationPayload, receivedAt: number): Confirmation {
+  const isPending = result.order.status === "pending";
+  const canEditSeat = typeof result.canEditSeat === "boolean"
+    ? result.canEditSeat
+    : isPending && result.editRemainingMs > 0;
   return {
     id: result.order.id,
     status: result.order.status,
@@ -43,8 +49,9 @@ function confirmationFrom(result: ConfirmationPayload, receivedAt: number): Conf
     seat: result.order.seat,
     items: result.order.items,
     editToken: result.editToken,
-    editDeadline: receivedAt + result.editRemainingMs,
+    editDeadline: canEditSeat ? receivedAt + result.editRemainingMs : receivedAt,
     editWindowMs: result.editWindowMs,
+    canEditSeat,
   };
 }
 
@@ -257,7 +264,25 @@ export default function OrderFood() {
           if (current && current.id > result.order.id) return current;
           if (!current || current.id !== result.order.id) return confirmationFrom(result, receivedAt);
           if (current.status === result.order.status && current.seat === result.order.seat) return current;
-          return { ...current, status: result.order.status, seat: result.order.seat, items: result.order.items };
+
+          // If order transitioned away from pending (staff accepted and KOT printed), close seat editing
+          if (current.status === "pending" && result.order.status !== "pending") {
+            setEditingSeat(false);
+            setSeatError("");
+          }
+
+          const isPending = result.order.status === "pending";
+          const canEditSeat = typeof result.canEditSeat === "boolean"
+            ? result.canEditSeat
+            : isPending && current.editDeadline > receivedAt;
+
+          return {
+            ...current,
+            status: result.order.status,
+            seat: result.order.seat,
+            items: result.order.items,
+            canEditSeat,
+          };
         });
       } catch {
         /* Keep last known */
@@ -711,7 +736,7 @@ export default function OrderFood() {
 
   async function saveSeat(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!confirmation || secondsLeft === 0 || savingSeat) return;
+    if (!confirmation || confirmation.status !== "pending" || secondsLeft === 0 || savingSeat) return;
     setSavingSeat(true);
     setSeatError("");
     try {
@@ -721,7 +746,16 @@ export default function OrderFood() {
         body: JSON.stringify({ seat: seatDraft.trim(), editToken: confirmation.editToken }),
       });
       const result = await response.json();
-      if (!response.ok) throw new Error(result.error || "Please try again.");
+      if (!response.ok) {
+        if (response.status === 409) {
+          // Staff accepted the order while customer was editing
+          setConfirmation((current) =>
+            current ? { ...current, status: result.status || "preparing", canEditSeat: false } : current
+          );
+          setEditingSeat(false);
+        }
+        throw new Error(result.error || "Please try again.");
+      }
       setConfirmation((current) => (current ? { ...current, seat: result.order.seat } : current));
       setSeat(result.order.seat);
       setEditingSeat(false);
@@ -1086,6 +1120,15 @@ export default function OrderFood() {
                   <h2 className="mt-1 text-xl font-bold sm:text-2xl">{orderStatusText[confirmation.status] || "Order received"}</h2>
                   <p className="mt-1 text-xs text-foreground/80 sm:text-sm">
                     {confirmation.customerName} · Delivering to: <strong className="text-gold">{confirmation.seat}</strong>
+                    {confirmation.status === "pending" && secondsLeft > 0 ? (
+                      <span className="ml-2 inline-flex items-center rounded-full border border-gold/40 bg-gold/15 px-2 py-0.5 text-[0.68rem] font-bold text-gold">
+                        Seat editable: {secondsLeft}s
+                      </span>
+                    ) : confirmation.status !== "pending" ? (
+                      <span className="ml-2 inline-flex items-center rounded-full border border-emerald-600/30 bg-emerald-50 px-2 py-0.5 text-[0.68rem] font-bold text-emerald-800">
+                        Seat locked · Ticket printed
+                      </span>
+                    ) : null}
                   </p>
 
                   {/* Progress bar */}
@@ -1538,13 +1581,25 @@ export default function OrderFood() {
 
             {/* Screen & Seat Card */}
             <div className="mt-5 rounded-2xl border border-gold/35 bg-[#f9edda] p-4">
-              <p className="text-xs font-bold uppercase tracking-[0.18em] text-gold">Delivering To</p>
-              <p className="mt-1 text-xl font-black text-foreground sm:text-2xl">{confirmation.seat}</p>
+              <div className="flex items-start justify-between gap-2">
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-gold">Delivering To</p>
+                  <p className="mt-1 text-xl font-black text-foreground sm:text-2xl">{confirmation.seat}</p>
+                </div>
+                {confirmation.status !== "pending" && (
+                  <span className="inline-flex items-center gap-1 rounded-full border border-emerald-600/30 bg-emerald-50 px-2.5 py-1 text-[0.68rem] font-bold text-emerald-800">
+                    <svg className="h-3 w-3 shrink-0 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                    <span>KOT Printed</span>
+                  </span>
+                )}
+              </div>
 
-              {secondsLeft > 0 ? (
+              {confirmation.status === "pending" && secondsLeft > 0 ? (
                 <>
                   <p className="mt-2.5 text-xs text-muted">
-                    Need to correct your seat? Changes close in <strong className="text-gold">{secondsLeft}s</strong>
+                    Need to correct your seat? Changes close when staff accepts order or in <strong className="text-gold">{secondsLeft}s</strong>
                   </p>
                   {editingSeat ? (
                     <form onSubmit={saveSeat} className="mt-3.5 space-y-3">
@@ -1598,6 +1653,18 @@ export default function OrderFood() {
                     </button>
                   )}
                 </>
+              ) : confirmation.status !== "pending" ? (
+                <div className="mt-3 flex items-start gap-2.5 rounded-xl border border-emerald-600/30 bg-emerald-500/10 p-3 text-xs text-foreground">
+                  <svg className="mt-0.5 h-4 w-4 shrink-0 text-emerald-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                  <div>
+                    <span className="font-bold text-foreground">Order Accepted &amp; Kitchen Ticket Printed</span>
+                    <p className="mt-0.5 text-muted">
+                      Cafe staff accepted your order and printed the physical kitchen ticket. Your food will be delivered to the seat indicated above. Seat changes are no longer allowed.
+                    </p>
+                  </div>
+                </div>
               ) : (
                 <p className="mt-2 text-xs text-muted">Seat edit window has closed.</p>
               )}

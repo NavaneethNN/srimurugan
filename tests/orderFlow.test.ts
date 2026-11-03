@@ -8,6 +8,7 @@ import { readJsonBody, RequestTooLargeError } from "../src/lib/requestBody";
 import { createCafeSession, verifyCafeSession } from "../src/lib/cafeSession";
 import { createCustomerOrderSession, verifyCustomerOrderSession } from "../src/lib/customerOrderSession";
 import { createSeatEditToken, verifySeatEditToken, SEAT_EDIT_WINDOW_MS } from "../src/lib/foodOrderEdit";
+import { foodOrderConfirmation } from "../src/lib/foodPayment";
 import { formatPrice } from "../src/lib/foodMenu";
 import { parseCategoryInput, parseProductInput, assignVariantIds } from "../src/lib/foodMenuValidation";
 import type { FoodCategory, FoodProduct } from "../src/lib/foodMenu";
@@ -179,6 +180,47 @@ test("seat-edit token is rejected when it has extra segments", () => {
   const expiresAt = Date.now() + SEAT_EDIT_WINDOW_MS;
   const token = createSeatEditToken(42, expiresAt) + ".extra";
   assert.equal(verifySeatEditToken(token, 42), false);
+});
+
+test("foodOrderConfirmation allows seat editing only when order status is pending", () => {
+  process.env.SESSION_SECRET = "seat-test-secret";
+  const now = new Date();
+  const baseOrder = {
+    id: 101,
+    customerName: "Murugan Fan",
+    seat: "Screen 1 · Row D, Seat 5",
+    items: [{ productId: 1, variantId: "v1", name: "Popcorn", variantName: "Regular", quantity: 1, unitPricePaise: 15000 }],
+    amountPaise: 15000,
+    razorpayPaymentId: "pay_12345",
+    paymentStatus: "paid" as const,
+    paidAt: now,
+  };
+
+  // Pending status within window: can edit seat
+  const pendingConfirmation = foodOrderConfirmation({ ...baseOrder, status: "pending" });
+  assert.equal(pendingConfirmation.canEditSeat, true);
+  assert.ok(pendingConfirmation.editRemainingMs > 0);
+
+  // Preparing status (staff accepted and KOT printed): seat editing is locked
+  const preparingConfirmation = foodOrderConfirmation({ ...baseOrder, status: "preparing" });
+  assert.equal(preparingConfirmation.canEditSeat, false);
+  assert.equal(preparingConfirmation.editRemainingMs, 0);
+
+  // Completed status: seat editing is locked
+  const completedConfirmation = foodOrderConfirmation({ ...baseOrder, status: "completed" });
+  assert.equal(completedConfirmation.canEditSeat, false);
+  assert.equal(completedConfirmation.editRemainingMs, 0);
+
+  // Cancelled status: seat editing is locked
+  const cancelledConfirmation = foodOrderConfirmation({ ...baseOrder, status: "cancelled" });
+  assert.equal(cancelledConfirmation.canEditSeat, false);
+  assert.equal(cancelledConfirmation.editRemainingMs, 0);
+
+  // Pending status but time expired: seat editing is locked
+  const expiredPaidAt = new Date(Date.now() - SEAT_EDIT_WINDOW_MS - 1000);
+  const expiredConfirmation = foodOrderConfirmation({ ...baseOrder, status: "pending", paidAt: expiredPaidAt });
+  assert.equal(expiredConfirmation.canEditSeat, false);
+  assert.equal(expiredConfirmation.editRemainingMs, 0);
 });
 
 // ─── Customer order session ───────────────────────────────────────────────────

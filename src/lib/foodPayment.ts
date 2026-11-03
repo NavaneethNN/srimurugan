@@ -4,14 +4,22 @@ import { foodOrders } from "@/lib/schema";
 import { captureRazorpayPayment, fetchRazorpayPayment, isCapturedFoodPayment } from "@/lib/razorpay";
 import { createSeatEditToken, SEAT_EDIT_WINDOW_MS } from "@/lib/foodOrderEdit";
 
-export function foodOrderConfirmation(order: typeof foodOrders.$inferSelect) {
+export type ConfirmedFoodOrder = Pick<
+  typeof foodOrders.$inferSelect,
+  "id" | "status" | "customerName" | "seat" | "items" | "amountPaise" | "paymentStatus" | "paidAt" | "razorpayPaymentId"
+>;
+
+export function foodOrderConfirmation(order: ConfirmedFoodOrder) {
   if (order.paymentStatus !== "paid" || !order.paidAt || !order.razorpayPaymentId) throw new Error("Order payment is not confirmed");
   const expiresAt = order.paidAt.getTime() + SEAT_EDIT_WINDOW_MS;
+  const isPending = order.status === "pending";
+  const canEditSeat = isPending && expiresAt > Date.now();
   return {
-    order: { id: order.id, status: order.status, customerName: order.customerName, seat: order.seat, items: order.items, amountPaise: order.amountPaise },
+    order: { id: order.id, status: order.status, customerName: order.customerName, seat: order.seat, items: order.items as import("@/lib/foodMenu").FoodOrderItem[], amountPaise: order.amountPaise },
     editToken: createSeatEditToken(order.id, expiresAt),
-    editRemainingMs: Math.max(0, expiresAt - Date.now()),
+    editRemainingMs: canEditSeat ? Math.max(0, expiresAt - Date.now()) : 0,
     editWindowMs: SEAT_EDIT_WINDOW_MS,
+    canEditSeat,
   };
 }
 

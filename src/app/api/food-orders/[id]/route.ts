@@ -44,6 +44,16 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
       );
     }
 
+    if (existing.status !== "pending") {
+      return NextResponse.json(
+        {
+          error: "The kitchen staff has already accepted your order and printed your ticket. Seat changes are no longer allowed.",
+          status: existing.status,
+        },
+        { status: 409 }
+      );
+    }
+
     const now = new Date();
     const logs = Array.isArray(existing.statusLogs) && existing.statusLogs.length > 0
       ? [...existing.statusLogs]
@@ -73,12 +83,30 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
       .where(
         and(
           eq(foodOrders.id, orderId),
-          eq(foodOrders.paymentStatus, "paid")
+          eq(foodOrders.paymentStatus, "paid"),
+          eq(foodOrders.status, "pending"),
+          gt(foodOrders.paidAt, new Date(Date.now() - SEAT_EDIT_WINDOW_MS))
         )
       )
-      .returning({ id: foodOrders.id, seat: foodOrders.seat });
+      .returning({ id: foodOrders.id, seat: foodOrders.seat, status: foodOrders.status });
 
     if (!order) {
+      const [latest] = await db
+        .select({ status: foodOrders.status })
+        .from(foodOrders)
+        .where(eq(foodOrders.id, orderId))
+        .limit(1);
+
+      if (latest && latest.status !== "pending") {
+        return NextResponse.json(
+          {
+            error: "The kitchen staff has already accepted your order and printed your ticket. Seat changes are no longer allowed.",
+            status: latest.status,
+          },
+          { status: 409 }
+        );
+      }
+
       return NextResponse.json(
         { error: `The ${SEAT_EDIT_WINDOW_MS / 1000}-second seat edit window has ended.` },
         { status: 403 }
