@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useCallback, useEffect, useState } from "react";
+import { ChangeEvent, DragEvent, FormEvent, useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import AdminNav from "@/components/AdminNav";
 import type { FoodCategory, FoodProduct } from "@/lib/foodMenu";
@@ -58,6 +58,11 @@ export default function CafeMenuPage() {
   const [selectedCategoryFilter, setSelectedCategoryFilter] = useState<number | "all">("all");
   const [searchQuery, setSearchQuery] = useState("");
 
+  // Product Image Upload states
+  const [uploadingProductImage, setUploadingProductImage] = useState(false);
+  const [dragActiveProductImage, setDragActiveProductImage] = useState(false);
+  const fileInputProductRef = useRef<HTMLInputElement>(null);
+
   const refresh = useCallback(async () => {
     try {
       const response = await fetch("/api/admin/food-menu/categories", { cache: "no-store" });
@@ -89,6 +94,80 @@ export default function CafeMenuPage() {
   const resetProduct = () => {
     setEditingProductId(null);
     setProduct(newProduct(categories[0]?.id || 0));
+    setDragActiveProductImage(false);
+  };
+
+  // Upload menu product image handler
+  async function handleProductImageUpload(file: File) {
+    if (!file.type.startsWith("image/")) {
+      setMessage({ type: "error", text: "Please select an image file (PNG, JPG, WebP, AVIF)." });
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      setMessage({ type: "error", text: "File size exceeds 10 MB limit. Please select a smaller image." });
+      return;
+    }
+
+    setUploadingProductImage(true);
+    setMessage(null);
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("folder", "menu");
+
+      const response = await fetch("/api/admin/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to upload menu item image.");
+      }
+
+      setProduct((prev) => ({ ...prev, imageUrl: data.url }));
+      setMessage({ type: "success", text: "Menu item image uploaded successfully." });
+    } catch (error) {
+      setMessage({
+        type: "error",
+        text: error instanceof Error ? error.message : "Failed to upload menu item image.",
+      });
+    } finally {
+      setUploadingProductImage(false);
+    }
+  }
+
+  const onProductFileInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      void handleProductImageUpload(file);
+    }
+    e.target.value = "";
+  };
+
+  const onProductDragOver = (e: DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActiveProductImage(true);
+  };
+
+  const onProductDragLeave = (e: DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActiveProductImage(false);
+  };
+
+  const onProductDrop = (e: DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActiveProductImage(false);
+
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      void handleProductImageUpload(file);
+    }
   };
 
   const saveCategory = async (e: FormEvent) => {
@@ -428,35 +507,131 @@ export default function CafeMenuPage() {
                   />
                 </div>
 
-                {/* Image URL & Tag */}
-                <div className="space-y-3">
+                {/* Product Image Uploader */}
+                <div className="rounded-xl border border-[#222018] bg-[#161410]/70 p-3.5 space-y-3">
                   <div>
-                    <label className="block text-xs font-semibold uppercase tracking-wider text-[#b8b2aa]">
-                      Image URL / Path
+                    <label className="block text-xs font-bold uppercase tracking-wider text-[#e8be6a]">
+                      Product Image
+                    </label>
+                    <p className="mt-0.5 text-[11px] text-[#b8b2aa]">
+                      Upload a photo (PNG, JPG, WebP up to 10MB) or enter an image URL
+                    </p>
+                  </div>
+
+                  {/* Hidden file input */}
+                  <input
+                    ref={fileInputProductRef}
+                    type="file"
+                    accept="image/png,image/jpeg,image/webp,image/avif,image/gif"
+                    className="hidden"
+                    onChange={onProductFileInputChange}
+                  />
+
+                  {/* Dropzone area */}
+                  <div
+                    onDragOver={onProductDragOver}
+                    onDragLeave={onProductDragLeave}
+                    onDrop={onProductDrop}
+                    className={`flex flex-col items-center justify-center rounded-xl border-2 border-dashed p-4 text-center transition ${
+                      dragActiveProductImage
+                        ? "border-[#e8be6a] bg-[#c9993a]/10"
+                        : "border-[#2c2820] bg-[#161410] hover:border-[#c9993a]/50 hover:bg-[#161410]/90"
+                    }`}
+                  >
+                    {uploadingProductImage ? (
+                      <div className="flex flex-col items-center py-2">
+                        <svg className="h-6 w-6 animate-spin text-[#e8be6a]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                          <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                        </svg>
+                        <span className="mt-2 text-xs font-semibold text-[#e8be6a]">Uploading menu image...</span>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#c9993a]/30 bg-[#c9993a]/10 text-[#e8be6a]">
+                          <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                            <polyline points="17 8 12 3 7 8" />
+                            <line x1="12" y1="8" x2="12" y2="15" />
+                          </svg>
+                        </div>
+                        <div className="mt-2">
+                          <button
+                            type="button"
+                            onClick={() => fileInputProductRef.current?.click()}
+                            className="inline-flex items-center gap-1.5 rounded-lg bg-[#c9993a]/15 border border-[#c9993a]/30 px-3 py-1 text-xs font-bold text-[#e8be6a] transition hover:bg-[#c9993a]/25"
+                          >
+                            <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <circle cx="12" cy="12" r="10" />
+                              <line x1="12" y1="8" x2="12" y2="16" />
+                              <line x1="8" y1="12" x2="16" y2="12" />
+                            </svg>
+                            <span>Browse Image to Upload</span>
+                          </button>
+                          <span className="block mt-1 text-[10px] text-[#b8b2aa]">
+                            or drag and drop here (JPG, PNG, WebP up to 10MB)
+                          </span>
+                        </div>
+                      </>
+                    )}
+                  </div>
+
+                  {/* Preview if image URL exists */}
+                  {product.imageUrl && (
+                    <div className="flex items-center justify-between gap-3 rounded-xl border border-[#222018] bg-[#080808] p-2.5">
+                      <div className="flex items-center gap-3 overflow-hidden">
+                        <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg border border-[#2c2820] bg-[#111010]">
+                          <Image
+                            src={product.imageUrl}
+                            alt="Menu Preview"
+                            fill
+                            sizes="48px"
+                            className="object-cover"
+                            unoptimized
+                          />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-xs font-semibold text-[#f4efe8] truncate">Selected Image</p>
+                          <p className="text-[10px] text-[#b8b2aa] truncate">{product.imageUrl}</p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <button
+                          type="button"
+                          onClick={() => fileInputProductRef.current?.click()}
+                          className="rounded-lg border border-[#2c2820] bg-[#161410] px-2.5 py-1 text-[11px] font-medium text-[#b8b2aa] hover:text-[#f4efe8] transition"
+                        >
+                          Replace
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setProduct((prev) => ({ ...prev, imageUrl: "" }))}
+                          className="rounded-lg border border-red-900/30 bg-red-950/20 px-2 py-1 text-[11px] font-medium text-red-400 hover:bg-red-900/40 transition"
+                          title="Remove image"
+                        >
+                          <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <line x1="18" y1="6" x2="6" y2="18" />
+                            <line x1="6" y1="6" x2="18" y2="18" />
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Manual URL Input fallback */}
+                  <div>
+                    <label className="block text-[11px] font-medium text-[#b8b2aa]">
+                      Or Direct Image URL / Path
                     </label>
                     <input
                       type="text"
                       value={product.imageUrl}
                       onChange={(e) => setProduct({ ...product, imageUrl: e.target.value })}
-                      className="mt-1.5 w-full rounded-xl border border-[#2c2820] bg-[#161410] px-3.5 py-2.5 text-xs text-[#f4efe8] placeholder-[#b8b2aa]/50 outline-none transition focus:border-[#c9993a]"
+                      className="mt-1 w-full rounded-xl border border-[#2c2820] bg-[#161410] px-3.5 py-2 text-xs text-[#f4efe8] placeholder-[#b8b2aa]/50 outline-none transition focus:border-[#c9993a]"
                       placeholder="e.g. /food/popcorn.jpg or https://..."
                     />
-                    {product.imageUrl && (
-                      <div className="mt-2 flex items-center gap-3 rounded-xl border border-[#222018] bg-[#080808] p-2">
-                        <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-lg bg-[#111010]">
-                          <Image
-                            src={product.imageUrl}
-                            alt="Preview"
-                            fill
-                            sizes="40px"
-                            className="object-cover"
-                            unoptimized
-                          />
-                        </div>
-                        <span className="truncate text-[11px] text-[#b8b2aa]">Preview: {product.imageUrl}</span>
-                      </div>
-                    )}
                   </div>
+                </div>
 
                   <div>
                     <label className="block text-xs font-semibold uppercase tracking-wider text-[#b8b2aa]">
@@ -471,7 +646,6 @@ export default function CafeMenuPage() {
                       placeholder="e.g. Best Seller, Veg, Must Try"
                     />
                   </div>
-                </div>
 
                 {/* Available toggle */}
                 <div className="flex items-center gap-3 rounded-xl border border-[#222018] bg-[#161410]/70 p-3">
@@ -566,7 +740,7 @@ export default function CafeMenuPage() {
                 <div className="flex gap-2.5 pt-3">
                   <button
                     type="submit"
-                    disabled={saving || !categories.length}
+                    disabled={saving || uploadingProductImage || !categories.length}
                     className="flex-1 rounded-xl bg-gradient-to-r from-[#c9993a] via-[#e8be6a] to-[#c9993a] px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-[#080808] shadow-md shadow-[#c9993a]/20 transition hover:brightness-110 active:scale-95 disabled:opacity-50"
                   >
                     {saving ? "Saving..." : editingProductId ? "Update Product" : "Save Product"}

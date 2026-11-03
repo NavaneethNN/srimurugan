@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { verifyAdminSession } from "@/lib/adminSession";
-import { writeFile, mkdir } from "node:fs/promises";
+import { uploadImage } from "@/lib/r2";
 import { randomBytes } from "node:crypto";
-import path from "node:path";
 
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 const SESSION_SECRET = process.env.SESSION_SECRET;
@@ -29,6 +28,8 @@ export async function POST(request: NextRequest) {
 
     const formData = await request.formData();
     const file = formData.get("file");
+    const rawFolder = formData.get("folder")?.toString() || "posters";
+    const folder = rawFolder === "menu" ? "menu" : "posters";
 
     if (!file || !(file instanceof File)) {
       return NextResponse.json({ error: "No image file provided." }, { status: 400 });
@@ -58,29 +59,29 @@ export async function POST(request: NextRequest) {
 
     const timestamp = Date.now();
     const randomHex = randomBytes(4).toString("hex");
-    const filename = `poster_${timestamp}_${randomHex}.${extension}`;
-
-    const uploadsDir = path.join(process.cwd(), "public", "uploads", "posters");
-    await mkdir(uploadsDir, { recursive: true });
+    const prefix = folder === "menu" ? "menu" : "poster";
+    const filename = `${prefix}_${timestamp}_${randomHex}.${extension}`;
 
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
-    const destinationPath = path.join(uploadsDir, filename);
 
-    await writeFile(destinationPath, buffer);
-
-    const publicUrl = `/uploads/posters/${filename}`;
+    const uploadResult = await uploadImage({
+      buffer,
+      filename,
+      mimeType: file.type,
+      folder,
+    });
 
     return NextResponse.json({
-      url: publicUrl,
+      url: uploadResult.url,
       filename,
       size: file.size,
       mimeType: file.type,
+      storage: uploadResult.storage,
     });
   } catch (error) {
-    console.error("Poster image upload error:", error);
+    console.error("Image upload error:", error);
     const message = error instanceof Error ? error.message : "Failed to upload image.";
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
-

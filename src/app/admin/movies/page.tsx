@@ -122,6 +122,7 @@ export default function MoviesManagement() {
     try {
       const formData = new FormData();
       formData.append("file", file);
+      formData.append("folder", "posters");
 
       const response = await fetch("/api/admin/upload", {
         method: "POST",
