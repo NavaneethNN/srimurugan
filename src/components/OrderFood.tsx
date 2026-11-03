@@ -146,14 +146,16 @@ function ProductImage({ product, sizes }: { product: FoodProduct; sizes: string 
   );
 }
 
+let cachedMenuData: { categories: FoodCategory[]; products: FoodProduct[] } | null = null;
+
 export default function OrderFood() {
-  const [categories, setCategories] = useState<FoodCategory[]>([]);
-  const [products, setProducts] = useState<FoodProduct[]>([]);
+  const [categories, setCategories] = useState<FoodCategory[]>(() => cachedMenuData?.categories || []);
+  const [products, setProducts] = useState<FoodProduct[]>(() => cachedMenuData?.products || []);
   // activeCategory null means "All"
   const [activeCategory, setActiveCategory] = useState<number | null>(null);
   const [dietaryFilter, setDietaryFilter] = useState<"all" | "veg" | "non-veg">("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const [menuLoading, setMenuLoading] = useState(true);
+  const [menuLoading, setMenuLoading] = useState(() => !cachedMenuData || cachedMenuData.products.length === 0);
   const [menuError, setMenuError] = useState("");
   const [quantities, setQuantities] = useState<Record<string, number>>({});
   const [cartReady, setCartReady] = useState(false);
@@ -301,10 +303,13 @@ export default function OrderFood() {
     let cancelled = false;
     async function loadMenu() {
       try {
-        const response = await fetch("/api/food-menu", { cache: "no-store" });
+        const response = await fetch("/api/food-menu");
         const data = await response.json();
         if (!response.ok) throw new Error(data.error || "Unable to load the menu.");
         if (cancelled) return;
+        if (data.categories && data.products) {
+          cachedMenuData = { categories: data.categories, products: data.products };
+        }
         setCategories(data.categories || []);
         setProducts(data.products || []);
         // By default show "All" (null), or first category if preferred

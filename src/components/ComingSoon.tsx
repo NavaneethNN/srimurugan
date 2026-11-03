@@ -106,9 +106,11 @@ function MovieCard({ movie, index }: { movie: UpcomingMovie; index: number }) {
   );
 }
 
+let cachedUpcoming: UpcomingMovie[] | null = null;
+
 export default function ComingSoon() {
-  const [upcoming, setUpcoming] = useState<UpcomingMovie[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [upcoming, setUpcoming] = useState<UpcomingMovie[]>(() => cachedUpcoming || []);
+  const [loading, setLoading] = useState(() => !cachedUpcoming || cachedUpcoming.length === 0);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
   const [progress, setProgress] = useState(0); // 0 to 1
@@ -119,7 +121,13 @@ export default function ComingSoon() {
   useEffect(() => {
     fetch("/api/upcoming")
       .then((r) => r.json())
-      .then((d) => setUpcoming(d.upcoming || []))
+      .then((d) => {
+        if (Array.isArray(d.upcoming)) {
+          cachedUpcoming = d.upcoming;
+          setUpcoming(d.upcoming);
+        }
+      })
+      .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
 

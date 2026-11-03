@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
 import NowShowing from "@/components/NowShowing";
@@ -18,10 +19,14 @@ export const metadata: Metadata = {
   },
 };
 
+export const revalidate = 60;
+
 export default function Home() {
   return (
     <div className="site-light flex flex-1 flex-col">
-      <SectionScrollHandler />
+      <Suspense fallback={null}>
+        <SectionScrollHandler />
+      </Suspense>
       <Header />
       <main className="flex-1">
         <Hero />

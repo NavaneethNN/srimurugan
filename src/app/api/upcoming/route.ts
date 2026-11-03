@@ -10,7 +10,14 @@ export async function GET() {
       orderBy: asc(upcomingMovies.releaseDate),
     });
 
-    return NextResponse.json({ upcoming });
+    return NextResponse.json(
+      { upcoming },
+      {
+        headers: {
+          "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
+        },
+      }
+    );
   } catch (error) {
     console.error("Unable to load upcoming movies:", error);
     return NextResponse.json({ error: "Unable to load upcoming movies." }, { status: 500 });

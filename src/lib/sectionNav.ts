@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback } from "react";
+import { useRouter } from "next/navigation";
 
 const SECTION_PATHS = [
   "/home",
@@ -25,6 +26,8 @@ export function scrollToSection(id: string) {
 }
 
 export function useSectionNav() {
+  const router = useRouter();
+
   const handleNav = useCallback((e: React.MouseEvent<HTMLAnchorElement>, path: string) => {
     // If navigating to standalone pages like /order-food, don't intercept with section scroll
     if (path === "/order-food") {
@@ -34,7 +37,7 @@ export function useSectionNav() {
     if (window.location.pathname !== "/") {
       e.preventDefault();
       const id = pathToId(path);
-      window.location.href = `/?section=${encodeURIComponent(id)}`;
+      router.push(`/?section=${encodeURIComponent(id)}`);
       return;
     }
 
@@ -42,7 +45,7 @@ export function useSectionNav() {
     const id = pathToId(path);
     scrollToSection(id);
     window.history.pushState(null, "", path);
-  }, []);
+  }, [router]);
 
   return { handleNav };
 }

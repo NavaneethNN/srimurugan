@@ -9,6 +9,8 @@ export const metadata: Metadata = {
   alternates: { canonical: "/order-food" },
 };
 
+export const revalidate = 60;
+
 export default function OrderFoodPage() {
   return (
     <div className="site-light flex min-h-screen flex-col">

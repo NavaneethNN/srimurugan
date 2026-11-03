@@ -32,9 +32,11 @@ function to12h(time: string) {
 const AUTOPLAY_DURATION_MS = 7000;
 const TICK_INTERVAL_MS = 50;
 
+let cachedMovies: Movie[] | null = null;
+
 export default function NowShowing() {
-  const [movies, setMovies] = useState<Movie[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [movies, setMovies] = useState<Movie[]>(() => cachedMovies || []);
+  const [loading, setLoading] = useState(() => !cachedMovies || cachedMovies.length === 0);
   const [current, setCurrent] = useState(0);
   const [selectedTimes, setSelectedTimes] = useState<Record<number, string | null>>({});
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
@@ -46,7 +48,13 @@ export default function NowShowing() {
   useEffect(() => {
     fetch("/api/movies")
       .then((response) => response.json())
-      .then((data) => setMovies(data.movies || []))
+      .then((data) => {
+        if (Array.isArray(data.movies)) {
+          cachedMovies = data.movies;
+          setMovies(data.movies);
+        }
+      })
+      .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
 

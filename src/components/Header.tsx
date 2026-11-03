@@ -150,11 +150,28 @@ export default function Header() {
         <nav className="hidden items-center gap-1 xl:flex" aria-label="Main navigation">
           {navLinks.map((link) => {
             const isActive = activeHref === link.href;
+            if (link.href === "/order-food") {
+              return (
+                <Link
+                  key={link.label}
+                  href="/order-food"
+                  prefetch={true}
+                  className={`relative px-3 py-1.5 text-[0.7rem] font-semibold tracking-[0.12em] uppercase transition-colors duration-200 ${
+                    isActive ? "text-gold" : "text-white/70 hover:text-white"
+                  }`}
+                >
+                  {link.label}
+                  {isActive && (
+                    <span className="absolute inset-x-3 -bottom-0.5 h-[2px] rounded-full bg-gold" />
+                  )}
+                </Link>
+              );
+            }
             return (
               <a
                 key={link.label}
                 href={link.href}
-                onClick={link.href === "/order-food" ? () => setOpen(false) : (e) => handleNavClick(e, link.href)}
+                onClick={(e) => handleNavClick(e, link.href)}
                 className={`relative px-3 py-1.5 text-[0.7rem] font-semibold tracking-[0.12em] uppercase transition-colors duration-200 ${
                   isActive ? "text-gold" : "text-white/70 hover:text-white"
                 }`}
@@ -250,20 +267,21 @@ export default function Header() {
         <nav className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-3 sm:px-6" aria-label="Mobile navigation">
           {navLinks.map((link) => {
             const isActive = activeHref === link.href;
-            return (
-              <a
-                key={link.label}
-                href={link.href}
-                onClick={link.href === "/order-food" ? () => setOpen(false) : (e) => handleNavClick(e, link.href)}
-                className={`group flex min-h-12 w-full items-center gap-3 rounded px-3 py-3 text-base font-semibold uppercase tracking-[0.12em] transition-colors sm:text-lg ${
-                  isActive
-                    ? "text-gold"
-                    : "text-white/80 hover:bg-white/[0.03] hover:text-white"
-                }`}
-              >
-                <span className={`h-4 w-0.5 shrink-0 rounded-full ${isActive ? "bg-gold" : "bg-transparent"}`} />
-                <span className="flex-1">{link.label}</span>
-                {link.label === "Order Food" && (
+            if (link.href === "/order-food") {
+              return (
+                <Link
+                  key={link.label}
+                  href="/order-food"
+                  prefetch={true}
+                  onClick={() => setOpen(false)}
+                  className={`group flex min-h-12 w-full items-center gap-3 rounded px-3 py-3 text-base font-semibold uppercase tracking-[0.12em] transition-colors sm:text-lg ${
+                    isActive
+                      ? "text-gold"
+                      : "text-white/80 hover:bg-white/[0.03] hover:text-white"
+                  }`}
+                >
+                  <span className={`h-4 w-0.5 shrink-0 rounded-full ${isActive ? "bg-gold" : "bg-transparent"}`} />
+                  <span className="flex-1">{link.label}</span>
                   <span className="inline-flex items-center gap-1 rounded-full bg-gold/20 px-2 py-0.5 text-[0.65rem] font-bold text-gold">
                     <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                       <path d="M18 2v6a3 3 0 0 1-3 3 3 3 0 0 1-3-3V2" />
@@ -273,8 +291,23 @@ export default function Header() {
                     </svg>
                     <span>Seat Delivery</span>
                   </span>
-                )}
-                </a>
+                </Link>
+              );
+            }
+            return (
+              <a
+                key={link.label}
+                href={link.href}
+                onClick={(e) => handleNavClick(e, link.href)}
+                className={`group flex min-h-12 w-full items-center gap-3 rounded px-3 py-3 text-base font-semibold uppercase tracking-[0.12em] transition-colors sm:text-lg ${
+                  isActive
+                    ? "text-gold"
+                    : "text-white/80 hover:bg-white/[0.03] hover:text-white"
+                }`}
+              >
+                <span className={`h-4 w-0.5 shrink-0 rounded-full ${isActive ? "bg-gold" : "bg-transparent"}`} />
+                <span className="flex-1">{link.label}</span>
+              </a>
             );
           })}
         </nav>
