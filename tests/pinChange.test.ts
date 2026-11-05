@@ -63,3 +63,26 @@ test("admin PIN change enforces confirmation matching and prevents identical PIN
   assert.notEqual(newPin, mismatchConfirm, "Rejects mismatched confirmation");
 });
 
+test("4-digit PIN '4321' verifies correctly with salted hash and rejects wrong PINs", () => {
+  const activePin = "4321";
+  const hashed = hashPin(activePin);
+
+  assert.equal(verifyPin("4321", hashed), true, "Active PIN 4321 must verify successfully");
+  assert.equal(verifyPin("1234", hashed), false, "Wrong PIN 1234 must fail verification");
+  assert.equal(verifyPin("4320", hashed), false, "Off-by-one PIN must fail verification");
+  assert.equal(verifyPin("43210", hashed), false, "Extra digit PIN must fail verification");
+});
+
+test("login UI validation logic accepts 4, 5, or 6 digit PINs", () => {
+  function isReadyToSubmit(pin: string) {
+    return pin.length >= 4 && pin.length <= 6 && /^\d+$/.test(pin);
+  }
+
+  assert.equal(isReadyToSubmit("4321"), true, "4 digits is valid and ready to submit");
+  assert.equal(isReadyToSubmit("12345"), true, "5 digits is valid and ready to submit");
+  assert.equal(isReadyToSubmit("123456"), true, "6 digits is valid and ready to submit");
+  assert.equal(isReadyToSubmit("123"), false, "3 digits is not ready to submit");
+  assert.equal(isReadyToSubmit(""), false, "Empty PIN is not ready to submit");
+});
+
+

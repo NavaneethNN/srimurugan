@@ -37,6 +37,13 @@ export default function CafeUsersPage() {
     try {
       const response = await fetch("/api/admin/cafe-users", { cache: "no-store" });
       const data = await response.json();
+      if (response.status === 401) {
+        setMessage({
+          type: "error",
+          text: "Admin session expired. Please log in again to manage staff accounts.",
+        });
+        return;
+      }
       if (!response.ok) throw new Error(data.error || "Failed to load staff accounts");
       setUsers(data.users || []);
     } catch (err) {
@@ -89,6 +96,18 @@ export default function CafeUsersPage() {
       });
 
       const data = await response.json();
+
+      if (response.status === 401) {
+        setMessage({
+          type: "error",
+          text: "Admin session expired. Redirecting to login...",
+        });
+        setTimeout(() => {
+          window.location.href = "/admin/login?redirect=/admin/cafe-users";
+        }, 1500);
+        return;
+      }
+
       if (!response.ok) throw new Error(data.error || "Failed to save staff member");
 
       setMessage({
@@ -158,7 +177,12 @@ export default function CafeUsersPage() {
       return;
     }
 
-    if (modalConfirmPin.trim() && cleanPin !== modalConfirmPin.trim()) {
+    if (!modalConfirmPin.trim()) {
+      setModalError("Please re-enter the new PIN to confirm.");
+      return;
+    }
+
+    if (cleanPin !== modalConfirmPin.trim()) {
       setModalError("Confirmation PIN does not match. Please re-enter.");
       return;
     }
@@ -174,6 +198,15 @@ export default function CafeUsersPage() {
       });
 
       const data = await response.json();
+
+      if (response.status === 401) {
+        setModalError("Admin session expired. Redirecting to login...");
+        setTimeout(() => {
+          window.location.href = "/admin/login?redirect=/admin/cafe-users";
+        }, 1500);
+        return;
+      }
+
       if (!response.ok) throw new Error(data.error || "Failed to update staff PIN");
 
       const staffName = pinModalUser.name;
@@ -199,6 +232,16 @@ export default function CafeUsersPage() {
       });
 
       const data = await response.json();
+      if (response.status === 401) {
+        setMessage({
+          type: "error",
+          text: "Admin session expired. Redirecting to login...",
+        });
+        setTimeout(() => {
+          window.location.href = "/admin/login?redirect=/admin/cafe-users";
+        }, 1500);
+        return;
+      }
       if (!response.ok) throw new Error(data.error || "Failed to update staff status");
 
       setMessage({
@@ -223,6 +266,16 @@ export default function CafeUsersPage() {
       });
 
       const data = await response.json();
+      if (response.status === 401) {
+        setMessage({
+          type: "error",
+          text: "Admin session expired. Redirecting to login...",
+        });
+        setTimeout(() => {
+          window.location.href = "/admin/login?redirect=/admin/cafe-users";
+        }, 1500);
+        return;
+      }
       if (!response.ok) throw new Error(data.error || "Failed to delete staff member");
 
       setMessage({ type: "success", text: `Staff account "${user.name}" removed.` });
@@ -746,7 +799,7 @@ export default function CafeUsersPage() {
               <div className="flex gap-2.5 pt-3">
                 <button
                   type="submit"
-                  disabled={modalSaving || modalNewPin.length < 4 || (modalConfirmPin.length > 0 && modalNewPin !== modalConfirmPin)}
+                  disabled={modalSaving || modalNewPin.length < 4 || modalConfirmPin.length < 4 || modalNewPin !== modalConfirmPin}
                   className="flex-1 rounded-xl bg-gradient-to-r from-[#c9993a] via-[#e8be6a] to-[#c9993a] px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-[#080808] shadow-md shadow-[#c9993a]/20 transition hover:brightness-110 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   {modalSaving ? "Saving PIN..." : "Update PIN Now"}

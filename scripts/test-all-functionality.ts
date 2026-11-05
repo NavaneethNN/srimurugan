@@ -136,40 +136,46 @@ async function main() {
 
   // Login with valid PIN (let's create a temporary test staff with known PIN "123456" if needed)
   console.log(`  Testing cafe login with staff: ${activeStaff.name}...`);
-  // Temporarily set a test PIN for verification
+  // Temporarily set a test PIN for verification and guarantee restoration
   const { hashPin } = await import("../src/lib/cafeAuth");
   const testPin = "987654";
+  const originalStaffPin = activeStaff.pin;
   await db.update(cafeUsers).set({ pin: hashPin(testPin) }).where(eq(cafeUsers.id, activeStaff.id));
 
-  const cafeLoginRes = await checkRoute("Cafe Login with Correct PIN", "/api/cafe/auth", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ pin: testPin }),
-  }, 200);
+  try {
+    const cafeLoginRes = await checkRoute("Cafe Login with Correct PIN", "/api/cafe/auth", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ pin: testPin }),
+    }, 200);
 
-  const cafeCookie = cafeLoginRes.res.headers.get("set-cookie") || "";
-  assert.ok(cafeCookie.includes("cafe-session="), "Login must return cafe-session cookie");
-  const cafeSessionToken = cafeCookie.split(";")[0];
+    const cafeCookie = cafeLoginRes.res.headers.get("set-cookie") || "";
+    assert.ok(cafeCookie.includes("cafe-session="), "Login must return cafe-session cookie");
+    const cafeSessionToken = cafeCookie.split(";")[0];
 
-  // Verify cafe session with cookie
-  const cafeSessionCheck = await checkRoute("Verify Cafe Session with Cookie", "/api/cafe/session", {
-    headers: { Cookie: cafeSessionToken },
-  });
-  assert.equal(cafeSessionCheck.body?.user?.name, activeStaff.name);
-  console.log(`  Successfully authenticated as: ${cafeSessionCheck.body?.user?.name}`);
+    // Verify cafe session with cookie
+    const cafeSessionCheck = await checkRoute("Verify Cafe Session with Cookie", "/api/cafe/session", {
+      headers: { Cookie: cafeSessionToken },
+    });
+    assert.equal(cafeSessionCheck.body?.user?.name, activeStaff.name);
+    console.log(`  Successfully authenticated as: ${cafeSessionCheck.body?.user?.name}`);
 
-  // Test Cafe POS Food Orders API with session
-  const cafeOrders = await checkRoute("Cafe POS Active Queue with Cookie", "/api/cafe/food-orders?status=active", {
-    headers: { Cookie: cafeSessionToken },
-  });
-  assert.ok(Array.isArray(cafeOrders.body?.orders), "Cafe POS must return orders array");
-  console.log(`  Cafe POS queue returned ${cafeOrders.body.orders.length} active orders`);
+    // Test Cafe POS Food Orders API with session
+    const cafeOrders = await checkRoute("Cafe POS Active Queue with Cookie", "/api/cafe/food-orders?status=active", {
+      headers: { Cookie: cafeSessionToken },
+    });
+    assert.ok(Array.isArray(cafeOrders.body?.orders), "Cafe POS must return orders array");
+    console.log(`  Cafe POS queue returned ${cafeOrders.body.orders.length} active orders`);
 
-  // Test Cafe Logout
-  await checkRoute("Cafe Logout", "/api/cafe/auth", {
-    method: "DELETE",
-    headers: { Cookie: cafeSessionToken },
-  });
+    // Test Cafe Logout
+    await checkRoute("Cafe Logout", "/api/cafe/auth", {
+      method: "DELETE",
+      headers: { Cookie: cafeSessionToken },
+    });
+  } finally {
+    // Restore original staff PIN so live credentials remain intact
+    await db.update(cafeUsers).set({ pin: originalStaffPin }).where(eq(cafeUsers.id, activeStaff.id));
+  }
 
   // ----------------------------------------------------------------
   // SECTION 5: ADMIN AUTHENTICATION & MANAGEMENT
