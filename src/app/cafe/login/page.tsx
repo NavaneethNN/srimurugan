@@ -37,8 +37,8 @@ export default function CafeLoginPage() {
   const pin = digits.join("");
 
   const handleLogin = useCallback(async (pinValue: string) => {
-    if (pinValue.length < 4) {
-      setError("Please enter your 4 to 6-digit staff PIN.");
+    if (pinValue.length !== 4 && pinValue.length !== 6) {
+      setError("Please enter your 4 or 6-digit staff PIN.");
       return;
     }
 
@@ -117,7 +117,7 @@ export default function CafeLoginPage() {
       inputRefs.current[nextIndex]?.focus();
 
       const fullPin = updated.join("");
-      if (fullPin.length >= 4 && chars.length === cleaned.length) {
+      if ((fullPin.length === 4 || fullPin.length === 6) && chars.length === cleaned.length) {
         void handleLogin(fullPin);
       }
     }
@@ -135,10 +135,10 @@ export default function CafeLoginPage() {
     } else if (e.key === "Enter") {
       e.preventDefault();
       const currentPin = digits.join("");
-      if (currentPin.length >= 4) {
+      if (currentPin.length === 4 || currentPin.length === 6) {
         void handleLogin(currentPin);
       } else {
-        setError("Please enter your 4 to 6-digit staff PIN.");
+        setError("Please enter your 4 or 6-digit staff PIN.");
       }
     } else if (e.key === "ArrowLeft" && index > 0) {
       e.preventDefault();
@@ -165,7 +165,7 @@ export default function CafeLoginPage() {
     const nextIndex = Math.min(chars.length, 5);
     inputRefs.current[nextIndex]?.focus();
 
-    if (pasted.length >= 4) {
+    if (pasted.length === 4 || pasted.length === 6) {
       void handleLogin(pasted);
     }
   };
@@ -213,7 +213,7 @@ export default function CafeLoginPage() {
     void handleLogin(pin);
   };
 
-  const isSubmitReady = pin.length >= 4 && !loading && rateLimitSeconds === null;
+  const isSubmitReady = (pin.length === 4 || pin.length === 6) && !loading && rateLimitSeconds === null;
 
   return (
     <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#080808] px-4 py-8 text-[#f4efe8]">
@@ -256,18 +256,17 @@ export default function CafeLoginPage() {
           <form onSubmit={handleSubmit}>
             <div className="mb-4 text-center">
               <h2 className="text-sm font-bold uppercase tracking-wider text-[#f4efe8]">
-                Enter Staff Access PIN
+                Staff Access PIN
               </h2>
               <p className="mt-1 text-xs text-[#b8b2aa]">
-                Enter your 4 to 6-digit numeric terminal passcode
+                Enter 4 or 6-digit PIN
               </p>
             </div>
 
-            {/* PIN Inputs (Hidden caret, glowing boxes with dots) */}
-            <div className="mb-3 flex justify-center gap-1.5 xs:gap-2 sm:gap-2.5">
+            {/* PIN Inputs */}
+            <div className="mb-5 flex justify-center gap-1.5 xs:gap-2 sm:gap-2.5">
               {[0, 1, 2, 3, 4, 5].map((index) => {
                 const isFilled = digits[index] !== "";
-                const isOptional = index >= 4;
                 return (
                   <div key={index} className="relative flex flex-col items-center">
                     <input
@@ -283,13 +282,11 @@ export default function CafeLoginPage() {
                       onKeyDown={(e) => handleKeyDown(index, e)}
                       onPaste={handlePaste}
                       disabled={loading || rateLimitSeconds !== null}
-                      aria-label={`PIN digit ${index + 1}${isOptional ? " (optional)" : ""}`}
+                      aria-label={`PIN digit ${index + 1}`}
                       className={`h-11 w-9 xs:w-10 sm:h-13 sm:w-12 rounded-xl border-2 text-center font-mono text-lg font-bold transition-all sm:text-2xl text-transparent caret-transparent select-none ${
                         isFilled
                           ? "border-[#c9993a] bg-[#c9993a]/15 shadow-[0_0_12px_rgba(201,153,58,0.25)]"
-                          : isOptional
-                            ? "border-[#221f18] bg-[#0c0b0a] focus:border-[#c9993a] focus:bg-[#161410] focus:outline-none"
-                            : "border-[#2c2820] bg-[#111010] focus:border-[#c9993a] focus:bg-[#161410] focus:outline-none focus:ring-1 focus:ring-[#c9993a]/50"
+                          : "border-[#2c2820] bg-[#111010] focus:border-[#c9993a] focus:bg-[#161410] focus:outline-none focus:ring-1 focus:ring-[#c9993a]/50"
                       } disabled:opacity-50`}
                       style={{
                         color: "transparent",
@@ -306,18 +303,6 @@ export default function CafeLoginPage() {
                   </div>
                 );
               })}
-            </div>
-
-            {/* Helper status when 4 or 5 digits entered */}
-            <div className="mb-3 min-h-[22px] text-center">
-              {pin.length >= 4 && pin.length < 6 && (
-                <div className="inline-flex items-center gap-1.5 rounded-full border border-[#c9993a]/30 bg-[#c9993a]/10 px-3 py-0.5 text-[11px] font-semibold text-[#e8be6a]">
-                  <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                    <polyline points="20 6 9 17 4 12" />
-                  </svg>
-                  <span>{pin.length} digits entered — press Enter or tap Sign In</span>
-                </div>
-              )}
             </div>
 
             {/* Rate limit warning */}
@@ -422,15 +407,11 @@ export default function CafeLoginPage() {
                   <svg className="h-4 w-4 animate-spin text-[#080808]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                     <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
                   </svg>
-                  <span>Authenticating Terminal...</span>
+                  <span>Signing In...</span>
                 </>
               ) : (
                 <>
-                  <span>
-                    {pin.length >= 4
-                      ? `Sign In to POS Terminal (${pin.length} digits)`
-                      : "Sign In to POS Terminal"}
-                  </span>
+                  <span>Sign In</span>
                   <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                     <line x1="5" y1="12" x2="19" y2="12" />
                     <polyline points="12 5 19 12 12 19" />

@@ -70,12 +70,12 @@ export default function CafeUsersPage() {
 
     const cleanPin = formPin.trim();
     if (!editingId && !cleanPin) {
-      setMessage({ type: "error", text: "A 4-6 digit numeric PIN is required for new staff." });
+      setMessage({ type: "error", text: "A 4 or 6-digit numeric PIN is required for new staff." });
       return;
     }
 
-    if (cleanPin && !/^\d{4,6}$/.test(cleanPin)) {
-      setMessage({ type: "error", text: "PIN must be between 4 and 6 numeric digits." });
+    if (cleanPin && !/^(\d{4}|\d{6})$/.test(cleanPin)) {
+      setMessage({ type: "error", text: "PIN must be either 4 or 6 numeric digits." });
       return;
     }
 
@@ -172,8 +172,8 @@ export default function CafeUsersPage() {
     if (!pinModalUser) return;
 
     const cleanPin = modalNewPin.trim();
-    if (!/^\d{4,6}$/.test(cleanPin)) {
-      setModalError("PIN must be between 4 and 6 numeric digits.");
+    if (!/^(\d{4}|\d{6})$/.test(cleanPin)) {
+      setModalError("PIN must be either 4 or 6 numeric digits.");
       return;
     }
 
@@ -422,7 +422,7 @@ export default function CafeUsersPage() {
                       inputMode="numeric"
                       value={formPin}
                       onChange={(e) => setFormPin(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                      placeholder={editingId ? "Leave blank to keep existing PIN" : "4 to 6-digit numeric PIN"}
+                      placeholder={editingId ? "Leave blank to keep existing PIN" : "4 or 6-digit numeric PIN"}
                       required={!editingId}
                       className="w-full rounded-xl border border-[#2c2820] bg-[#161410] pl-3.5 pr-10 py-2.5 font-mono text-xs text-[#f4efe8] placeholder-[#b8b2aa]/40 outline-none transition focus:border-[#c9993a]"
                     />
@@ -692,7 +692,7 @@ export default function CafeUsersPage() {
                   <h3 className="text-base font-bold text-white">Change Staff PIN</h3>
                 </div>
                 <p className="mt-1 text-xs text-[#b8b2aa]">
-                  Set a new 4 to 6-digit numeric login PIN for <strong className="text-white">{pinModalUser.name}</strong>
+                  Set a new 4 or 6-digit numeric login PIN for <strong className="text-white">{pinModalUser.name}</strong>
                 </p>
               </div>
 
@@ -731,8 +731,8 @@ export default function CafeUsersPage() {
                     New Numeric PIN <span className="text-[#e8be6a]">*</span>
                   </label>
                   {modalNewPin.length > 0 && (
-                    <span className={`text-[10px] font-mono ${modalNewPin.length >= 4 ? "text-emerald-400" : "text-amber-400"}`}>
-                      {modalNewPin.length}/6 digits {modalNewPin.length >= 4 ? "(Valid)" : "(Min 4)"}
+                    <span className={`text-[10px] font-mono ${modalNewPin.length === 4 || modalNewPin.length === 6 ? "text-emerald-400" : "text-amber-400"}`}>
+                      {modalNewPin.length} digits {modalNewPin.length === 4 || modalNewPin.length === 6 ? "(Valid)" : "(4 or 6 digits)"}
                     </span>
                   )}
                 </div>
@@ -744,7 +744,7 @@ export default function CafeUsersPage() {
                     autoFocus
                     value={modalNewPin}
                     onChange={(e) => setModalNewPin(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                    placeholder="Enter 4 to 6 digits"
+                    placeholder="Enter 4 or 6 digits"
                     required
                     className="w-full rounded-xl border border-[#2c2820] bg-[#161410] pl-3.5 pr-10 py-2.5 font-mono text-sm text-[#f4efe8] placeholder-[#b8b2aa]/40 outline-none transition focus:border-[#c9993a]"
                   />
@@ -799,7 +799,12 @@ export default function CafeUsersPage() {
               <div className="flex gap-2.5 pt-3">
                 <button
                   type="submit"
-                  disabled={modalSaving || modalNewPin.length < 4 || modalConfirmPin.length < 4 || modalNewPin !== modalConfirmPin}
+                  disabled={
+                    modalSaving ||
+                    (modalNewPin.length !== 4 && modalNewPin.length !== 6) ||
+                    (modalConfirmPin.length !== 4 && modalConfirmPin.length !== 6) ||
+                    modalNewPin !== modalConfirmPin
+                  }
                   className="flex-1 rounded-xl bg-gradient-to-r from-[#c9993a] via-[#e8be6a] to-[#c9993a] px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-[#080808] shadow-md shadow-[#c9993a]/20 transition hover:brightness-110 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   {modalSaving ? "Saving PIN..." : "Update PIN Now"}

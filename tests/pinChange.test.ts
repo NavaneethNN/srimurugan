@@ -73,16 +73,16 @@ test("4-digit PIN '4321' verifies correctly with salted hash and rejects wrong P
   assert.equal(verifyPin("43210", hashed), false, "Extra digit PIN must fail verification");
 });
 
-test("login UI validation logic accepts 4, 5, or 6 digit PINs", () => {
+test("login UI validation logic accepts either 4 or 6 digit PINs", () => {
   function isReadyToSubmit(pin: string) {
-    return pin.length >= 4 && pin.length <= 6 && /^\d+$/.test(pin);
+    return (pin.length === 4 || pin.length === 6) && /^\d+$/.test(pin);
   }
 
   assert.equal(isReadyToSubmit("4321"), true, "4 digits is valid and ready to submit");
-  assert.equal(isReadyToSubmit("12345"), true, "5 digits is valid and ready to submit");
   assert.equal(isReadyToSubmit("123456"), true, "6 digits is valid and ready to submit");
-  assert.equal(isReadyToSubmit("123"), false, "3 digits is not ready to submit");
-  assert.equal(isReadyToSubmit(""), false, "Empty PIN is not ready to submit");
+  assert.equal(isReadyToSubmit("12345"), false, "5 digits is rejected (must be 4 or 6)");
+  assert.equal(isReadyToSubmit("123"), false, "3 digits is rejected");
+  assert.equal(isReadyToSubmit(""), false, "Empty PIN is rejected");
 });
 
 
