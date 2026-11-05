@@ -405,7 +405,7 @@ export default function NowShowing() {
                                 }))
                               }
                               aria-pressed={active}
-                              className={`rounded-lg border px-3 py-1.5 text-xs font-bold backdrop-blur-md transition-all ${
+                              className={`min-h-10 rounded-xl border px-3.5 py-2 text-xs font-bold backdrop-blur-md transition-all active:scale-95 ${
                                 active
                                   ? "border-gold bg-gold text-black shadow-md shadow-gold/30"
                                   : "border-white/30 bg-black/60 text-white hover:border-gold hover:text-gold"
@@ -508,7 +508,7 @@ export default function NowShowing() {
                   </div>
 
                   {/* Interactive Movie Film Strip Cards */}
-                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+                  <div className="touch-scroll-x flex gap-3 overflow-x-auto pb-2 pt-1 no-scrollbar sm:grid sm:grid-cols-3 lg:grid-cols-4">
                     {movies.map((m, idx) => {
                       const isActive = idx === current;
                       const thumb = m.posterUrl || m.desktopBgUrl || m.mobileBgUrl;
@@ -517,7 +517,7 @@ export default function NowShowing() {
                           key={m.id}
                           type="button"
                           onClick={() => switchMovie(idx)}
-                          className={`group relative flex items-center gap-3 overflow-hidden rounded-2xl border p-2.5 text-left transition-all duration-300 ${
+                          className={`group relative flex shrink-0 w-[210px] xs:w-[230px] sm:w-auto items-center gap-3 overflow-hidden rounded-2xl border p-2.5 text-left transition-all duration-300 ${
                             isActive
                               ? "border-gold/80 bg-gold/15 shadow-[0_0_24px_rgba(201,153,58,0.25)] ring-1 ring-gold"
                               : "border-white/10 bg-black/40 hover:border-white/25 hover:bg-black/60"

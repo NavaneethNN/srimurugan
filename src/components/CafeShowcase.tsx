@@ -117,7 +117,7 @@ export default function CafeShowcase() {
               href="/order-food"
               className="inline-flex min-h-12 items-center justify-center rounded-lg border border-surface-border bg-card px-6 text-xs font-bold uppercase tracking-wider text-foreground transition hover:border-gold hover:text-gold"
             >
-              Browse Full Menu (25 Items) →
+              Browse Full Menu →
             </Link>
           </div>
         </div>

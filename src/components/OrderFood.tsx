@@ -708,13 +708,22 @@ export default function OrderFood() {
       !itemCount ||
       hasUnpricedItems ||
       knownTotalPaise < 100 ||
-      !name.trim() ||
-      !seat.trim() ||
-      !seatConfirmed ||
       submittingRef.current ||
       pendingPayment ||
       pendingCheckout
     ) {
+      return;
+    }
+    if (!name.trim()) {
+      setError("Please enter your name for the order.");
+      return;
+    }
+    if (!seat.trim()) {
+      setError("Please specify your screen and seat number.");
+      return;
+    }
+    if (!seatConfirmed) {
+      setError("Please verify and check the seat verification box above.");
       return;
     }
     submittingRef.current = true;
@@ -802,8 +811,39 @@ export default function OrderFood() {
       </label>
 
       {/* Screen and seat number */}
-      <label className="block text-xs font-bold text-foreground">
-        Screen and seat number <span className="text-gold">*</span>
+      <div>
+        <label className="block text-xs font-bold text-foreground">
+          Screen &amp; Seat Number <span className="text-gold">*</span>
+        </label>
+        
+        {/* Quick Screen Selection Pills */}
+        <div className="mt-2 flex items-center gap-2">
+          <span className="text-[0.68rem] font-semibold text-muted">Auditorium:</span>
+          {["Screen 1", "Screen 2"].map((scr) => {
+            const isSelected = seat.startsWith(scr);
+            return (
+              <button
+                key={scr}
+                type="button"
+                onClick={() => {
+                  setSeat((prev) => {
+                    const clean = prev.replace(/^Screen [12]\s*[·,-]?\s*/i, "").trim();
+                    return clean ? `${scr} · ${clean}` : `${scr} · `;
+                  });
+                  setSeatConfirmed(false);
+                }}
+                className={`flex min-h-8 items-center rounded-lg px-3 text-xs font-bold transition-all active:scale-95 ${
+                  isSelected
+                    ? "border border-gold bg-gold text-white shadow-sm"
+                    : "border border-surface-border bg-surface text-foreground hover:border-gold/60"
+                }`}
+              >
+                {scr}
+              </button>
+            );
+          })}
+        </div>
+
         <input
           required
           maxLength={120}
@@ -813,12 +853,12 @@ export default function OrderFood() {
             setSeatConfirmed(false);
           }}
           placeholder="e.g. Screen 1 · Row E, Seat 12"
-          className="order-input"
+          className="order-input mt-2"
         />
         <span className="mt-1 block text-[0.7rem] font-medium text-muted">
-          Type your screen and seat number (e.g. Screen 1, Row E 12)
+          Tap your screen above, then enter row and seat number
         </span>
-      </label>
+      </div>
 
       {/* Reassuring note */}
       <div className="rounded-xl border border-surface-border bg-surface/60 p-3 text-[0.7rem] leading-relaxed text-muted">
@@ -868,9 +908,6 @@ export default function OrderFood() {
           !itemCount ||
           hasUnpricedItems ||
           knownTotalPaise < 100 ||
-          !seat.trim() ||
-          !name.trim() ||
-          !seatConfirmed ||
           !!pendingPayment ||
           !!pendingCheckout ||
           status === "submitting" ||
@@ -1428,7 +1465,7 @@ export default function OrderFood() {
                                       type="button"
                                       onClick={() => changeQuantity(product.id, variant.id, -1)}
                                       aria-label={`Remove one ${product.name} ${variant.name}`}
-                                      className="flex min-h-[38px] min-w-[38px] items-center justify-center text-base font-bold text-gold transition hover:bg-gold hover:text-white active:scale-95"
+                                      className="flex min-h-10 min-w-10 sm:min-h-9 sm:min-w-9 items-center justify-center text-base font-bold text-gold transition hover:bg-gold hover:text-white active:scale-95"
                                     >
                                       −
                                     </button>
@@ -1437,7 +1474,7 @@ export default function OrderFood() {
                                       type="button"
                                       onClick={() => changeQuantity(product.id, variant.id, 1)}
                                       aria-label={`Add one ${product.name} ${variant.name}`}
-                                      className="flex min-h-[38px] min-w-[38px] items-center justify-center text-base font-bold text-gold transition hover:bg-gold hover:text-white active:scale-95"
+                                      className="flex min-h-10 min-w-10 sm:min-h-9 sm:min-w-9 items-center justify-center text-base font-bold text-gold transition hover:bg-gold hover:text-white active:scale-95"
                                     >
                                       +
                                     </button>
@@ -1447,7 +1484,7 @@ export default function OrderFood() {
                                     type="button"
                                     onClick={() => changeQuantity(product.id, variant.id, 1)}
                                     aria-label={`Add ${product.name} ${variant.name}`}
-                                    className="flex min-h-[38px] items-center gap-1.5 rounded-lg border border-gold/60 bg-card px-3.5 text-xs font-bold text-gold shadow-sm transition-all hover:bg-gold hover:text-white active:scale-95"
+                                    className="flex min-h-10 items-center gap-1.5 rounded-lg border border-gold/60 bg-card px-4 text-xs font-bold text-gold shadow-sm transition-all hover:bg-gold hover:text-white active:scale-95"
                                   >
                                     <span>Add</span>
                                     <span aria-hidden="true">+</span>

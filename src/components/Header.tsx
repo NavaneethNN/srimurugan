@@ -254,7 +254,7 @@ export default function Header() {
       </div>
 
       {/* Mobile drawer */}
-      {open && createPortal(<div id="mobile-menu" role="dialog" aria-modal="true" aria-label="Main menu" className="fixed inset-0 z-[100] flex h-dvh flex-col bg-[#080808] text-white xl:hidden">
+      {open && typeof document !== "undefined" && createPortal(<div id="mobile-menu" role="dialog" aria-modal="true" aria-label="Main menu" className="fixed inset-0 z-[100] flex h-dvh flex-col bg-[#080808] text-white xl:hidden">
         {/* top bar */}
         <div className="flex h-[68px] shrink-0 items-center justify-between border-b border-[#28251f] px-4 sm:px-6">
           <Image src="/logo.png" alt="Sri Murugan Cinema" width={110} height={110} className="h-[56px] w-auto object-contain" />
